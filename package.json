@@ -3,29 +3,40 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 9090",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^5.8.1",
     "@react-jvectormap/core": "^1.0.4",
     "@react-jvectormap/unitedstates": "^1.0.1",
-    "@types/node": "20.4.8",
-    "@types/react": "18.2.18",
-    "@types/react-dom": "18.2.7",
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "20.5.7",
+    "@types/react": "18.2.21",
+    "@types/react-dom": "18.2.14",
     "apexcharts": "^3.41.1",
+    "argon2": "^0.31.2",
     "autoprefixer": "10.4.14",
-    "eslint": "8.46.0",
-    "eslint-config-next": "13.4.12",
+    "bcrypt": "^5.1.1",
+    "clsx": "^2.1.0",
+    "eslint": "^8.52.0",
+    "eslint-config-next": "14.0.4",
     "jsvectormap": "^1.5.3",
-    "next": "13.4.12",
+    "next": "^14.0.2",
+    "next-auth": "^5.0.0-beta.4",
     "postcss": "8.4.27",
+    "prisma": "^5.8.1",
     "react": "18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-dom": "18.2.0",
     "react-jvectormap": "^0.0.16",
     "tailwindcss": "3.3.3",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "zod": "^3.22.4"
+  },
+  "engines": {
+    "node": ">=18.17.0"
   }
 }

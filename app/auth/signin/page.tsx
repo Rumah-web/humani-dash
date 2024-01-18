@@ -1,15 +1,21 @@
+'use client';
+
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { Metadata } from "next";
-export const metadata: Metadata = {
-  title: "Signin | Humani Catering Service",
-  description: "Humani Catering Service",
-  // other metadata
-};
+import { useFormState, useFormStatus } from 'react-dom';
+import { authenticate } from '@/app/lib/actions';
 
-const SignIn: React.FC = () => {
+// import { Metadata } from "next";
+// export const metadata: Metadata = {
+//   title: "Signin | Humani Catering Service",
+//   description: "Humani Catering Service",
+//   // other metadata
+// };
+
+export default function LoginForm() {
+  const [errorMessage, formAction] = useFormState(authenticate, undefined);
+
   return (
     <>
       <div className="h-screen rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -41,7 +47,7 @@ const SignIn: React.FC = () => {
                 Sign In
               </h2>
 
-              <form>
+              <form action={formAction}>
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
                     Email
@@ -50,6 +56,7 @@ const SignIn: React.FC = () => {
                     <input
                       type="email"
                       placeholder="Enter your email"
+                      name="email"
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
 
@@ -81,6 +88,7 @@ const SignIn: React.FC = () => {
                     <input
                       type="password"
                       placeholder="6+ Characters, 1 Capital letter"
+                      name="password"
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
 
@@ -114,7 +122,19 @@ const SignIn: React.FC = () => {
                     value="Sign In"
                     className="w-full cursor-pointer rounded-lg border border-danger bg-danger p-4 text-white transition hover:bg-opacity-90"
                   />
-                </div>                
+                </div>       
+                <div
+                  className="flex h-8 items-end space-x-1"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  {errorMessage && (
+                    <div className="flex items-center justify-center">
+                      <div className="text-red-500">Error : </div>
+                      <div className="text-red-500 pl-2">{errorMessage}</div>
+                    </div>
+                  )}
+                </div>         
               </form>
             </div>
           </div>
@@ -123,5 +143,3 @@ const SignIn: React.FC = () => {
     </>
   );
 };
-
-export default SignIn;
