@@ -6,6 +6,7 @@ import { z } from 'zod';
 import * as argon2 from "argon2";
 import db from './prisma/lib/db'
 import { m_user } from '@prisma/client';
+import { use } from 'react';
  
 async function getUser(email: string): Promise<m_user | null> {
   try {
@@ -35,12 +36,11 @@ export const { auth, signIn, signOut } = NextAuth({
           const user = await getUser(email);
           if (!user) return null;
 
-          const passwordsMatch = await argon2.verify(password, user.password);
+          const passwordsMatch = await argon2.verify(user.password, password);
 
           if (passwordsMatch) return user as any
         } 
         
-        console.log('Invalid credentials : ', parsedCredentials);
         return null
       },
     })

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useFormState, useFormStatus } from 'react-dom';
 import { authenticate } from '@/app/lib/actions';
+import { Button } from "@/components/common/Button";
 
 // import { Metadata } from "next";
 // export const metadata: Metadata = {
@@ -117,11 +118,7 @@ export default function LoginForm() {
                 </div>
 
                 <div className="mb-5">
-                  <input
-                    type="submit"
-                    value="Sign In"
-                    className="w-full cursor-pointer rounded-lg border border-danger bg-danger p-4 text-white transition hover:bg-opacity-90"
-                  />
+                  <LoginButton />
                 </div>       
                 <div
                   className="flex h-8 items-end space-x-1"
@@ -129,10 +126,14 @@ export default function LoginForm() {
                   aria-atomic="true"
                 >
                   {errorMessage && (
-                    <div className="flex items-center justify-center">
-                      <div className="text-red-500">Error : </div>
-                      <div className="text-red-500 pl-2">{errorMessage}</div>
-                    </div>
+                    <>
+                      <div className="h-5 w-5 text-danger">
+                        <svg data-slot="icon" fill="none" strokeWidth="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"></path>
+                        </svg>
+                      </div>
+                      <p className="text-sm text-danger">{errorMessage}</p>
+                    </>
                   )}
                 </div>         
               </form>
@@ -143,3 +144,13 @@ export default function LoginForm() {
     </>
   );
 };
+
+function LoginButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button className="w-full p-4 focus-visible:outline-danger active:bg-danger hover:bg-danger bg-danger" aria-disabled={pending}>
+      Sign In
+    </Button>
+  );
+}
