@@ -6,8 +6,7 @@ import { z } from 'zod';
 import * as argon2 from "argon2";
 import db from './prisma/lib/db'
 import { m_user } from '@prisma/client';
-import { use } from 'react';
- 
+
 async function getUser(email: string): Promise<m_user | null> {
   try {
     const user = await db.m_user.findUnique({
@@ -38,6 +37,8 @@ export const { auth, signIn, signOut } = NextAuth({
 
           const passwordsMatch = await argon2.verify(user.password, password);
 
+          console.log('SUCCESS LOGIN : ', user)
+
           if (passwordsMatch) return user as any
         } 
         
@@ -45,6 +46,12 @@ export const { auth, signIn, signOut } = NextAuth({
       },
     })
   ],
+  secret: process.env.AUTH_SECRET,
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
 });
 
 

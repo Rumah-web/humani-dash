@@ -21,6 +21,10 @@ model m_user {
   username     String         @unique(map: "m_user_username") @db.VarChar(50)
   password     String
   created_at   DateTime       @default(now()) @db.Timestamp(6)
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
   m_user_roles m_user_roles[]
 }
 
