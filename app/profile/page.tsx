@@ -4,8 +4,8 @@ import Image from "next/image";
 import { Metadata } from "next";
 import { auth } from "@/auth";
 export const metadata: Metadata = {
-  title: "Profile Page | Next.js E-commerce Dashboard Template",
-  description: "This is Profile page for TailAdmin Next.js",
+  title: "Humani | Profile",
+  description: "Profile Page",
   // other metadata
 };
 
