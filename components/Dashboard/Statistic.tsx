@@ -14,7 +14,7 @@ const MapOne = dynamic(() => import("../Maps/MapOne"), {
   ssr: false,
 });
 
-const ECommerce: React.FC = () => {
+const Statistic: React.FC = () => {
   return (
     <>
 
@@ -110,13 +110,12 @@ const ECommerce: React.FC = () => {
         <ChartTwo />
         <ChartThree />
         <MapOne />
-        <div className="col-span-12 xl:col-span-8">
+        <div className="col-span-12 xl:col-span-12 w-full">
           <TableOne />
         </div>
-        <ChatCard />
       </div>
     </>
   );
 };
 
-export default ECommerce;
+export default Statistic;

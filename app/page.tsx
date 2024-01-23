@@ -1,6 +1,6 @@
-import ECommerce from "@/components/Dashboard/E-commerce";
 import { Metadata } from "next";
 import { auth } from "@/auth"
+import Statistic from "@/components/Dashboard/Statistic";
 
 export const metadata: Metadata = {
   title: "Humani | Dashboard ",
@@ -13,8 +13,7 @@ export default async function Home() {
 
   return (
     <>
-      {JSON.stringify(session)}
-      <ECommerce />
+      <Statistic />
     </>
   );
 }
