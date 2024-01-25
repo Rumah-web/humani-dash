@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import Link from 'next/link'
 import Sort from "@/components/Table/Sort";
 import Loading from "@/components/Table/Loading";
+import { useRouter } from 'next/navigation'
 
 interface ITabCount {
 	status: string,
@@ -15,6 +15,7 @@ interface ITabCount {
 }
 
 const Menu = () => {
+	const router = useRouter()
 	const [activeTab, setActiveTab] = useState("all");
 	const [datas, setDatas] = useState([]);
     const [total, setTotal] = useState(0);
@@ -24,7 +25,6 @@ const Menu = () => {
 	const [tabs, setTabs] = useState([] as {label: string, value: string, count: number}[]);
 	const [condition, setCondition] = useState({} as any)
 	const [order, setOrder] = useState({id: 'desc'} as any)
-
 
 
 	const columns = [
@@ -258,6 +258,22 @@ const Menu = () => {
 		}
 	}
 
+	const onAdd = async() => {
+		const req = await fetch("/menu/api/add", {
+			method: "POST",
+			body: JSON.stringify({}),
+			headers: {
+				"content-type": "application/json",
+			},
+		})
+
+        if(req) {
+            const {data} = await req.json() 
+			console.log('>>>> DATA <<<<<', data)
+			router.push(`/menu/form/${data.uuid}`);
+        }
+	}
+
 	return (
 		<>
 			<Breadcrumb pageName='Menu' />
@@ -268,7 +284,8 @@ const Menu = () => {
 							<div className="w-full flex justify-end">
 								<div 
 									className="px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70"
-									><Link href="/menu/create">Add</Link></div>
+									onClick={onAdd}
+									>Add</div>
 							</div>
 						</div>
 					</div>
