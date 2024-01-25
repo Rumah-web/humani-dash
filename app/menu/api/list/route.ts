@@ -23,6 +23,7 @@ export async function POST(request: Request) {
         description: true,
         price: true,
         price_promo: true,
+        status: true,
         m_menu_files: {
             select: {
                 m_files: {

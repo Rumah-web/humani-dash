@@ -1,10 +1,9 @@
 "use client";
-import { PropsColumn } from "@/app/type";
+
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { data } from "autoprefixer";
-import { m_menu } from "@prisma/client";
+import Link from 'next/link'
 import Sort from "@/components/Table/Sort";
 import Loading from "@/components/Table/Loading";
 
@@ -66,6 +65,15 @@ const Menu = () => {
 					.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
 			sortable: true,
 			sortField: 'price_promo',	
+		},
+		{
+			name: "Status",
+			selector: (row: any) => row.status,
+			key: "status",
+			type: "text",
+			format: (row: any) => <div className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${row.status === 'draft' ? 'bg-danger' : 'bg-success'}`}>{row.status}</div>,
+			sortable: true,
+			sortField: 'status',	
 		},
 	];
 
@@ -258,7 +266,9 @@ const Menu = () => {
 					<div id="header" className={`${isLoading ? 'mb-9' : ''}`}>
 						<div className="flex justify-between">
 							<div className="w-full flex justify-end">
-								<div className="px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70">Add</div>
+								<div 
+									className="px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70"
+									><Link href="/menu/create">Add</Link></div>
 							</div>
 						</div>
 					</div>
