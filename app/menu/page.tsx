@@ -5,6 +5,8 @@ import DataTable from "react-data-table-component";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { data } from "autoprefixer";
 import { m_menu } from "@prisma/client";
+import Sort from "@/components/Table/Sort";
+import Loading from "@/components/Table/Loading";
 
 interface ITabCount {
 	status: string,
@@ -253,6 +255,13 @@ const Menu = () => {
 			<Breadcrumb pageName='Menu' />
 			<div>
 				<>
+					<div id="header" className={`${isLoading ? 'mb-9' : ''}`}>
+						<div className="flex justify-between">
+							<div className="w-full flex justify-end">
+								<div className="px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70">Add</div>
+							</div>
+						</div>
+					</div>
 					<div className='flex'>
 						{tabs.map(({ value, label, count }, i) => {
 							return (
@@ -289,6 +298,7 @@ const Menu = () => {
 								columns={columns}
 								data={datas}
 								keyField={"id"}
+								noHeader={true}
 								fixedHeader={true}
 								customStyles={customStyles}
 								persistTableHead={true}
@@ -301,55 +311,10 @@ const Menu = () => {
 								onChangePage={(page) => handlePageChange(page)}
 								sortServer
 								onSort={(column, sortDirection) => handleSort(column, sortDirection)}
-								sortIcon={<>{Object.values(order).includes('desc') ? <div className="rotate-180"><svg width="10" height="10" viewBox="0 0 320 512" xmlns="http://www.w3.org/2000/svg">
-								<path fill="currentColor" d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192"/>
-							</svg></div> : <div><svg width="10" height="10" viewBox="0 0 320 512" xmlns="http://www.w3.org/2000/svg">
-								<path fill="currentColor" d="M288.662 352H31.338c-17.818 0-26.741-21.543-14.142-34.142l128.662-128.662c7.81-7.81 20.474-7.81 28.284 0l128.662 128.662c12.6 12.599 3.676 34.142-14.142 34.142"/>
-							</svg></div>}</>}
+								sortIcon={<>{Object.values(order).includes('desc') ? <div className="rotate-180"><Sort /></div> : <div className="rotate-180"><Sort /></div>}</>}
 								progressComponent={
 									<div className="pt-5">
-										<svg
-											width='50'
-											height='50'
-											viewBox='0 0 24 24'
-											xmlns='http://www.w3.org/2000/svg'>
-											<g
-												fill='none'
-												stroke='currentColor'
-												strokeLinecap='round'
-												strokeWidth='2'>
-												<path
-													strokeDasharray='60'
-													strokeDashoffset='60'
-													strokeOpacity='.3'
-													d='M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z'>
-													<animate
-														fill='freeze'
-														attributeName='stroke-dashoffset'
-														dur='1.3s'
-														values='60;0'
-													/>
-												</path>
-												<path
-													strokeDasharray='15'
-													strokeDashoffset='15'
-													d='M12 3C16.9706 3 21 7.02944 21 12'>
-													<animate
-														fill='freeze'
-														attributeName='stroke-dashoffset'
-														dur='0.3s'
-														values='15;0'
-													/>
-													<animateTransform
-														attributeName='transform'
-														dur='1.5s'
-														repeatCount='indefinite'
-														type='rotate'
-														values='0 12 12;360 12 12'
-													/>
-												</path>
-											</g>
-										</svg>
+										<Loading />
 									</div>
 								}
 							/>
