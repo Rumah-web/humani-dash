@@ -69,10 +69,10 @@ model invoice {
 model m_files {
   id           Int            @id @default(autoincrement())
   uuid         String         @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  path         Int
-  name         Int
+  path         String
+  name         String
   size         Int
-  type         Int
+  type         String         @db.VarChar(100)
   created_at   DateTime       @default(now()) @db.Timestamp(6)
   m_menu_files m_menu_files[]
 }
@@ -85,6 +85,7 @@ model m_menu {
   price        Decimal        @db.Decimal
   price_promo  Decimal        @db.Decimal
   created_at   DateTime       @default(now()) @db.Timestamp(6)
+  status       String         @default("draft") @db.VarChar(50)
   m_menu_files m_menu_files[]
   order_detail order_detail[]
 }
