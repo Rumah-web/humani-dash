@@ -41,7 +41,7 @@ export default function RootLayout({
                 {/* <!-- ===== Sidebar End ===== --> */}
 
                 {/* <!-- ===== Content Area Start ===== --> */}
-                <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+                <div className="relative flex flex-1 flex-col overflow-y-hidden overflow-x-hidden">
                   {/* <!-- ===== Header Start ===== --> */}
                   <Header
                     sidebarOpen={sidebarOpen}
@@ -51,7 +51,7 @@ export default function RootLayout({
 
                   {/* <!-- ===== Main Content Start ===== --> */}
                   <main>
-                    <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+                    <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10 overflow-y-auto h-screen">
                       {children}
                     </div>
                   </main>
