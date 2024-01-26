@@ -7,6 +7,7 @@ import Sort from "@/components/Table/Sort";
 import Loading from "@/components/Table/Loading";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import NoImage from "@/components/Placeholder/NoImage";
 
 interface ITabCount {
 	status: string;
@@ -29,6 +30,12 @@ const Menu = () => {
 	const [condition, setCondition] = useState({} as any);
 	const [order, setOrder] = useState({ id: "desc" } as any);
 
+	let tabsDefault = [
+		{ label: "All", value: "all", count: 0 },
+		{ label: "Draft", value: "draft", count: 0 },
+		{ label: "Published", value: "published", count: 0 },
+	];
+
 	const columns = [
 		{
 			name: "Foto",
@@ -41,21 +48,38 @@ const Menu = () => {
 			format: (row: any) => {
 				if (row.m_menu_files[0] && row.m_menu_files[0].m_files) {
 					return (
-						<div className="p-2">
+						<div className='p-2'>
 							<Image
 								src={"/" + row.m_menu_files[0].m_files.path}
 								width={100}
 								height={100}
 								alt={row.name}
 								priority={false}
-								className="w-24"
+								className='w-24'
 							/>
 						</div>
 					);
 				}
 
-				return <></>;
+				return (
+					<div className="py-1">
+						<div className='bg-gray flex justify-center items-center w-28'>
+							<NoImage
+								w={50}
+								h={50}
+							/>
+						</div>
+					</div>
+				);
 			},
+		},
+		{
+			name: "UUID",
+			selector: (row: any) => row.uuid,
+			key: "uuid",
+			type: "text",
+			sortable: true,
+			omit: true
 		},
 		{
 			name: "Name",
@@ -126,6 +150,7 @@ const Menu = () => {
 		rows: {
 			style: {
 				fontSize: "15px",
+				cursor: 'pointer'
 			},
 		},
 		headCells: {
@@ -200,6 +225,7 @@ const Menu = () => {
 	};
 
 	useEffect(() => {
+		setTabs(tabsDefault);
 		(async () => {
 			const data = await runQuery(condition, take, page, order);
 			const total = await runTotal(condition);
@@ -209,11 +235,7 @@ const Menu = () => {
 			setLoading(false);
 			setTotal(total);
 
-			let tabsDefault = [
-				{ label: "All", value: "all", count: 0 },
-				{ label: "Draft", value: "draft", count: 0 },
-				{ label: "Published", value: "published", count: 0 },
-			];
+			
 
 			tabsDefault = tabsDefault.map((tab, i) => {
 				const find: ITabCount = tabTotal.find(
@@ -232,6 +254,8 @@ const Menu = () => {
 			});
 
 			setTabs(tabsDefault);
+
+			
 		})();
 	}, []);
 
@@ -310,6 +334,10 @@ const Menu = () => {
 		}
 	};
 
+	const onRowClicked = (row: any, event: any) => {
+		router.push(`/menu/form/${row.uuid}`);
+	}
+
 	return (
 		<>
 			<Breadcrumb pageName='Menu' />
@@ -381,6 +409,7 @@ const Menu = () => {
 								onSort={(column, sortDirection) =>
 									handleSort(column, sortDirection)
 								}
+								onRowClicked={onRowClicked}
 								sortIcon={
 									<>
 										{Object.values(order).includes("desc") ? (

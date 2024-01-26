@@ -5,11 +5,11 @@ type ResponseData = {
 };
 
 export async function POST(request: Request) {
-    const {uuid} = await request.json()
+    const {uuid, status} = await request.json()
 
     const update = await db.m_menu.update({
         data: {
-            status: 'published'
+            status
         },
         where: {
             uuid

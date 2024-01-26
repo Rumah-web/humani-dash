@@ -22,6 +22,7 @@ export async function POST(request: Request) {
 
 	const query = await db.m_menu.findMany({
 		select: {
+			uuid: true,
 			name: true,
 			description: true,
 			price: true,

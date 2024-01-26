@@ -20,7 +20,7 @@ import { m_menu } from "@prisma/client";
 import { NumericFormat } from "react-number-format";
 import Image from "next/image";
 import draftToHtml from "draftjs-to-html";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -36,7 +36,7 @@ const Form = () => {
 	const [data, setData] = useState({} as m_menu);
 	const [dataField, setDataField] = useState({});
 	const [htmlValue, setHtmlValue] = useState(null as any);
-	const router = useRouter()
+	const router = useRouter();
 
 	const params = useParams<{ uuid: string }>();
 
@@ -87,19 +87,19 @@ const Form = () => {
 		setDataField(params);
 	};
 
-	const onPublish = async() => {
-		setPublished(true)
-		await fetch("/menu/api/publish", {
+	const onChangeState = async (status: string) => {
+		setPublished(true);
+		await fetch("/menu/api/change-state", {
 			method: "POST",
-			body: JSON.stringify({ uuid: params.uuid }),
+			body: JSON.stringify({ uuid: params.uuid, status }),
 			headers: {
 				"content-type": "application/json",
 			},
 		});
-		setPublished(false)
+		setPublished(false);
 
 		router.push(`/menu`);
-	}
+	};
 
 	useEffect(() => {
 		const timeoutIdDesc = setTimeout(async () => {
@@ -129,7 +129,7 @@ const Form = () => {
 			if (req) {
 				const { data, file } = await req.json();
 				setData(data);
-				if(file) {
+				if (file) {
 					setFile(file.path);
 				}
 				setEditorState(
@@ -283,17 +283,23 @@ const Form = () => {
 							{data.status === "draft" && (
 								<button
 									disabled={published ? true : false}
-									className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${published ? 'opacity-70 cursor-wait' : ''}`}
-									onClick={onPublish}
-								>Publish</button>
+									className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
+										published ? "opacity-70 cursor-wait" : ""
+									}`}
+									onClick={() => onChangeState('published')}>
+									Publish
+								</button>
 							)}
 
 							{data.status === "published" && (
-								<input
-									type='submit'
-									value={"Update"}
-									className='px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
-								/>
+								<button
+									disabled={published ? true : false}
+									className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
+										published ? "opacity-70 cursor-wait" : ""
+									}`}
+									onClick={() => onChangeState('deleted')}>
+									Delete
+								</button>
 							)}
 						</div>
 					</div>
