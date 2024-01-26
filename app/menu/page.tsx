@@ -5,36 +5,65 @@ import DataTable from "react-data-table-component";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Sort from "@/components/Table/Sort";
 import Loading from "@/components/Table/Loading";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface ITabCount {
-	status: string,
+	status: string;
 	_count: {
-		status: number
-	}
+		status: number;
+	};
 }
 
 const Menu = () => {
-	const router = useRouter()
+	const router = useRouter();
 	const [activeTab, setActiveTab] = useState("all");
 	const [datas, setDatas] = useState([]);
-    const [total, setTotal] = useState(0);
+	const [total, setTotal] = useState(0);
 	const [isLoading, setLoading] = useState(true);
-    const [page, setPage] = useState(0);
-    const [take, setTake] = useState(10);
-	const [tabs, setTabs] = useState([] as {label: string, value: string, count: number}[]);
-	const [condition, setCondition] = useState({} as any)
-	const [order, setOrder] = useState({id: 'desc'} as any)
-
+	const [page, setPage] = useState(0);
+	const [take, setTake] = useState(10);
+	const [tabs, setTabs] = useState(
+		[] as { label: string; value: string; count: number }[]
+	);
+	const [condition, setCondition] = useState({} as any);
+	const [order, setOrder] = useState({ id: "desc" } as any);
 
 	const columns = [
+		{
+			name: "Foto",
+			selector: (row: any) =>
+				row.m_menu_files[0] && row.m_menu_files[0].m_files
+					? row.m_menu_files[0].m_files.path
+					: null,
+			key: "path",
+			type: "text",
+			format: (row: any) => {
+				if (row.m_menu_files[0] && row.m_menu_files[0].m_files) {
+					return (
+						<div className="p-2">
+							<Image
+								src={"/" + row.m_menu_files[0].m_files.path}
+								width={100}
+								height={100}
+								alt={row.name}
+								priority={false}
+								className="w-24"
+							/>
+						</div>
+					);
+				}
+
+				return <></>;
+			},
+		},
 		{
 			name: "Name",
 			selector: (row: any) => row.name,
 			key: "name",
 			type: "text",
 			sortable: true,
-			sortField: 'name',
+			sortField: "name",
 		},
 		{
 			name: "Description",
@@ -42,8 +71,10 @@ const Menu = () => {
 			key: "description",
 			type: "text",
 			sortable: true,
-			sortField: 'description',
-			format: (row: any) => <div dangerouslySetInnerHTML={{ __html: row.description }}/>
+			sortField: "description",
+			format: (row: any) => (
+				<div dangerouslySetInnerHTML={{ __html: row.description }} />
+			),
 		},
 		{
 			name: "Price",
@@ -53,7 +84,7 @@ const Menu = () => {
 			format: (row: any) =>
 				`Rp. ${row.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
 			sortable: true,
-			sortField: 'price',	
+			sortField: "price",
 		},
 		{
 			name: "Price Promo",
@@ -65,16 +96,23 @@ const Menu = () => {
 					.toString()
 					.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
 			sortable: true,
-			sortField: 'price_promo',	
+			sortField: "price_promo",
 		},
 		{
 			name: "Status",
 			selector: (row: any) => row.status,
 			key: "status",
 			type: "text",
-			format: (row: any) => <div className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${row.status === 'draft' ? 'bg-danger' : 'bg-success'}`}>{row.status}</div>,
+			format: (row: any) => (
+				<div
+					className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
+						row.status === "draft" ? "bg-danger" : "bg-success"
+					}`}>
+					{row.status}
+				</div>
+			),
 			sortable: true,
-			sortField: 'status',	
+			sortField: "status",
 		},
 	];
 
@@ -111,33 +149,38 @@ const Menu = () => {
 			headers: {
 				"content-type": "application/json",
 			},
-		})
+		});
 
-        if(req) {
-            const {data} = await req.json()
-            return data
-        }
-	}
+		if (req) {
+			const { data } = await req.json();
+			return data;
+		}
+	};
 
-    const runTotal = async(where: {}) => {
-        const req = await fetch("/menu/api/total", {
+	const runTotal = async (where: {}) => {
+		const req = await fetch("/menu/api/total", {
 			method: "POST",
 			body: JSON.stringify({
-				where
+				where,
 			}),
 			headers: {
 				"content-type": "application/json",
 			},
-		})
+		});
 
-        if(req) {
-            const {total} = await req.json()
-            return total
-        }
-    }
+		if (req) {
+			const { total } = await req.json();
+			return total;
+		}
+	};
 
-    const runQuery = async (where: {}, take: number, skip: number, orderBy: {}) => {
-        const req = await fetch("/menu/api/list", {
+	const runQuery = async (
+		where: {},
+		take: number,
+		skip: number,
+		orderBy: {}
+	) => {
+		const req = await fetch("/menu/api/list", {
 			method: "POST",
 			body: JSON.stringify({
 				where,
@@ -148,144 +191,140 @@ const Menu = () => {
 			headers: {
 				"content-type": "application/json",
 			},
-		})
+		});
 
-        if(req) {
-            const {data} = await req.json() 
-            return data
-        }
-    }
+		if (req) {
+			const { data } = await req.json();
+			return data;
+		}
+	};
 
 	useEffect(() => {
-        (async() => {
-            
-            const data = await runQuery(condition,take,page,order)
-            const total = await runTotal(condition)
-			const tabTotal = await runTabTotal()
+		(async () => {
+			const data = await runQuery(condition, take, page, order);
+			const total = await runTotal(condition);
+			const tabTotal = await runTabTotal();
 
-            setDatas(data)
-            setLoading(false)
-            setTotal(total)
+			setDatas(data);
+			setLoading(false);
+			setTotal(total);
 
 			let tabsDefault = [
 				{ label: "All", value: "all", count: 0 },
 				{ label: "Draft", value: "draft", count: 0 },
 				{ label: "Published", value: "published", count: 0 },
 			];
-	
-			
-	
+
 			tabsDefault = tabsDefault.map((tab, i) => {
-				const find: ITabCount = tabTotal.find((res: ITabCount, i: number) => res.status === tab.value)
+				const find: ITabCount = tabTotal.find(
+					(res: ITabCount, i: number) => res.status === tab.value
+				);
 
-				if(find) {
-					return {...tab, count: find._count.status}
+				if (find) {
+					return { ...tab, count: find._count.status };
 				}
 
-				if(tab.value === 'all') {
-					return {...tab, count: total}
+				if (tab.value === "all") {
+					return { ...tab, count: total };
 				}
 
-				return tab
-			})
+				return tab;
+			});
 
-			setTabs(tabsDefault)
-			
-
-        })()
-
-		
+			setTabs(tabsDefault);
+		})();
 	}, []);
 
 	const onClickTab = async (value: string) => {
-		setLoading(true)
+		setLoading(true);
 		setActiveTab(value);
 
-		let where = {}
-		if(['draft', 'published'].includes(value)) {
+		let where = {};
+		if (["draft", "published"].includes(value)) {
 			where = {
-				status: value
-			}
+				status: value,
+			};
 
-			setCondition(where) 
+			setCondition(where);
 		}
 
-		const data = await runQuery(where,take,page,order)
+		const data = await runQuery(where, take, page, order);
 
-		const total = await runTotal(where)
+		const total = await runTotal(where);
 
-		setDatas(data)
-		setTotal(total)
-		setLoading(false)
+		setDatas(data);
+		setTotal(total);
+		setLoading(false);
 	};
 
 	const handlePageChange = async (page: number) => {
-        if(datas.length > 0) {
-            const _page = page - 1
-            setLoading(true)
-            const data = await runQuery(condition, take, _page, order) 
-            setPage(_page)
-            setDatas(data)
-            setLoading(false)
-        } 
+		if (datas.length > 0) {
+			const _page = page - 1;
+			setLoading(true);
+			const data = await runQuery(condition, take, _page, order);
+			setPage(_page);
+			setDatas(data);
+			setLoading(false);
+		}
 	};
 
 	const handlePerRowsChange = async (newPerPage: number, page: number) => {
-        if(datas.length > 0) {
-            const _page = page - 1
-            setLoading(true)
-            const data = await runQuery(condition, newPerPage, _page, order)
-            setTake(newPerPage) 
-            setDatas(data)
-            setLoading(false)
-        }
-		
+		if (datas.length > 0) {
+			const _page = page - 1;
+			setLoading(true);
+			const data = await runQuery(condition, newPerPage, _page, order);
+			setTake(newPerPage);
+			setDatas(data);
+			setLoading(false);
+		}
 	};
 
 	const handleSort = async (column: any, sortDirection: string) => {
+		if (typeof column.sortField !== "undefined") {
+			const order = { [column.sortField]: sortDirection };
 
-		if(typeof column.sortField !== 'undefined') {
-			const order = {[column.sortField]: sortDirection}
-			
-			setLoading(true)
-			setOrder(order)
-			
-			const data = await runQuery(condition, take, page, order)
+			setLoading(true);
+			setOrder(order);
 
-			setDatas(data)
-			setLoading(false)
+			const data = await runQuery(condition, take, page, order);
 
-			console.log(Object.values(order)[0])
+			setDatas(data);
+			setLoading(false);
+
+			console.log(Object.values(order)[0]);
 		}
-	}
+	};
 
-	const onAdd = async() => {
+	const onAdd = async () => {
 		const req = await fetch("/menu/api/add", {
 			method: "POST",
 			body: JSON.stringify({}),
 			headers: {
 				"content-type": "application/json",
 			},
-		})
+		});
 
-        if(req) {
-            const {data} = await req.json() 
+		if (req) {
+			const { data } = await req.json();
 			router.push(`/menu/form/${data.uuid}`);
-        }
-	}
+		}
+	};
 
 	return (
 		<>
 			<Breadcrumb pageName='Menu' />
-			<div className="pb-36">
+			<div className='pb-36'>
 				<>
-					<div id="header" className={`${isLoading ? 'mb-9' : ''}`}>
-						<div className="flex justify-between">
-							<div className="w-full flex justify-end">
-								<div 
-									className="px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70"
-									onClick={onAdd}
-									>Add</div>
+					<div
+						id='header'
+						className={`${isLoading ? "mb-9" : ""}`}>
+						<div className='flex justify-between'>
+							<div className='w-full flex justify-end'>
+								<div
+									className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
+									onClick={onAdd}>
+									Add
+								</div>
 							</div>
 						</div>
 					</div>
@@ -334,13 +373,29 @@ const Menu = () => {
 								paginationTotalRows={total}
 								progressPending={isLoading}
 								paginationServer
-								onChangeRowsPerPage={(newPerPage, page) => handlePerRowsChange(newPerPage, page)}
+								onChangeRowsPerPage={(newPerPage, page) =>
+									handlePerRowsChange(newPerPage, page)
+								}
 								onChangePage={(page) => handlePageChange(page)}
 								sortServer
-								onSort={(column, sortDirection) => handleSort(column, sortDirection)}
-								sortIcon={<>{Object.values(order).includes('desc') ? <div className="rotate-180"><Sort /></div> : <div className="rotate-180"><Sort /></div>}</>}
+								onSort={(column, sortDirection) =>
+									handleSort(column, sortDirection)
+								}
+								sortIcon={
+									<>
+										{Object.values(order).includes("desc") ? (
+											<div className='rotate-180'>
+												<Sort />
+											</div>
+										) : (
+											<div className='rotate-180'>
+												<Sort />
+											</div>
+										)}
+									</>
+								}
 								progressComponent={
-									<div className="pt-5">
+									<div className='pt-5'>
 										<Loading />
 									</div>
 								}
