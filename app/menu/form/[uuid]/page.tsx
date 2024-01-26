@@ -19,8 +19,8 @@ import Loading from "@/components/Table/Loading";
 import { m_menu } from "@prisma/client";
 import { NumericFormat } from "react-number-format";
 import Image from "next/image";
-import { convertToHTML } from "draft-convert";
 import draftToHtml from "draftjs-to-html";
+import { useRouter } from 'next/navigation'
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -32,9 +32,11 @@ const Form = () => {
 	const [file, setFile] = useState(null);
 	const [isLoading, setLoading] = useState(true);
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
+	const [published, setPublished] = useState(false);
 	const [data, setData] = useState({} as m_menu);
 	const [dataField, setDataField] = useState({});
 	const [htmlValue, setHtmlValue] = useState(null as any);
+	const router = useRouter()
 
 	const params = useParams<{ uuid: string }>();
 
@@ -85,6 +87,20 @@ const Form = () => {
 		setDataField(params);
 	};
 
+	const onPublish = async() => {
+		setPublished(true)
+		await fetch("/menu/api/publish", {
+			method: "POST",
+			body: JSON.stringify({ uuid: params.uuid }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+		setPublished(false)
+
+		router.push(`/menu`);
+	}
+
 	useEffect(() => {
 		const timeoutIdDesc = setTimeout(async () => {
 			const raw = convertToRaw(editorState.getCurrentContent());
@@ -113,7 +129,9 @@ const Form = () => {
 			if (req) {
 				const { data, file } = await req.json();
 				setData(data);
-				setFile(file.path);
+				if(file) {
+					setFile(file.path);
+				}
 				setEditorState(
 					EditorState.createWithContent(
 						ContentState.createFromBlockArray(
@@ -263,11 +281,11 @@ const Form = () => {
 						</div>
 						<div className='flex flex-col justify-end'>
 							{data.status === "draft" && (
-								<input
-									type='submit'
-									value={"Publish"}
-									className='px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
-								/>
+								<button
+									disabled={published ? true : false}
+									className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${published ? 'opacity-70 cursor-wait' : ''}`}
+									onClick={onPublish}
+								>Publish</button>
 							)}
 
 							{data.status === "published" && (

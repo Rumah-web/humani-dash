@@ -43,6 +43,7 @@ const Menu = () => {
 			type: "text",
 			sortable: true,
 			sortField: 'description',
+			format: (row: any) => <div dangerouslySetInnerHTML={{ __html: row.description }}/>
 		},
 		{
 			name: "Price",
@@ -269,7 +270,6 @@ const Menu = () => {
 
         if(req) {
             const {data} = await req.json() 
-			console.log('>>>> DATA <<<<<', data)
 			router.push(`/menu/form/${data.uuid}`);
         }
 	}
@@ -277,7 +277,7 @@ const Menu = () => {
 	return (
 		<>
 			<Breadcrumb pageName='Menu' />
-			<div>
+			<div className="pb-36">
 				<>
 					<div id="header" className={`${isLoading ? 'mb-9' : ''}`}>
 						<div className="flex justify-between">

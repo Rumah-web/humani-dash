@@ -24,8 +24,13 @@ export async function POST(request: Request) {
             uuid
         }
     })
-	
-    const file = {...data?.m_menu_files[0].m_files, path: dirUploadPath + "/" + data?.m_menu_files[0].m_files.path}
+
+    let file = null as any
+    
+    if(data?.m_menu_files && data?.m_menu_files.length > 0) {
+        file = {...data?.m_menu_files[0].m_files, path: dirUploadPath + "/" + data?.m_menu_files[0].m_files.path}
+    }
+    
 	return Response.json({
 		data,
         file
