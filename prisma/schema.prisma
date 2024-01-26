@@ -79,7 +79,7 @@ model m_files {
 
 model m_menu {
   id           Int            @id @default(autoincrement())
-  uuid         String         @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  uuid         String         @unique(map: "m_menu_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name         String         @db.VarChar
   description  String
   price        Decimal        @db.Decimal

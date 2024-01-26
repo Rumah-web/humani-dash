@@ -2,7 +2,13 @@
 
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useForm } from "react-hook-form";
-import { EditorState, ContentState, convertFromHTML } from "draft-js";
+import {
+	EditorState,
+	ContentState,
+	convertFromHTML,
+	convertFromRaw,
+	convertToRaw,
+} from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { useEffect, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
@@ -13,6 +19,8 @@ import Loading from "@/components/Table/Loading";
 import { m_menu } from "@prisma/client";
 import { NumericFormat } from "react-number-format";
 import Image from "next/image";
+import { convertToHTML } from "draft-convert";
+import draftToHtml from "draftjs-to-html";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -23,8 +31,10 @@ const Form = () => {
 	const [editorState, setEditorState] = useState(EditorState.createEmpty());
 	const [file, setFile] = useState(null);
 	const [isLoading, setLoading] = useState(true);
-	const [isLoadingUpload, setLoadingUpload] = useState(true);
+	const [isLoadingUpload, setLoadingUpload] = useState(false);
 	const [data, setData] = useState({} as m_menu);
+	const [dataField, setDataField] = useState({});
+	const [htmlValue, setHtmlValue] = useState(null as any);
 
 	const params = useParams<{ uuid: string }>();
 
@@ -41,11 +51,10 @@ const Form = () => {
 	};
 
 	const handleChangeFile = async (file: any) => {
+		setLoadingUpload(true);
 		const formData = new FormData();
 		formData.append("file", file);
 		formData.append("uuid", data.uuid);
-
-		setLoadingUpload(true);
 
 		const upload = await fetch("/menu/api/upload-file", {
 			method: "POST",
@@ -58,9 +67,38 @@ const Form = () => {
 
 			setLoadingUpload(false);
 		}
-
-		console.log("file : ", file);
 	};
+
+	const onUpdateByField = async (data: any) => {
+		await fetch("/menu/api/update-field", {
+			method: "POST",
+			body: JSON.stringify({ uuid: params.uuid, data }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+	};
+
+	const onChange = async (column: string, value: any) => {
+		const params = { [column]: value };
+		setData({ ...data, ...params });
+		setDataField(params);
+	};
+
+	useEffect(() => {
+		const timeoutIdDesc = setTimeout(async () => {
+			const raw = convertToRaw(editorState.getCurrentContent());
+			await onUpdateByField({ description: draftToHtml(raw) });
+		}, 500);
+		return () => clearTimeout(timeoutIdDesc);
+	}, [editorState, 500]);
+
+	useEffect(() => {
+		const timeoutId = setTimeout(async () => {
+			await onUpdateByField(dataField);
+		}, 500);
+		return () => clearTimeout(timeoutId);
+	}, [data, 500]);
 
 	useEffect(() => {
 		(async () => {
@@ -112,7 +150,8 @@ const Form = () => {
 							<input
 								{...register("name", { required: true })}
 								value={data.name}
-								className='w-full py-2 px-3 '
+								className='w-full py-2 px-3'
+								onChange={(e) => onChange("name", e.target.value)}
 							/>
 						</div>
 						<div className='flex flex-col space-y-2'>
@@ -131,22 +170,28 @@ const Form = () => {
 							<NumericFormat
 								prefix={"Rp."}
 								value={data.price as any}
+								name='price'
 								allowLeadingZeros
 								thousandSeparator=','
 								className='w-full py-2 px-3'
+								onValueChange={(values, sourceInfo) => {
+									onChange("price", values.value);
+								}}
 							/>
-							{errors.price && <p>Please enter number for price.</p>}
 						</div>
 						<div className='flex flex-col space-y-2'>
 							<label htmlFor='name'>Discount Price</label>
 							<NumericFormat
 								prefix={"Rp."}
 								value={data.price_promo as any}
+								name='price_promo'
 								allowLeadingZeros
 								thousandSeparator=','
 								className='w-full py-2 px-3'
+								onValueChange={(values, sourceInfo) => {
+									onChange("price_promo", values.value);
+								}}
 							/>
-							{errors.price && <p>Please enter number for discount price.</p>}
 						</div>
 					</div>
 					<div className='flex w-1/3 flex-col space-y-4 p-4 relative'>
@@ -157,49 +202,64 @@ const Form = () => {
 								state={data.status === "draft" ? "danger" : "success"}
 							/>
 						</div>
-						<div className='mt-4'>
-							<FileUploader
-								handleChange={handleChangeFile}
-								name='file'
-								types={fileTypes}>
-								<div
-									className={`border border-dashed border-primary cursor-pointer hover:opacity-60`}>
-									{file ? (
-										<>
-											<div className={`flex justify-center h-36 relative`}>
-												<Image
-													src={"/" + file}
-													alt={data.name}
-													width={100}
-													height={100}
-													className="w-fit"
-												/>
-											</div>
-										</>
-									) : (
-										<>
-											<div className='flex flex-col text-primary items-center justify-center py-16 text-center'>
-												<svg
-													className='w-6 h-6 mr-1 text-current-50'
-													xmlns='http://www.w3.org/2000/svg'
-													fill='none'
-													viewBox='0 0 24 24'
-													stroke='currentColor'>
-													<path
-														strokeLinecap='round'
-														strokeLinejoin='round'
-														strokeWidth='2'
-														d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
-													/>
-												</svg>
-												<p className='mt-2 text-xs text-graydark'>
-													Drag your files here or click in this area.
-												</p>
-											</div>
-										</>
-									)}
-								</div>
-							</FileUploader>
+						<div className='mt-4 flex flex-col space-y-2'>
+							<label htmlFor='name'>Foto Menu</label>
+							{isLoadingUpload ? (
+								<>
+									<div
+										className={`border border-dashed border-primary cursor-pointer hover:opacity-60`}>
+										<div className='flex flex-col text-primary items-center justify-center py-12 text-center'>
+											<Loading />
+										</div>
+									</div>
+								</>
+							) : (
+								<>
+									<FileUploader
+										handleChange={handleChangeFile}
+										name='file'
+										types={fileTypes}>
+										<div
+											className={`border border-dashed border-primary cursor-pointer hover:opacity-60`}>
+											{file ? (
+												<>
+													<div className={`flex justify-center h-36 relative`}>
+														<Image
+															src={"/" + file}
+															alt={data.name}
+															width={100}
+															height={100}
+															priority={false}
+															className='w-fit'
+														/>
+													</div>
+												</>
+											) : (
+												<>
+													<div className='flex flex-col text-primary items-center justify-center py-16 text-center'>
+														<svg
+															className='w-6 h-6 mr-1 text-current-50'
+															xmlns='http://www.w3.org/2000/svg'
+															fill='none'
+															viewBox='0 0 24 24'
+															stroke='currentColor'>
+															<path
+																strokeLinecap='round'
+																strokeLinejoin='round'
+																strokeWidth='2'
+																d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
+															/>
+														</svg>
+														<p className='mt-2 text-xs text-graydark'>
+															Drag your files here or click in this area.
+														</p>
+													</div>
+												</>
+											)}
+										</div>
+									</FileUploader>
+								</>
+							)}
 						</div>
 						<div className='flex flex-col justify-end'>
 							{data.status === "draft" && (
