@@ -7,37 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model m_roles {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(50)
-  description String
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  uuid        String   @unique(map: "m_roles_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-}
-
-model m_user {
-  id             Int            @id @default(autoincrement())
-  uuid           String         @unique(map: "m_user_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  username       String         @unique(map: "m_user_username") @db.VarChar(50)
-  password       String
-  created_at     DateTime       @default(now()) @db.Timestamp(6)
-  email          String?        @unique
-  image          String?
-  name           String?
-  affiliate_code String?        @db.VarChar
-  email_verified Boolean        @default(false)
-  m_user_roles   m_user_roles[]
-}
-
-model m_user_roles {
-  id                 Int            @id @default(autoincrement())
-  m_user_id          Int
-  m_roles_id         Int
-  m_user_roles       m_user_roles   @relation("m_user_rolesTom_user_roles", fields: [m_roles_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  other_m_user_roles m_user_roles[] @relation("m_user_rolesTom_user_roles")
-  m_user             m_user         @relation(fields: [m_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model customer {
   id         Int      @id @default(autoincrement())
@@ -75,8 +44,10 @@ model m_files {
   type         String         @db.VarChar(100)
   created_at   DateTime       @default(now()) @db.Timestamp(6)
   m_menu_files m_menu_files[]
+  m_user       m_user[]
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model m_menu {
   id           Int            @id @default(autoincrement())
   uuid         String         @unique(map: "m_menu_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
@@ -98,18 +69,52 @@ model m_menu_files {
   m_menu     m_menu  @relation(fields: [m_menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
+model m_roles {
+  id           Int            @id @default(autoincrement())
+  name         String         @db.VarChar(50)
+  description  String
+  created_at   DateTime       @default(now()) @db.Timestamp(6)
+  uuid         String         @unique(map: "m_roles_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  m_user_roles m_user_roles[]
+}
+
+model m_user {
+  id             Int            @id @default(autoincrement())
+  uuid           String         @unique(map: "m_user_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username       String         @unique(map: "m_user_username") @db.VarChar(50)
+  password       String
+  created_at     DateTime       @default(now()) @db.Timestamp(6)
+  email          String?        @unique
+  name           String?
+  affiliate_code String?        @unique(map: "m_user_affiliate_code") @db.VarChar(50)
+  email_verified Boolean        @default(false)
+  image          Int?
+  m_files        m_files?       @relation(fields: [image], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  m_user_roles   m_user_roles[]
+}
+
+model m_user_roles {
+  id         Int     @id @default(autoincrement())
+  m_user_id  Int
+  m_roles_id Int
+  m_roles    m_roles @relation(fields: [m_roles_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  m_user     m_user  @relation(fields: [m_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model order {
-  id           Int            @id @default(autoincrement())
-  uuid         String         @unique(map: "order_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  order_no     Int
-  notes        String
-  customer_id  Int
-  status       String         @default("draft") @db.VarChar(20)
-  created_at   DateTime       @default(now()) @db.Timestamp(6)
-  invoice      invoice[]
-  customer     customer       @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  order_detail order_detail[]
+  id             Int            @id @default(autoincrement())
+  uuid           String         @unique(map: "order_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  order_no       Int
+  notes          String
+  customer_id    Int
+  status         String         @default("draft") @db.VarChar(20)
+  created_at     DateTime       @default(now()) @db.Timestamp(6)
+  source         String?        @db.VarChar(50)
+  affiliate_code String?        @db.VarChar(50)
+  invoice        invoice[]
+  customer       customer       @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order_detail   order_detail[]
 }
 
 model order_detail {
