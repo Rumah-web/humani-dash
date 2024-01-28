@@ -21,7 +21,7 @@ const Form = () => {
 	const [dataField, setDataField] = useState({});
 	const router = useRouter();
 	const [userData, setUserData] = useState(null as any);
-	const [roles, setRoles] = useState([] as { value: string; label: string }[]);
+	const [roles, setRoles] = useState([] as { value: number; label: string }[]);
 	const [selectRoles, setSelectRoles] = useState([] as any);
 	const [updateRoles, setUpdateRoes] = useState(false);
 
@@ -138,7 +138,18 @@ const Form = () => {
 					setFile(file.path);
 				}
 
-				setLoading(false);
+				let userRoles: any = [];
+
+				if (data.m_user_roles && data.m_user_roles.length > 0) {
+					userRoles = data.m_user_roles.map((user_role: any, i: number) => {
+						return {
+							value: user_role.m_roles.id,
+							label: user_role.m_roles.name
+						};
+					});
+
+					setSelectRoles(userRoles);
+				}
 			}
 
 			const session = await getSession();
@@ -156,19 +167,18 @@ const Form = () => {
 					})
 				);
 			}
+
+			setLoading(false);
 		})();
 	}, []);
 
 	const onChangeRoles = (val: any) => {
 		setUpdateRoes(true);
-		setSelectRoles(val.map((role: any, i: number) => {
-			return {id: role.value}
-		}));
+		setSelectRoles(val);
 	};
 
-	const onMenuClose = async() => {
+	const onMenuClose = async () => {
 		if (updateRoles) {
-
 			await fetch("/users/api/set-roles", {
 				method: "POST",
 				body: JSON.stringify({ roles: selectRoles, user_id: data.uuid }),
@@ -225,6 +235,7 @@ const Form = () => {
 								onChange={onChangeRoles}
 								onMenuClose={onMenuClose}
 								closeMenuOnSelect={false}
+								defaultValue={selectRoles}
 								isMulti
 							/>
 						</div>

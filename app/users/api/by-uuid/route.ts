@@ -18,7 +18,13 @@ export async function POST(request: Request) {
             m_user_roles: {
                 select: {
                     m_user_id: true,
-                    m_roles_id: true
+                    m_roles_id: true,
+                    m_roles: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    }
                 }
             }
         },

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         if(roles.length > 0) {
             const data = roles.map((role: any, i: number) => {
                 return {
-                    m_roles_id: role.id,
+                    m_roles_id: role.value,
                     m_user_id: findUser?.id
                 }
             })

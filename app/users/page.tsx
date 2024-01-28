@@ -334,6 +334,10 @@ const Users = () => {
 		}
 	};
 
+	const onRowClicked = (row: any, event: any) => {
+		router.push(`/users/form/${row.uuid}`);
+	};
+
 	const renderRowsComponent = ({ data }: any) => {
 		return (
 			<>
@@ -440,6 +444,7 @@ const Users = () => {
 									handlePerRowsChange(newPerPage, page)
 								}
 								onChangePage={(page) => handlePageChange(page)}
+								onRowClicked={onRowClicked}
 								sortServer
 								onSort={(column, sortDirection) =>
 									handleSort(column, sortDirection)
