@@ -12,6 +12,13 @@ import { formatLongtDate, formatShorttDate } from "../lib/helper";
 import { m_roles, m_user_roles } from "@prisma/client";
 import Badge from "@/components/Badges";
 
+interface ITabCount {
+	status: string;
+	_count: {
+		status: number;
+	};
+}
+
 const Users = () => {
 	const router = useRouter();
 	const [datas, setDatas] = useState([]);
@@ -21,6 +28,17 @@ const Users = () => {
 	const [take, setTake] = useState(10);
 	const [condition, setCondition] = useState({} as any);
 	const [order, setOrder] = useState({ id: "desc" } as any);
+	const [activeTab, setActiveTab] = useState("all");
+	const [tabs, setTabs] = useState(
+		[] as { label: string; value: string; count: number }[]
+	);
+
+	let tabsDefault = [
+		{ label: "All", value: "all", count: 0 },
+		{ label: "Draft", value: "draft", count: 0 },
+		{ label: "Active", value: "active", count: 0 },
+		{ label: "Not Active", value: "inactive", count: 0 },
+	];
 
 	const columns = [
 		{
@@ -50,7 +68,22 @@ const Users = () => {
 			type: "text",
 			sortable: true,
 			sortField: "email_verified",
-			format: (row: any) => row.email_verified ? <><Badge label="true" state="success" /></> : <><Badge label="false" state="danger" /></>
+			format: (row: any) =>
+				row.email_verified ? (
+					<>
+						<Badge
+							label='true'
+							state='success'
+						/>
+					</>
+				) : (
+					<>
+						<Badge
+							label='false'
+							state='danger'
+						/>
+					</>
+				),
 		},
 		{
 			name: "Affiliate",
@@ -71,7 +104,23 @@ const Users = () => {
 
 				return rolesName.join(", ");
 			},
-		}
+		},
+		{
+			name: "Status",
+			selector: (row: any) => row.status,
+			key: "status",
+			type: "text",
+			format: (row: any) => (
+				<div
+					className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
+						row.status === "draft" ? "bg-danger" : (row.status === "active" ? "bg-success" : "bg-warning")
+					}`}>
+					{row.status}
+				</div>
+			),
+			sortable: true,
+			sortField: "status",
+		},
 	];
 
 	const customStyles = {
@@ -143,14 +192,49 @@ const Users = () => {
 		}
 	};
 
+	const runTabTotal = async () => {
+		const req = await fetch("/users/api/total-per-status", {
+			method: "POST",
+			body: JSON.stringify({}),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		if (req) {
+			const { data } = await req.json();
+			return data;
+		}
+	};
+
 	useEffect(() => {
+		setTabs(tabsDefault);
 		(async () => {
 			const data = await runQuery(condition, take, page, order);
 			const total = await runTotal(condition);
+			const tabTotal = await runTabTotal();
 
 			setDatas(data);
 			setLoading(false);
 			setTotal(total);
+
+			tabsDefault = tabsDefault.map((tab, i) => {
+				const find: ITabCount = tabTotal.find(
+					(res: ITabCount, i: number) => res.status === tab.value
+				);
+
+				if (find) {
+					return { ...tab, count: find._count.status };
+				}
+
+				if (tab.value === "all") {
+					return { ...tab, count: total };
+				}
+
+				return tab;
+			});
+
+			setTabs(tabsDefault);
 		})();
 	}, []);
 
@@ -189,6 +273,43 @@ const Users = () => {
 			setLoading(false);
 
 			console.log(Object.values(order)[0]);
+		}
+	};
+
+	const onClickTab = async (value: string) => {
+		setLoading(true);
+		setActiveTab(value);
+
+		let where = {};
+		if (["draft", "active", "inactive"].includes(value)) {
+			where = {
+				status: value,
+			};
+
+			setCondition(where);
+		}
+
+		const data = await runQuery(where, take, page, order);
+
+		const total = await runTotal(where);
+
+		setDatas(data);
+		setTotal(total);
+		setLoading(false);
+	};
+
+	const onAdd = async () => {
+		const req = await fetch("/menu/api/add", {
+			method: "POST",
+			body: JSON.stringify({}),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		if (req) {
+			const { data } = await req.json();
+			router.push(`/menu/form/${data.uuid}`);
 		}
 	};
 
@@ -236,6 +357,47 @@ const Users = () => {
 			<Breadcrumb pageName='Users' />
 			<div className='pb-36'>
 				<>
+					<div id='header'>
+						<div className='flex justify-between'>
+							<div className='w-full flex justify-end'>
+								<div
+									className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
+									onClick={onAdd}>
+									Add
+								</div>
+							</div>
+						</div>
+					</div>
+					<div className='flex'>
+						{tabs.map(({ value, label, count }, i) => {
+							return (
+								<div
+									key={i}
+									className={`pr-4 cursor-pointer text-center border-danger  ${
+										activeTab === value
+											? `border-b-2 text-danger font-bold`
+											: ``
+									}`}>
+									<div
+										className='flex items-center space-x-2 py-1 transition-all hover:opacity-60'
+										onClick={() => onClickTab(value)}>
+										<div
+											className={`text-base ${
+												activeTab === value ? `font-bold` : ``
+											}`}>
+											{label}
+										</div>
+										<div
+											className={`h-6 bg-white p-2 rounded-full text-[0.5rem] flex items-center ${
+												activeTab === value ? `text-danger` : ``
+											}`}>
+											{count}
+										</div>
+									</div>
+								</div>
+							);
+						})}
+					</div>
 					{Object.entries(columns).length > 0 && (
 						<>
 							<DataTable

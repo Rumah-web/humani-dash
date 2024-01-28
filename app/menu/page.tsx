@@ -62,7 +62,7 @@ const Menu = () => {
 				}
 
 				return (
-					<div className="py-1">
+					<div className='py-1'>
 						<div className='bg-gray flex justify-center items-center w-28'>
 							<NoImage
 								w={50}
@@ -79,7 +79,7 @@ const Menu = () => {
 			key: "uuid",
 			type: "text",
 			sortable: true,
-			omit: true
+			omit: true,
 		},
 		{
 			name: "Name",
@@ -150,7 +150,7 @@ const Menu = () => {
 		rows: {
 			style: {
 				fontSize: "15px",
-				cursor: 'pointer'
+				cursor: "pointer",
 			},
 		},
 		headCells: {
@@ -235,8 +235,6 @@ const Menu = () => {
 			setLoading(false);
 			setTotal(total);
 
-			
-
 			tabsDefault = tabsDefault.map((tab, i) => {
 				const find: ITabCount = tabTotal.find(
 					(res: ITabCount, i: number) => res.status === tab.value
@@ -254,8 +252,6 @@ const Menu = () => {
 			});
 
 			setTabs(tabsDefault);
-
-			
 		})();
 	}, []);
 
@@ -336,16 +332,14 @@ const Menu = () => {
 
 	const onRowClicked = (row: any, event: any) => {
 		router.push(`/menu/form/${row.uuid}`);
-	}
+	};
 
 	return (
 		<>
 			<Breadcrumb pageName='Menu' />
 			<div className='pb-36'>
 				<>
-					<div
-						id='header'
-						className={`${isLoading ? "mb-9" : ""}`}>
+					<div id='header'>
 						<div className='flex justify-between'>
 							<div className='w-full flex justify-end'>
 								<div

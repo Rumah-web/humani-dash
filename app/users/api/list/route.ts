@@ -10,7 +10,9 @@ export async function POST(request: Request) {
 	const { where, take, skip, orderBy } = await request.json();
 
 	let condition = {
-		
+		status: {
+			not: "deleted",
+		},
 	} as any;
 
 	if (Object.entries(where).length > 0) {
@@ -26,6 +28,7 @@ export async function POST(request: Request) {
 			email_verified: true,
 			created_at: true,
 			affiliate_code: true,
+			status: true,
 			m_files: {
 				select: {
 					path: true

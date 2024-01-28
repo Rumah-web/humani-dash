@@ -89,6 +89,7 @@ model m_user {
   affiliate_code String?        @unique(map: "m_user_affiliate_code") @db.VarChar(50)
   email_verified Boolean        @default(false)
   image          Int?
+  status         String         @default("draft") @db.VarChar(30)
   m_files        m_files?       @relation(fields: [image], references: [id], onDelete: NoAction, onUpdate: NoAction)
   m_user_roles   m_user_roles[]
 }
@@ -112,6 +113,7 @@ model order {
   created_at     DateTime       @default(now()) @db.Timestamp(6)
   source         String?        @db.VarChar(50)
   affiliate_code String?        @db.VarChar(50)
+  user_created   Int?
   invoice        invoice[]
   customer       customer       @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_detail   order_detail[]
