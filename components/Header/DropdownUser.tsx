@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useFormState } from "react-dom";
 import { logout } from "@/app/lib/actions";
+import Profile from "./Profile";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -45,21 +46,7 @@ const DropdownUser = () => {
         className="flex items-center gap-4"
         href="#"
       >
-        <span className="hidden text-right lg:block">
-          <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
-          </span>
-          <span className="block text-xs">UX Designer</span>
-        </span>
-
-        <span className="h-12 w-12 rounded-full">
-          <Image
-            width={112}
-            height={112}
-            src={"/images/user/user-01.png"}
-            alt="User"
-          />
-        </span>
+        <Profile />
 
         <svg
           className="hidden fill-current sm:block"
