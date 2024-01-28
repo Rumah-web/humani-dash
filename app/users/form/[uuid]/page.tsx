@@ -10,10 +10,9 @@ import Loading from "@/components/Table/Loading";
 import { m_user } from "@prisma/client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Select from 'react-select'
+import Select from "react-select";
 
 const Form = () => {
-	
 	const [file, setFile] = useState(null);
 	const [isLoading, setLoading] = useState(true);
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
@@ -22,7 +21,9 @@ const Form = () => {
 	const [dataField, setDataField] = useState({});
 	const router = useRouter();
 	const [userData, setUserData] = useState(null as any);
-	const [roles, setRoles] = useState([] as {value: string, label: string}[]);
+	const [roles, setRoles] = useState([] as { value: string; label: string }[]);
+	const [selectRoles, setSelectRoles] = useState([] as any);
+	const [updateRoles, setUpdateRoes] = useState(false);
 
 	const params = useParams<{ uuid: string }>();
 
@@ -47,8 +48,7 @@ const Form = () => {
 			const { data } = await req.json();
 			return data;
 		}
-	}
-
+	};
 
 	const getSession = async () => {
 		const req = await fetch("/users/api/session", {
@@ -137,33 +137,49 @@ const Form = () => {
 				if (file) {
 					setFile(file.path);
 				}
-				
+
 				setLoading(false);
 			}
 
 			const session = await getSession();
 			setUserData(session);
 
-			const roles = await getRoles()
+			const roles = await getRoles();
 
-			if(roles.length > 0) {
-				setRoles(roles.map((rol: any, i: number) => {
-					return {
-						value: rol.id,
-						label: rol.name
-					}
-				}))
+			if (roles.length > 0) {
+				setRoles(
+					roles.map((rol: any, i: number) => {
+						return {
+							value: rol.id,
+							label: rol.name,
+						};
+					})
+				);
 			}
-			
-
-
 		})();
-
 	}, []);
 
 	const onChangeRoles = (val: any) => {
-		console.log('SELE : ', val)
-	}
+		setUpdateRoes(true);
+		setSelectRoles(val.map((role: any, i: number) => {
+			return {id: role.value}
+		}));
+	};
+
+	const onMenuClose = async() => {
+		if (updateRoles) {
+
+			await fetch("/users/api/set-roles", {
+				method: "POST",
+				body: JSON.stringify({ roles: selectRoles, user_id: data.uuid }),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+
+			setUpdateRoes(false);
+		}
+	};
 
 	if (isLoading) {
 		return (
@@ -188,7 +204,7 @@ const Form = () => {
 							<label htmlFor='name'>Name</label>
 							<input
 								{...register("name", { required: true })}
-								value={data.name ? data.name : ''}
+								value={data.name ? data.name : ""}
 								className='w-full py-2 px-3'
 								onChange={(e) => onChange("name", e.target.value)}
 							/>
@@ -197,23 +213,26 @@ const Form = () => {
 							<label htmlFor='email'>Email</label>
 							<input
 								{...register("email", { required: true })}
-								value={data.email ? data.email : ''}
+								value={data.email ? data.email : ""}
 								className='w-full py-2 px-3'
 								onChange={(e) => onChange("email", e.target.value)}
 							/>
 						</div>
 						<div className='flex flex-col space-y-2'>
 							<label htmlFor='email'>Roles</label>
-							<Select 
+							<Select
 								options={roles}
 								onChange={onChangeRoles}
-      							isMulti />
+								onMenuClose={onMenuClose}
+								closeMenuOnSelect={false}
+								isMulti
+							/>
 						</div>
 						<div className='flex flex-col space-y-2'>
 							<label htmlFor='username'>Username</label>
 							<input
 								{...register("username", { required: true })}
-								value={data.username ? data.username : ''}
+								value={data.username ? data.username : ""}
 								className='w-full py-2 px-3'
 								onChange={(e) => onChange("username", e.target.value)}
 							/>
@@ -222,8 +241,8 @@ const Form = () => {
 							<label htmlFor='password'>Password</label>
 							<input
 								{...register("password", { required: true })}
-								value={data.password ? data.password : ''}
-								type="password"
+								value={data.password ? data.password : ""}
+								type='password'
 								className='w-full py-2 px-3'
 								onChange={(e) => onChange("password", e.target.value)}
 							/>
@@ -303,7 +322,7 @@ const Form = () => {
 									className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
 										published ? "opacity-70 cursor-wait" : ""
 									}`}
-									onClick={() => onChangeState('active')}>
+									onClick={() => onChangeState("active")}>
 									Activate
 								</button>
 							)}
@@ -314,7 +333,7 @@ const Form = () => {
 									className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
 										published ? "opacity-70 cursor-wait" : ""
 									}`}
-									onClick={() => onChangeState('inactive')}>
+									onClick={() => onChangeState("inactive")}>
 									Set Not Active
 								</button>
 							)}
