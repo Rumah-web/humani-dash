@@ -32,6 +32,7 @@ const Users = () => {
 	const [tabs, setTabs] = useState(
 		[] as { label: string; value: string; count: number }[]
 	);
+	const [userData, setUserData] = useState(null as any);
 
 	let tabsDefault = [
 		{ label: "All", value: "all", count: 0 },
@@ -150,6 +151,21 @@ const Users = () => {
 		},
 	};
 
+	const getSession = async () => {
+		const req = await fetch("/users/api/session", {
+			method: "POST",
+			body: JSON.stringify({}),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		if (req) {
+			const { session } = await req.json();
+			return session;
+		}
+	};
+
 	const runTotal = async (where: {}) => {
 		const req = await fetch("/users/api/total", {
 			method: "POST",
@@ -235,6 +251,9 @@ const Users = () => {
 			});
 
 			setTabs(tabsDefault);
+
+			const session = await getSession();
+			setUserData(session);
 		})();
 	}, []);
 
@@ -299,9 +318,11 @@ const Users = () => {
 	};
 
 	const onAdd = async () => {
-		const req = await fetch("/menu/api/add", {
+		const req = await fetch("/users/api/add", {
 			method: "POST",
-			body: JSON.stringify({}),
+			body: JSON.stringify({
+				owner: userData.user.uuid
+			}),
 			headers: {
 				"content-type": "application/json",
 			},
@@ -309,7 +330,7 @@ const Users = () => {
 
 		if (req) {
 			const { data } = await req.json();
-			router.push(`/menu/form/${data.uuid}`);
+			router.push(`/users/form/${data.uuid}`);
 		}
 	};
 

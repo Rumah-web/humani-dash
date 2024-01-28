@@ -90,6 +90,7 @@ model m_user {
   email_verified Boolean        @default(false)
   image          Int?
   status         String         @default("draft") @db.VarChar(30)
+  user_owner     Int?
   m_files        m_files?       @relation(fields: [image], references: [id], onDelete: NoAction, onUpdate: NoAction)
   m_user_roles   m_user_roles[]
 }
