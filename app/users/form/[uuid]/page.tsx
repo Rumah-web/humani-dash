@@ -14,6 +14,7 @@ import Select from "react-select";
 import SwitcherOne from "@/components/Switchers/SwitcherOne";
 import CheckboxOne from "@/components/Checkboxes/CheckboxOne";
 import CheckboxTwo from "@/components/Checkboxes/CheckboxTwo";
+import InputPassword from "@/components/Inputs/Password";
 
 const Form = () => {
 	const [file, setFile] = useState(null);
@@ -196,8 +197,8 @@ const Form = () => {
 	};
 
 	const onSetNewPassword = (val: boolean) => {
-		setNewPassword(val)
-	}
+		setNewPassword(val);
+	};
 
 	if (isLoading) {
 		return (
@@ -265,16 +266,18 @@ const Form = () => {
 								</div>
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='password'>Password</label>
-									<input
-										{...register("password", { required: true })}
-										value={data.password ? data.password : ''}
-										disabled={!newPassword}
-										minLength={6}
-										type='password'
-										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
-										onChange={(e) => onChange("password", e.target.value)}
+									<div className='relative'>
+										<InputPassword
+											value={data.password ? data.password : ""}
+											disabled={!newPassword}
+											onChange={(e) => onChange("password", e.target.value)}
+										/>
+									</div>
+									<CheckboxTwo
+										label='Set new password'
+										checked={newPassword}
+										onClick={onSetNewPassword}
 									/>
-									<CheckboxTwo label="Set new password"  checked={newPassword} onClick={onSetNewPassword}  />
 								</div>
 							</div>
 						</div>
