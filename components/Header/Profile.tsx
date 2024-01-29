@@ -46,7 +46,7 @@ const Profile = () => {
 					
 						{userData.user.image ? (
 							<>
-                                <span className='h-12 w-12 rounded-full'>
+                                <span className='h-12 w-12 rounded-full bg-gray flex justify-center items-center overflow-hidden'>
                                     <Image
                                         width={112}
                                         height={112}

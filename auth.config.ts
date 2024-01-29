@@ -24,16 +24,20 @@ export const authConfig = {
     async session({ session, token }: any) {
       
       if (session.user?.name) session.user.name = token.name;
+      if (token.image) session.user.image = token.image
       if (token.uuid) session.user.uuid = token.uuid
 
       return session;
     },
     async jwt({ token, user }) {
-      
+      const dirUploadPath = process.env.DIR_UPLOAD;
       // * User only available on first run.
       let newUser = { ...user } as any;
       if (newUser.uuid)
         token.uuid = `${newUser.uuid}`;
+
+      if (newUser.image)
+        token.image = `${dirUploadPath}/${newUser.m_files.path}`;  
 
       return token;
     },

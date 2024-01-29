@@ -10,6 +10,13 @@ import { m_user } from '@prisma/client';
 async function getUser(email: string): Promise<m_user | null> {
   try {
     const user = await db.m_user.findUnique({
+      include: {
+        m_files: {
+          select: {
+            path: true
+          }
+        }
+      },
       where: {
         username: email,
         status: 'active'
