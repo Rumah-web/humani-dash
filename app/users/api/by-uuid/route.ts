@@ -9,7 +9,14 @@ export async function POST(request: Request) {
     const dirUploadPath = process.env.DIR_UPLOAD;
 
     const data = await db.m_user.findFirst({
-        include: {
+        select: {
+            uuid: true,
+            name: true,
+            email: true,
+            username: true,
+            user_owner: true,
+            status: true,
+            password: true,
             m_files: {
                 select: {
                     path: true
@@ -38,6 +45,10 @@ export async function POST(request: Request) {
     
     if(data?.m_files) {
         file = {...data?.m_files, path: dirUploadPath + "/" + data?.m_files.path}
+    }
+
+    if(data) {
+        data.password = null as any
     }
     
 	return Response.json({

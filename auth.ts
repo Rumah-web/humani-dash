@@ -11,7 +11,8 @@ async function getUser(email: string): Promise<m_user | null> {
   try {
     const user = await db.m_user.findUnique({
       where: {
-        username: email
+        username: email,
+        status: 'active'
       }
     })
     return user;
@@ -27,8 +28,11 @@ export const { auth, signIn, signOut } = NextAuth({
     Credentials({
       async authorize(credentials) {
         const parsedCredentials = z
-          .object({ email: z.string().email(), password: z.string().min(6) })
+          .object({ email: z.string(), password: z.string().min(6) })
           .safeParse(credentials);
+
+
+          console.log('parsedCredentials : ', parsedCredentials)
 
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;

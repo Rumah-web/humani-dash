@@ -1,8 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const CheckboxOne = () => {
+const CheckboxOne = ({label, checked}: {label?: string, checked? : boolean}) => {
   const [isChecked, setIsChecked] = useState<boolean>(false);
+
+  useEffect(() => {
+    if(checked) {
+      setIsChecked(checked)
+    }
+    
+  }, [checked])
 
   return (
     <div>
@@ -29,7 +36,7 @@ const CheckboxOne = () => {
             ></span>
           </div>
         </div>
-        Checkbox Text
+        {(label && label !== '') ? label : 'Checkbox Text'}
       </label>
     </div>
   );

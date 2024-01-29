@@ -1,8 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const CheckboxTwo = () => {
+const CheckboxTwo = ({label, checked, onClick}: {label?: string, checked? : boolean, onClick?: (val: boolean) => void}) => {
   const [isChecked, setIsChecked] = useState<boolean>(false);
+
+  useEffect(() => {
+    if(checked) {
+      setIsChecked(checked)
+    }
+    
+  }, [checked])
 
   return (
     <div>
@@ -16,6 +23,7 @@ const CheckboxTwo = () => {
             id="checkboxLabelTwo"
             className="sr-only"
             onChange={() => {
+              if(typeof onClick !== 'undefined') onClick(!checked)
               setIsChecked(!isChecked);
             }}
           />
@@ -42,7 +50,7 @@ const CheckboxTwo = () => {
             </span>
           </div>
         </div>
-        Checkbox Text
+        {(label && label !== '') ? label : 'Checkbox Text'}
       </label>
     </div>
   );
