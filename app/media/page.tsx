@@ -220,6 +220,10 @@ const Media = () => {
 		}
 	};
 
+	const onRowClicked = (row: any, event: any) => {
+		return window.open(`/media/api/assets/${row.uuid}`, '_blank')
+	};
+
 	return (
 		<>
 			<Breadcrumb pageName='Media' />
@@ -245,6 +249,7 @@ const Media = () => {
 								}
 								onChangePage={(page) => handlePageChange(page)}
 								sortServer
+								onRowClicked={onRowClicked}
 								onSort={(column, sortDirection) =>
 									handleSort(column, sortDirection)
 								}
