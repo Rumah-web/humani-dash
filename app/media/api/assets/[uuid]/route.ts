@@ -1,7 +1,6 @@
 // render image
 
 import db from "@/prisma/lib/db";
-import type { NextApiRequest } from "next";
 const fs = require("fs");
 import path from "path";
 
@@ -9,7 +8,7 @@ type ResponseData = {
 	message: string;
 };
 
-export async function GET(request: NextApiRequest, context: any) {
+export async function GET(request: Request, context: any) {
 	const dirUploadPath = process.env.DIR_UPLOAD;
 	const { uuid } = context.params;
 
