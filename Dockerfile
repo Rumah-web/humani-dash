@@ -2,7 +2,6 @@
 FROM ubuntu:latest as base
 WORKDIR /usr/src
 
-COPY . .
 # COPY package*.json ./
 
 
@@ -23,10 +22,13 @@ RUN npm install -g pm2
 RUN bun --version
 RUN bun install
 
+# copy env for prisma
+COPY ./.env-prod ./.env
 
 # prisma generate and db pull
 RUN cd ./prisma && bun prisma db pull && bun prisma generate
 
+COPY . .
 
 RUN bun run build
 
