@@ -2,7 +2,8 @@
 FROM ubuntu:latest as base
 WORKDIR /usr/src
 
-COPY package*.json ./
+COPY . .
+# COPY package*.json ./
 
 
 ARG NODE_VERSION=20
@@ -22,7 +23,7 @@ RUN npm install -g pm2
 RUN bun --version
 RUN bun install
 
-COPY . .
+
 # prisma generate and db pull
 RUN cd ./prisma && bun prisma db pull && bun prisma generate
 
