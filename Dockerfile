@@ -2,7 +2,7 @@
 FROM ubuntu:latest as base
 WORKDIR /usr/src
 
-# COPY package*.json ./
+COPY package*.json ./
 
 
 ARG NODE_VERSION=20
@@ -25,10 +25,10 @@ RUN bun install
 # copy env for prisma
 COPY ./.env-prod ./.env
 
+COPY . .
+
 # prisma generate and db pull
 RUN cd ./prisma && bun prisma db pull && bun prisma generate
-
-COPY . .
 
 RUN bun run build
 
