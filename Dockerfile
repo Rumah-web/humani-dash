@@ -27,9 +27,6 @@ RUN npm install -g pm2
 RUN bun --version
 RUN bun install
 
-# copy env for prisma
-# COPY ./.env-prod ./.env
-
 COPY . .
 
 # prisma generate and db pull
