@@ -28,7 +28,7 @@ RUN bun --version
 RUN bun install
 
 # copy env for prisma
-COPY ./.env-prod ./.env
+# COPY ./.env-prod ./.env
 
 COPY . .
 
