@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 	let file = null as any;
 
 	if (data?.m_files) {
-		file = { ...data, m_files: dirUploadPath + "/" + data?.m_files.path };
+		file = dirUploadPath + "/" + data?.m_files.path
 	}
 
 	return Response.json({

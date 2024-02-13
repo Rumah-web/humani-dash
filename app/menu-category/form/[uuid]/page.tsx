@@ -6,7 +6,6 @@ import {
 	EditorState,
 	ContentState,
 	convertFromHTML,
-	convertFromRaw,
 	convertToRaw,
 } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
@@ -16,8 +15,7 @@ import Badge from "@/components/Badges";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Table/Loading";
-import { m_menu } from "@prisma/client";
-import { NumericFormat } from "react-number-format";
+import { m_menu_category } from "@prisma/client";
 import Image from "next/image";
 import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
@@ -33,9 +31,8 @@ const Form = () => {
 	const [isLoading, setLoading] = useState(true);
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
 	const [published, setPublished] = useState(false);
-	const [data, setData] = useState({} as m_menu);
+	const [data, setData] = useState({} as m_menu_category);
 	const [dataField, setDataField] = useState({});
-	const [htmlValue, setHtmlValue] = useState(null as any);
 	const router = useRouter();
 
 	const params = useParams<{ uuid: string }>();
@@ -58,7 +55,7 @@ const Form = () => {
 		formData.append("file", file);
 		formData.append("uuid", data.uuid);
 
-		const upload = await fetch("/menu/api/upload-file", {
+		const upload = await fetch("/menu-category/api/upload-file", {
 			method: "POST",
 			body: formData,
 		});
@@ -72,7 +69,7 @@ const Form = () => {
 	};
 
 	const onUpdateByField = async (data: any) => {
-		await fetch("/menu/api/update-field", {
+		await fetch("/menu-category/api/update-field", {
 			method: "POST",
 			body: JSON.stringify({ uuid: params.uuid, data }),
 			headers: {
@@ -89,7 +86,7 @@ const Form = () => {
 
 	const onChangeState = async (status: string) => {
 		setPublished(true);
-		await fetch("/menu/api/change-state", {
+		await fetch("/menu-category/api/change-state", {
 			method: "POST",
 			body: JSON.stringify({ uuid: params.uuid, status }),
 			headers: {
@@ -98,7 +95,7 @@ const Form = () => {
 		});
 		setPublished(false);
 
-		router.push(`/menu`);
+		router.push(`/menu-category`);
 	};
 
 	useEffect(() => {
@@ -118,7 +115,7 @@ const Form = () => {
 
 	useEffect(() => {
 		(async () => {
-			const req = await fetch("/menu/api/by-uuid", {
+			const req = await fetch("/menu-category/api/by-uuid", {
 				method: "POST",
 				body: JSON.stringify({ uuid: params.uuid }),
 				headers: {
@@ -130,7 +127,7 @@ const Form = () => {
 				const { data, file } = await req.json();
 				setData(data);
 				if (file) {
-					setFile(file.path);
+					setFile(file);
 				}
 				setEditorState(
 					EditorState.createWithContent(
@@ -166,7 +163,7 @@ const Form = () => {
 						<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
 							<div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
 								<h3 className='font-medium text-black dark:text-white'>
-									Menu Information
+									Category Information
 								</h3>
 							</div>
 							<div className='flex flex-col gap-5.5 p-6.5'>
@@ -190,34 +187,6 @@ const Form = () => {
 										onEditorStateChange={onEditorStateChange}
 									/>
 								</div>
-								<div className='flex flex-col space-y-2'>
-									<label htmlFor='name'>Price</label>
-									<NumericFormat
-										prefix={"Rp."}
-										value={data.price as any}
-										name='price'
-										allowLeadingZeros
-										thousandSeparator=','
-										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
-										onValueChange={(values, sourceInfo) => {
-											onChange("price", values.value);
-										}}
-									/>
-								</div>
-								<div className='flex flex-col space-y-2'>
-									<label htmlFor='name'>Discount Price</label>
-									<NumericFormat
-										prefix={"Rp."}
-										value={data.price_promo as any}
-										name='price_promo'
-										allowLeadingZeros
-										thousandSeparator=','
-										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
-										onValueChange={(values, sourceInfo) => {
-											onChange("price_promo", values.value);
-										}}
-									/>
-								</div>
 							</div>
 						</div>
 					</div>
@@ -237,7 +206,7 @@ const Form = () => {
 									/>
 								</div>
 								<div className='mt-4 flex flex-col space-y-2'>
-									<label htmlFor='name'>Foto Menu</label>
+									<label htmlFor='name'>Cover</label>
 									{isLoadingUpload ? (
 										<>
 											<div

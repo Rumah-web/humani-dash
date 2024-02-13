@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 			"/" +
 			("0" + (date.getMonth() + 1)).slice(-2) +
 			"/" +
-			date.getDay().toString().padStart(2, "0");
+			date.getDate().toString().padStart(2, "0")
 		fs.mkdirSync(mediaPath + "/" + uploadPath, { recursive: true });
 		fs.writeFileSync(
 			path.join(process.cwd(), mediaPath + "/" + uploadPath + "/" + filename),
