@@ -82,6 +82,14 @@ const Menu = () => {
 			omit: true,
 		},
 		{
+			name: "Category",
+			selector: (row: any) => row.m_menu_category ? row.m_menu_category.name : null,
+			key: "m_menu_category",
+			type: "text",
+			sortable: true,
+			sortField: "name",
+		},
+		{
 			name: "Name",
 			selector: (row: any) => row.name,
 			key: "name",

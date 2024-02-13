@@ -21,6 +21,8 @@ import { NumericFormat } from "react-number-format";
 import Image from "next/image";
 import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
+import Select from "react-select";
+import { IOptionsSelect } from "@/app/type";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -35,7 +37,8 @@ const Form = () => {
 	const [published, setPublished] = useState(false);
 	const [data, setData] = useState({} as m_menu);
 	const [dataField, setDataField] = useState({});
-	const [htmlValue, setHtmlValue] = useState(null as any);
+	const [options, setOptions] = useState([] as IOptionsSelect[]);
+	const [valueOption, setValueOption] = useState({} as IOptionsSelect);
 	const router = useRouter();
 
 	const params = useParams<{ uuid: string }>();
@@ -118,6 +121,14 @@ const Form = () => {
 
 	useEffect(() => {
 		(async () => {
+			const reqCategory = await fetch("/menu/api/menu-category", {
+				method: "POST",
+				body: JSON.stringify({}),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+
 			const req = await fetch("/menu/api/by-uuid", {
 				method: "POST",
 				body: JSON.stringify({ uuid: params.uuid }),
@@ -139,6 +150,12 @@ const Form = () => {
 						)
 					)
 				);
+				if (reqCategory) {
+					const category = await reqCategory.json();
+					setOptions(category.data);
+					setValueOption(category.data.find((opt: IOptionsSelect, i: number) => opt.value === data.m_menu_category_id))
+				}
+				
 				setLoading(false);
 			}
 		})();
@@ -177,6 +194,16 @@ const Form = () => {
 										value={data.name}
 										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
 										onChange={(e) => onChange("name", e.target.value)}
+									/>
+								</div>
+								<div className='flex flex-col space-y-2'>
+									<label htmlFor='m_menu_category_id'>Category</label>
+									<Select
+										options={options}
+										defaultValue={options.find(
+											(opt, i) => opt.value === data.m_menu_category_id
+										)}
+										onChange={(e) => onChange("m_menu_category_id", e?.value)}
 									/>
 								</div>
 								<div className='flex flex-col space-y-2'>

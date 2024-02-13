@@ -28,6 +28,11 @@ export async function POST(request: Request) {
 			price: true,
 			price_promo: true,
 			status: true,
+			m_menu_category: {
+				select: {
+					name: true
+				}
+			},
 			m_menu_files: {
 				select: {
 					m_files: {

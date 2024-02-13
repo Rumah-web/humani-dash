@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
 	if (query) {
 		data = query.map((menu, i) => {
-			return { ...menu, m_files: dirUploadPath + "/" + menu.m_files.path };
+			return { ...menu, m_files: menu.m_files ? dirUploadPath + "/" + menu.m_files?.path : null };
 		});
 	}
 

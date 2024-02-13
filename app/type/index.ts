@@ -18,3 +18,8 @@ export interface PropsTable {
     tabs: Propstabs[],
     totalRow: number,
 }
+
+export interface IOptionsSelect {
+	value: number,
+	label: string
+}
