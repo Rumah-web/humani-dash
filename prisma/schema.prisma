@@ -141,9 +141,9 @@ model m_menu_category {
   uuid        String   @unique(map: "m_menu_category_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name        String   @db.VarChar
   description String?
-  cover       Int
+  cover       Int?
   created_at  DateTime @default(now()) @db.Timestamp(6)
   status      String   @default("draft") @db.VarChar(50)
   m_menu      m_menu[]
-  m_files     m_files  @relation(fields: [cover], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  m_files     m_files? @relation(fields: [cover], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
