@@ -11,7 +11,7 @@ type ResponseData = {
 export async function POST(request: Request) {
 	const formData = (await request.formData()) as any;
 	const mediaPath = process.env.PATH_UPLOAD;
-	const dirUploadPath = process.env.DIR_UPLOAD;
+	const dirUploadPath = process.env.API_ASSETS;
 
 	// Get params from the form data
 	const file = formData.get("file");
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
 				});
 
 				if (create) {
-					data = { ...m_files, path: dirUploadPath + "/" + m_files.path };
+					data = { ...m_files, path: dirUploadPath + "/" + m_files.uuid };
 
 					return Response.json({
 						data,
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
 					});
 				}
 			} else {
-				data = { ...m_files, path: dirUploadPath + "/" + m_files.path };
+				data = { ...m_files, path: dirUploadPath + "/" + m_files.uuid };
 
 				return Response.json({
 					data,
