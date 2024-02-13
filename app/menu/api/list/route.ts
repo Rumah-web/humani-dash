@@ -5,7 +5,7 @@ type ResponseData = {
 };
 
 export async function POST(request: Request) {
-	const dirUploadPath = process.env.DIR_UPLOAD;
+	const dirUploadPath = process.env.API_ASSETS;
 	const { where, take, skip, orderBy } = await request.json();
 
 	let condition = {
@@ -37,6 +37,7 @@ export async function POST(request: Request) {
 				select: {
 					m_files: {
 						select: {
+							uuid: true,
 							path: true,
 							name: true,
 							type: true,
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
 			const m_menu_files = menu.m_menu_files.map((menu_file, x) => {
 				const m_files = {
 					...menu_file.m_files,
-					path: dirUploadPath + "/" + menu_file.m_files.path,
+					path: dirUploadPath + "/" + menu_file.m_files.uuid
 				};
 				return { ...menu_file, m_files };
 			});
