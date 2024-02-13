@@ -36,29 +36,32 @@ model invoice {
 }
 
 model m_files {
-  id           Int            @id @default(autoincrement())
-  uuid         String         @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  path         String
-  name         String
-  size         Int
-  type         String         @db.VarChar(100)
-  created_at   DateTime       @default(now()) @db.Timestamp(6)
-  m_menu_files m_menu_files[]
-  m_user       m_user[]
+  id              Int               @id @default(autoincrement())
+  uuid            String            @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  path            String
+  name            String
+  size            Int
+  type            String            @db.VarChar(100)
+  created_at      DateTime          @default(now()) @db.Timestamp(6)
+  m_menu_category m_menu_category[]
+  m_menu_files    m_menu_files[]
+  m_user          m_user[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model m_menu {
-  id           Int            @id @default(autoincrement())
-  uuid         String         @unique(map: "m_menu_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name         String         @db.VarChar
-  description  String
-  price        Decimal        @db.Decimal
-  price_promo  Decimal        @db.Decimal
-  created_at   DateTime       @default(now()) @db.Timestamp(6)
-  status       String         @default("draft") @db.VarChar(50)
-  m_menu_files m_menu_files[]
-  order_detail order_detail[]
+  id                 Int              @id @default(autoincrement())
+  uuid               String           @unique(map: "m_menu_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name               String           @db.VarChar
+  description        String
+  price              Decimal          @db.Decimal
+  price_promo        Decimal          @db.Decimal
+  created_at         DateTime         @default(now()) @db.Timestamp(6)
+  status             String           @default("draft") @db.VarChar(50)
+  m_menu_category_id Int?
+  m_menu_category    m_menu_category? @relation(fields: [m_menu_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  m_menu_files       m_menu_files[]
+  order_detail       order_detail[]
 }
 
 model m_menu_files {
@@ -130,4 +133,17 @@ model order_detail {
   notes     String
   m_menu    m_menu  @relation(fields: [m_menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order     order   @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model m_menu_category {
+  id          Int      @id @default(autoincrement())
+  uuid        String   @unique(map: "m_menu_category_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name        String   @db.VarChar
+  description String?
+  cover       Int
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  status      String   @default("draft") @db.VarChar(50)
+  m_menu      m_menu[]
+  m_files     m_files  @relation(fields: [cover], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
