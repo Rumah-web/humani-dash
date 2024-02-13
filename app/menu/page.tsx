@@ -55,6 +55,7 @@ const Menu = () => {
 								height={100}
 								alt={row.name}
 								priority={false}
+								unoptimized
 								className='w-24'
 							/>
 						</div>

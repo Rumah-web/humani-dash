@@ -292,6 +292,7 @@ const Form = () => {
 																	width={100}
 																	height={100}
 																	priority={false}
+																	unoptimized
 																	className='w-fit'
 																/>
 															</div>

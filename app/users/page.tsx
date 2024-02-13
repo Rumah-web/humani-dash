@@ -353,6 +353,7 @@ const Users = () => {
 										height={100}
 										alt={data.name}
 										priority={false}
+										unoptimized
 										className='w-24'
 									/>
 								</div>
