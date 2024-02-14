@@ -21,9 +21,9 @@ RUN apt-get update && \
 
 # RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.0.25" && \
 #     ln -s $HOME/.bun/bin/bun /usr/local/bin/bun
-# RUN curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
-#     bash n $NODE_VERSION && \
-#     rm n && npm install -g n
+RUN curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
+    bash n $NODE_VERSION && \
+    rm n && npm install -g n
 
 RUN npm install -g pm2
 
