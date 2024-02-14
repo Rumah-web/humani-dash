@@ -23,7 +23,10 @@ RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.0.25" && \
 RUN curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
     bash n $NODE_VERSION && \
     rm n && npm install -g n
-RUN npm install --arch=arm64 --platform=linux --libc=musl sharp
+RUN npm install --save sharp
+RUN npm rebuild --arch=x64 --platform=linux --libc=musl sharp
+RUN npm rebuild --arch=x64 --platform=linux --libc=glibc sharp
+
 RUN npm install -g node-gyp    
 RUN npm install -g pm2
 
