@@ -2,9 +2,6 @@
 FROM ubuntu:latest as base
 WORKDIR /usr/src
 
-COPY package*.json ./
-
-
 ARG NODE_VERSION=20
 ENV AUTH_SECRET=BLuHexCSSyrYsZOAlk9xrcmpqPtLiLvBRb8eN9EcOE4=
 ENV DATABASE_URL="postgres://postgres:2bhor33251ylEq6nJPnwCUEsTNyYrtacyDsBJTAylpc92SWgjJQbQsdE86DI7mMW@45.118.135.134:5533/hcs?schema=public&pool_timeout=0&connect_timeout=300"
@@ -31,6 +28,8 @@ RUN npm install -g node-gyp
 RUN npm install -g pm2
 
 # install dependency
+COPY package*.json ./
+
 RUN bun --version
 RUN bun install
 
