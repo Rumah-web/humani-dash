@@ -19,25 +19,26 @@ RUN apt-get update && \
     apt-get install unzip && \
     apt-get install -y --no-install-recommends libvips42
 
-RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.0.25" && \
-    ln -s $HOME/.bun/bin/bun /usr/local/bin/bun
-RUN curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
-    bash n $NODE_VERSION && \
-    rm n && npm install -g n
+# RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.0.25" && \
+#     ln -s $HOME/.bun/bin/bun /usr/local/bin/bun
+# RUN curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
+#     bash n $NODE_VERSION && \
+#     rm n && npm install -g n
 
 RUN npm install -g pm2
 
 # install dependency
 
-RUN bun --version
-RUN bun install
+# RUN bun --version
+RUN npm i sharp --ignore-engines
+RUN npm install
 
 COPY . .
 
 # prisma generate and db pull
 RUN cd ./prisma && bun prisma db pull && bun prisma generate
 
-RUN bun add sharp
+# RUN bun add sharp
 RUN bun run build
 
 EXPOSE 6000
