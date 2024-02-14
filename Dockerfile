@@ -12,10 +12,12 @@ ENV DIR_UPLOAD="upload"
 ENV API_ASSETS="media/api/assets/"
 ENV API_ASSETS_HOST="https://dash.humanicode.com/"
 ENV AUTH_TRUST_HOST=true
+ENV NEXT_SHARP_PATH=/tmp/node_modules/sharp
 
 RUN apt-get update && \
     apt-get install -y curl && \
-    apt-get install unzip
+    apt-get install unzip && \
+    apt-get install -y --no-install-recommends libvips42
 
 RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.0.25" && \
     ln -s $HOME/.bun/bin/bun /usr/local/bin/bun
@@ -29,13 +31,13 @@ RUN npm install -g pm2
 
 RUN bun --version
 RUN bun install
-RUN bun add sharp
 
 COPY . .
 
 # prisma generate and db pull
 RUN cd ./prisma && bun prisma db pull && bun prisma generate
 
+RUN bun add sharp
 RUN bun run build
 
 EXPOSE 6000
