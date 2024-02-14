@@ -28,6 +28,7 @@ RUN npm install -g pm2
 # install dependency
 RUN bun --version
 RUN bun install
+RUN bun install --arch=arm64 --platform=linux --libc=musl sharp
 
 COPY . .
 
