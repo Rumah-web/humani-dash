@@ -50,11 +50,11 @@ const Menu = () => {
 					return (
 						<div className='p-2'>
 							<Image
-								src={"/" + row.m_menu_files[0].m_files.path}
+								src={`${row.m_menu_files[0].m_files.path}?width=100`}
 								width={100}
 								height={100}
 								alt={row.name}
-								priority={false}
+								priority={true}
 								unoptimized
 								className='w-24'
 							/>

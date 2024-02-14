@@ -11,6 +11,7 @@ ENV DATABASE_URL="postgres://postgres:2bhor33251ylEq6nJPnwCUEsTNyYrtacyDsBJTAylp
 ENV PATH_UPLOAD="public/upload"
 ENV DIR_UPLOAD="upload"
 ENV API_ASSETS="media/api/assets/"
+ENV API_ASSETS_HOST="https://dash.humanicode.com/"
 ENV AUTH_TRUST_HOST=true
 
 RUN apt-get update && \

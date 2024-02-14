@@ -37,6 +37,7 @@ const Form = () => {
 	const [published, setPublished] = useState(false);
 	const [data, setData] = useState({} as m_menu);
 	const [dataField, setDataField] = useState({});
+	const [apiUpload, setApiUpload] = useState(null);
 	const [options, setOptions] = useState([] as IOptionsSelect[]);
 	const [valueOption, setValueOption] = useState({} as IOptionsSelect);
 	const router = useRouter();
@@ -61,7 +62,7 @@ const Form = () => {
 		formData.append("file", file);
 		formData.append("uuid", data.uuid);
 
-		const upload = await fetch("/menu/api/upload-file", {
+		const upload = await fetch(`${apiUpload}menu/api/upload-file`, {
 			method: "POST",
 			body: formData,
 		});
@@ -138,11 +139,16 @@ const Form = () => {
 			});
 
 			if (req) {
-				const { data, file } = await req.json();
+				const { data, file, apiupload } = await req.json();
 				setData(data);
 				if (file) {
 					setFile(file.path);
 				}
+
+				if(apiupload) {
+					setApiUpload(apiupload)
+				}
+
 				setEditorState(
 					EditorState.createWithContent(
 						ContentState.createFromBlockArray(
@@ -287,7 +293,7 @@ const Form = () => {
 															<div
 																className={`flex justify-center h-36 relative`}>
 																<Image
-																	src={"/" + file}
+																	src={`${file}?width=111`}
 																	alt={data.name}
 																	width={100}
 																	height={100}
