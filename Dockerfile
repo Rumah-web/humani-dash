@@ -15,7 +15,7 @@ ENV AUTH_TRUST_HOST=true
 
 RUN apt-get update && \
     apt-get install -y curl && \
-    apt-get install unzip libvips-dev
+    apt-get install unzip
 
 RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.0.25" && \
     ln -s $HOME/.bun/bin/bun /usr/local/bin/bun
