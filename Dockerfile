@@ -33,9 +33,11 @@ RUN bun install
 COPY . .
 
 RUN npm install --save --unsafe-perm sharp
-RUN npm rebuild --arch=x64 --platform=linux --libc=musl --unsafe-perm sharp
-RUN npm rebuild --arch=x64 --platform=linux --libc=glibc --unsafe-perm sharp
-RUN npm install -g node-gyp    
+# RUN npm install --arch=x64 --platform=linux --libc=musl --unsafe-perm sharp
+# RUN npm install --arch=x64 --platform=linux --libc=glibc --unsafe-perm sharp
+RUN npm install --cpu=x64 --os=linux sharp
+RUN npm install --cpu=x64 --os=linux --libc=musl sharp
+RUN npm install --save node-addon-api node-gyp
 
 # prisma generate and db pull
 RUN cd ./prisma && bun prisma db pull && bun prisma generate
