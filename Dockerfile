@@ -36,10 +36,10 @@ RUN npm install
 COPY . .
 
 # prisma generate and db pull
-RUN cd ./prisma && bun prisma db pull && bun prisma generate
+RUN cd ./prisma && npx prisma db pull && npx prisma generate
 
 # RUN bun add sharp
-RUN bun run build
+RUN npm run build
 
 EXPOSE 6000
-CMD [ "pm2-runtime", "bun run start"]
+CMD [ "pm2-runtime", "npm run start"]
