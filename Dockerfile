@@ -17,7 +17,7 @@ ENV NEXT_SHARP_PATH=/tmp/node_modules/sharp
 RUN apt-get update && \
     apt-get install -y curl && \
     apt-get install unzip && \
-    apt-get install -y --no-install-recommends gcc vips
+    apt-get install -y --no-install-recommends libvips42 gcc
 
 # RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.0.25" && \
 #     ln -s $HOME/.bun/bin/bun /usr/local/bin/bun
