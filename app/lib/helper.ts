@@ -1,8 +1,6 @@
-import { execFileSync } from "child_process";
-import { existsSync, mkdirSync, readFileSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 import path from "path";
-
-const sharp = require('sharp');
+// const sharp = require('sharp');
 
 export function formatLongtDate(dateParams: Date) {
 	const date = new Date(dateParams);
@@ -132,15 +130,17 @@ export const resizeImage = async (
 	height?: number | null,
 	fill?: "contain" | "cover" | "fill" | "inside" | "outside"
 ) => {
-	// const dir_upload = path.dirname(dir);
-	// const file_name = path.basename(dir);
-	// let dir_transform = `${dir_upload}/${width}/${fill}`;
-	// if (height) {
-	// 	dir_transform = `${dir_upload}/${width}x${height}/${fill}`;
-	// }
-	// if (!existsSync(dir_transform)) {
-	// 	mkdirSync(dir_transform, { recursive: true });
-	// }
+	const dir_upload = path.dirname(dir);
+	const file_name = path.basename(dir);
+	let dir_transform = `${dir_upload}/${width}/${fill}`;
+	if (height) {
+		dir_transform = `${dir_upload}/${width}x${height}/${fill}`;
+	}
+	if (!existsSync(dir_transform)) {
+		mkdirSync(dir_transform, { recursive: true });
+	}
+
+	return ''
 
 	// const path_transform = `${dir_transform}/${file_name}`;
 
