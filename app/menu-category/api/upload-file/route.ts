@@ -3,6 +3,7 @@ import path from "path";
 import { writeFile } from "fs/promises";
 import fs from "fs";
 import { m_files } from "@prisma/client";
+import { IUpload } from "@/app/type";
 
 type ResponseData = {
 	message: string;
@@ -10,8 +11,7 @@ type ResponseData = {
 
 export async function POST(request: Request) {
 	const formData = (await request.formData()) as any;
-	const mediaPath = process.env.PATH_UPLOAD;
-	const dirUploadPath = process.env.DIR_UPLOAD;
+	const assets_api = process.env.API_ASSETS_HOST + "/view";
 
 	// Get params from the form data
 	const file = formData.get("file");
@@ -26,84 +26,79 @@ export async function POST(request: Request) {
 		return Response.json({ error: "No files received." }, { status: 400 });
 	}
 
-	// Convert the file data to a Buffer
-	const buffer = Buffer.from(await file.arrayBuffer());
-
-	// Replace spaces in the file name with underscores
-	const filename =
-		Date.now() +
-		"_" +
-		Math.random().toString().substring(2) +
-		path.extname(file.name);
-
 	try {
-		// Write the file to the specified directory (public/assets) with the modified filename
-		const uploadPath =
-			date.getFullYear() +
-			"/" +
-			("0" + (date.getMonth() + 1)).slice(-2) +
-			"/" +
-			date.getDate().toString().padStart(2, "0")
-		fs.mkdirSync(mediaPath + "/" + uploadPath, { recursive: true });
-		fs.writeFileSync(
-			path.join(process.cwd(), mediaPath + "/" + uploadPath + "/" + filename),
-			buffer
-		);
-
-		const findByUUID = await db.m_menu_category.findFirst({
-			select: {
-				id: true,
-				uuid: true,
-				cover: true,
-				m_files: {
-					select: {
-						id: true,
-						path: true,
-					},
-				},
-			},
-			where: {
-				uuid,
-			},
+		/* Send request to another server */
+		const upload = await fetch(`${process.env.API_ASSETS_HOST}/upload`, {
+			method: "POST",
+			body: formData,
 		});
 
-		let m_files = {} as m_files;
-		if (findByUUID?.cover) {
-			m_files = await db.m_files.update({
-				data: {
-					name: file.name.replaceAll(" ", "_"),
-					size: file.size,
-					type: file.type,
-					path: uploadPath + "/" + filename,
+		const file: IUpload = await upload.json();
+
+		if (file) {
+			const findByUUID = await db.m_menu_category.findFirst({
+				select: {
+					id: true,
+					uuid: true,
+					cover: true,
+					m_files: {
+						select: {
+							id: true,
+							path: true,
+						},
+					},
 				},
 				where: {
-					id: findByUUID.cover,
+					uuid,
 				},
 			});
-		} else {
-			m_files = await db.m_files.create({
-				data: {
-					name: file.name.replaceAll(" ", "_"),
-					size: file.size,
-					type: file.type,
-					path: uploadPath + "/" + filename,
-				},
-			});
-		}
 
-		if (m_files) {
-			if (!findByUUID?.cover) {
-				const update = await db.m_menu_category.update({
-					where: {
-						id: findByUUID?.id,
-					},
+			let m_files = {} as m_files;
+			if (findByUUID?.cover) {
+				m_files = await db.m_files.update({
 					data: {
-						cover: m_files.id,
+						name: file.name,
+						size: file.size,
+						type: file.type,
+						path: file.path,
+					},
+					where: {
+						id: findByUUID.cover,
 					},
 				});
+			} else {
+				m_files = await db.m_files.create({
+					data: {
+						name: file.name,
+						size: file.size,
+						type: file.type,
+						path: file.path,
+					},
+				});
+			}
 
-				if (update) {
-					data = { ...m_files, path: dirUploadPath + "/" + m_files.path };
+			if (m_files) {
+				if (!findByUUID?.cover) {
+					const update = await db.m_menu_category.update({
+						where: {
+							id: findByUUID?.id,
+						},
+						data: {
+							cover: m_files.id,
+						},
+					});
+
+					if (update) {
+						data = { ...m_files, path: assets_api + "/" + m_files.uuid };
+
+						return Response.json({
+							data,
+							message: "Success",
+							status: 200,
+						});
+					}
+				} else {
+					data = { ...m_files, path: assets_api + "/" + m_files.uuid };
 
 					return Response.json({
 						data,
@@ -111,14 +106,6 @@ export async function POST(request: Request) {
 						status: 200,
 					});
 				}
-			} else {
-				data = { ...m_files, path: dirUploadPath + "/" + m_files.path };
-
-				return Response.json({
-					data,
-					message: "Success",
-					status: 200,
-				});
 			}
 		}
 

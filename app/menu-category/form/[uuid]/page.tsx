@@ -229,7 +229,7 @@ const Form = () => {
 															<div
 																className={`flex justify-center h-36 relative`}>
 																<Image
-																	src={"/" + file}
+																	src={`${file}?w=200`}
 																	alt={data.name}
 																	width={100}
 																	height={100}

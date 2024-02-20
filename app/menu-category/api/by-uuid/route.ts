@@ -6,13 +6,14 @@ type ResponseData = {
 
 export async function POST(request: Request) {
 	const { uuid } = await request.json();
-	const dirUploadPath = process.env.DIR_UPLOAD;
+	const assets_api =  process.env.API_ASSETS_HOST + '/view';
 
 	const data = await db.m_menu_category.findFirst({
 		include: {
 			m_files: {
 				select: {
 					path: true,
+					uuid: true
 				},
 			},
 		},
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
 	let file = null as any;
 
 	if (data?.m_files) {
-		file = dirUploadPath + "/" + data?.m_files.path
+		file = assets_api + "/" + data?.m_files.uuid
 	}
 
 	return Response.json({

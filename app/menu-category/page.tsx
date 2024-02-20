@@ -39,10 +39,7 @@ const Menu = () => {
 	const columns = [
 		{
 			name: "Cover",
-			selector: (row: any) =>
-				row.m_files
-					? row.m_files
-					: null,
+			selector: (row: any) => (row.m_files ? row.m_files : null),
 			key: "cover",
 			type: "text",
 			format: (row: any) => {
@@ -50,7 +47,7 @@ const Menu = () => {
 					return (
 						<div className='p-2'>
 							<Image
-								src={"/" + row.m_files}
+								src={`${row.m_files}?width=200`}
 								width={100}
 								height={100}
 								alt={row.name}
