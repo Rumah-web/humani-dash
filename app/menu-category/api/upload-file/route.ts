@@ -17,7 +17,6 @@ export async function POST(request: Request) {
 	const file = formData.get("file");
 	const uuid = formData.get("uuid");
 
-	let date = new Date();
 	let data = null as any;
 
 	// Check if a file is received

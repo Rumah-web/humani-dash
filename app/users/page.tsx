@@ -348,7 +348,7 @@ const Users = () => {
 							{data.m_files.path ? (
 								<div className='p-2'>
 									<Image
-										src={"/" + data.m_files.path}
+										src={`${data.m_files.path}?width=200`}
 										width={100}
 										height={100}
 										alt={data.name}

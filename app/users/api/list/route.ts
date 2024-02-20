@@ -6,7 +6,7 @@ type ResponseData = {
 };
 
 export async function POST(request: Request) {
-	const dirUploadPath = process.env.DIR_UPLOAD;
+	const assets_api = process.env.API_ASSETS_HOST + "/view";
 	const { where, take, skip, orderBy } = await request.json();
 
 	let condition = {
@@ -31,7 +31,8 @@ export async function POST(request: Request) {
 			status: true,
 			m_files: {
 				select: {
-					path: true
+					path: true,
+					uuid: true
 				}
 			},
 			m_user_roles: {
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
 
 	if(query) {
 		data = query.map((user, i) => {
-			const m_files = {...user.m_files, path: dirUploadPath + "/" + user.m_files?.path}
+			const m_files = {...user.m_files, path: assets_api + "/" + user.m_files?.uuid}
 			return {...user, m_files}
 		})
 	}

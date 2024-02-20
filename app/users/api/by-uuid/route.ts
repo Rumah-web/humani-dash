@@ -6,7 +6,7 @@ type ResponseData = {
 
 export async function POST(request: Request) {
     const {uuid } = await request.json()
-    const dirUploadPath = process.env.DIR_UPLOAD;
+    const assets_api =  process.env.API_ASSETS_HOST + '/view';
 
     const data = await db.m_user.findFirst({
         select: {
@@ -19,7 +19,8 @@ export async function POST(request: Request) {
             password: true,
             m_files: {
                 select: {
-                    path: true
+                    path: true,
+                    uuid: true
                 }
             },
             m_user_roles: {
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
     let file = null as any
     
     if(data?.m_files) {
-        file = {...data?.m_files, path: dirUploadPath + "/" + data?.m_files.path}
+        file = {...data?.m_files, path: assets_api + "/" + data?.m_files.uuid}
     }
 
     if(data) {

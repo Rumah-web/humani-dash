@@ -38,7 +38,7 @@ const Form = () => {
 		formState: { errors },
 	} = useForm();
 
-	const fileTypes = ["JPG", "PNG"];
+	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const getRoles = async () => {
 		const req = await fetch("/users/api/roles", {
@@ -321,7 +321,7 @@ const Form = () => {
 															<div
 																className={`flex justify-center h-36 relative`}>
 																<Image
-																	src={"/" + file}
+																	src={`${file}?width=200`}
 																	alt={data.username}
 																	width={100}
 																	height={100}

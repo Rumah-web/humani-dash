@@ -43,7 +43,7 @@ const Form = () => {
 		formState: { errors },
 	} = useForm();
 
-	const fileTypes = ["JPG", "PNG"];
+	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const onEditorStateChange = (editorState: any) => {
 		setEditorState(editorState);

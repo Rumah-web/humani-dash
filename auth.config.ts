@@ -30,14 +30,14 @@ export const authConfig = {
       return session;
     },
     async jwt({ token, user }) {
-      const dirUploadPath = process.env.DIR_UPLOAD;
+      const assets_api = process.env.API_ASSETS_HOST + "/view";
       // * User only available on first run.
       let newUser = { ...user } as any;
       if (newUser.uuid)
         token.uuid = `${newUser.uuid}`;
 
       if (newUser.image)
-        token.image = `${dirUploadPath}/${newUser.m_files.path}`;  
+        token.image = `${assets_api}/${newUser.m_files.uuid}`;  
 
       return token;
     },
