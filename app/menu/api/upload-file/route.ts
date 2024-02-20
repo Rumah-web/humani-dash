@@ -10,8 +10,8 @@ type ResponseData = {
 };
 
 export async function POST(request: Request) {
-	const formData = (await request.formData()) as any
-	const assets_api =  process.env.API_ASSETS_HOST + '/view';
+	const formData = (await request.formData()) as any;
+	const assets_api = process.env.API_ASSETS_HOST + "/view";
 
 	// Get params from the form data
 	const file = formData.get("file");
@@ -25,16 +25,14 @@ export async function POST(request: Request) {
 		return Response.json({ error: "No files received." }, { status: 400 });
 	}
 
-
 	try {
-
 		/* Send request to another server */
 		const upload = await fetch(`${process.env.API_ASSETS_HOST}/upload`, {
 			method: "POST",
 			body: formData,
 		});
 
-		const file: IUpload = await upload.json()
+		const file: IUpload = await upload.json();
 
 		if (file) {
 			const findMenuByUUID = await db.m_menu.findFirst({
@@ -44,6 +42,7 @@ export async function POST(request: Request) {
 					m_menu_files: {
 						select: {
 							m_files_id: true,
+							id: true,
 						},
 						take: 1,
 					},
@@ -54,28 +53,28 @@ export async function POST(request: Request) {
 			});
 
 			let m_files = {} as m_files;
-			if (typeof findMenuByUUID?.m_menu_files[0] !== "undefined") {
-				m_files = await db.m_files.update({
-					data: {
-						name: file.name,
-						size: file.size,
-						type: file.type,
-						path: file.path,
-					},
-					where: {
-						id: findMenuByUUID.m_menu_files[0].m_files_id,
-					},
-				});
-			} else {
-				m_files = await db.m_files.create({
-					data: {
-						name: file.name,
-						size: file.size,
-						type: file.type,
-						path: file.path,
-					},
-				});
-			}
+			// if (typeof findMenuByUUID?.m_menu_files[0] !== "undefined") {
+			// 	m_files = await db.m_files.update({
+			// 		data: {
+			// 			name: file.name,
+			// 			size: file.size,
+			// 			type: file.type,
+			// 			path: file.path,
+			// 		},
+			// 		where: {
+			// 			id: findMenuByUUID.m_menu_files[0].m_files_id,
+			// 		},
+			// 	});
+			// } else {
+			m_files = await db.m_files.create({
+				data: {
+					name: file.name,
+					size: file.size,
+					type: file.type,
+					path: file.path,
+				},
+			});
+			// }
 
 			if (m_files) {
 				if (typeof findMenuByUUID?.m_menu_files[0] === "undefined") {
@@ -96,13 +95,24 @@ export async function POST(request: Request) {
 						});
 					}
 				} else {
-					data = { ...m_files, path: assets_api + "/" + m_files.uuid };
-
-					return Response.json({
-						data,
-						message: "Success",
-						status: 200,
+					const update = await db.m_menu_files.update({
+						data: {
+							m_files_id: m_files.id,
+						},
+						where: {
+							id: findMenuByUUID?.m_menu_files[0].id,
+						},
 					});
+
+					if (update) {
+						data = { ...m_files, path: assets_api + "/" + m_files.uuid };
+
+						return Response.json({
+							data,
+							message: "Success",
+							status: 200,
+						});
+					}
 				}
 			}
 		}

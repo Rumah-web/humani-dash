@@ -53,50 +53,41 @@ export async function POST(request: Request) {
 			});
 
 			let m_files = {} as m_files;
-			if (findByUUID?.cover) {
-				m_files = await db.m_files.update({
-					data: {
-						name: file.name,
-						size: file.size,
-						type: file.type,
-						path: file.path,
-					},
-					where: {
-						id: findByUUID.cover,
-					},
-				});
-			} else {
-				m_files = await db.m_files.create({
-					data: {
-						name: file.name,
-						size: file.size,
-						type: file.type,
-						path: file.path,
-					},
-				});
-			}
+			// if (findByUUID?.cover) {
+			// 	m_files = await db.m_files.update({
+			// 		data: {
+			// 			name: file.name,
+			// 			size: file.size,
+			// 			type: file.type,
+			// 			path: file.path,
+			// 		},
+			// 		where: {
+			// 			id: findByUUID.cover,
+			// 		},
+			// 	});
+			// } else {
+			m_files = await db.m_files.create({
+				data: {
+					name: file.name,
+					size: file.size,
+					type: file.type,
+					path: file.path,
+				},
+			});
+			// }
 
 			if (m_files) {
-				if (!findByUUID?.cover) {
-					const update = await db.m_menu_category.update({
-						where: {
-							id: findByUUID?.id,
-						},
-						data: {
-							cover: m_files.id,
-						},
-					});
+				// if (!findByUUID?.cover) {
+				const update = await db.m_menu_category.update({
+					where: {
+						id: findByUUID?.id,
+					},
+					data: {
+						cover: m_files.id,
+					},
+				});
 
-					if (update) {
-						data = { ...m_files, path: assets_api + "/" + m_files.uuid };
-
-						return Response.json({
-							data,
-							message: "Success",
-							status: 200,
-						});
-					}
-				} else {
+				if (update) {
 					data = { ...m_files, path: assets_api + "/" + m_files.uuid };
 
 					return Response.json({
@@ -105,6 +96,15 @@ export async function POST(request: Request) {
 						status: 200,
 					});
 				}
+				// } else {
+				// 	data = { ...m_files, path: assets_api + "/" + m_files.uuid };
+
+				// 	return Response.json({
+				// 		data,
+				// 		message: "Success",
+				// 		status: 200,
+				// 	});
+				// }
 			}
 		}
 
