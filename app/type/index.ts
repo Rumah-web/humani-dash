@@ -23,3 +23,10 @@ export interface IOptionsSelect {
 	value: number,
 	label: string
 }
+
+export interface IUpload {
+    name: string,
+    size: number,
+    type: string,
+    path: string
+}

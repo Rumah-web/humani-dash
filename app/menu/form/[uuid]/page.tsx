@@ -37,7 +37,6 @@ const Form = () => {
 	const [published, setPublished] = useState(false);
 	const [data, setData] = useState({} as m_menu);
 	const [dataField, setDataField] = useState({});
-	const [apiUpload, setApiUpload] = useState(null);
 	const [options, setOptions] = useState([] as IOptionsSelect[]);
 	const [valueOption, setValueOption] = useState({} as IOptionsSelect);
 	const router = useRouter();
@@ -62,7 +61,7 @@ const Form = () => {
 		formData.append("file", file);
 		formData.append("uuid", data.uuid);
 
-		const upload = await fetch(`${apiUpload}menu/api/upload-file`, {
+		const upload = await fetch(`/menu/api/upload-file`, {
 			method: "POST",
 			body: formData,
 		});
@@ -139,14 +138,10 @@ const Form = () => {
 			});
 
 			if (req) {
-				const { data, file, apiupload } = await req.json();
+				const { data, file } = await req.json();
 				setData(data);
 				if (file) {
 					setFile(file.path);
-				}
-
-				if(apiupload) {
-					setApiUpload(apiupload)
 				}
 
 				setEditorState(
@@ -159,9 +154,14 @@ const Form = () => {
 				if (reqCategory) {
 					const category = await reqCategory.json();
 					setOptions(category.data);
-					setValueOption(category.data.find((opt: IOptionsSelect, i: number) => opt.value === data.m_menu_category_id))
+					setValueOption(
+						category.data.find(
+							(opt: IOptionsSelect, i: number) =>
+								opt.value === data.m_menu_category_id
+						)
+					);
 				}
-				
+
 				setLoading(false);
 			}
 		})();

@@ -3,21 +3,20 @@ import path from "path";
 import { writeFile } from "fs/promises";
 import fs from "fs";
 import { m_files } from "@prisma/client";
+import { IUpload } from "@/app/type";
 
 type ResponseData = {
 	message: string;
 };
 
 export async function POST(request: Request) {
-	const formData = (await request.formData()) as any;
-	const mediaPath = process.env.PATH_UPLOAD;
-	const dirUploadPath = process.env.API_ASSETS;
+	const formData = (await request.formData()) as any
+	const assets_api =  process.env.API_ASSETS_HOST + '/view';
 
 	// Get params from the form data
 	const file = formData.get("file");
 	const uuid = formData.get("uuid");
 
-	let date = new Date();
 	let data = null as any;
 
 	// Check if a file is received
@@ -26,81 +25,77 @@ export async function POST(request: Request) {
 		return Response.json({ error: "No files received." }, { status: 400 });
 	}
 
-	// Convert the file data to a Buffer
-	const buffer = Buffer.from(await file.arrayBuffer());
-
-	// Replace spaces in the file name with underscores
-	const filename =
-		Date.now() +
-		"_" +
-		Math.random().toString().substring(2) +
-		path.extname(file.name);
-
 	try {
-		// Write the file to the specified directory (public/assets) with the modified filename
-		const uploadPath =
-			date.getFullYear() +
-			"/" +
-			("0" + (date.getMonth() + 1)).slice(-2) +
-			"/" +
-			date.getDate().toString().padStart(2, "0");
-		fs.mkdirSync(mediaPath + "/" + uploadPath, { recursive: true });
-		fs.writeFileSync(
-			path.join(process.cwd(), mediaPath + "/" + uploadPath + "/" + filename),
-			buffer
-		);
 
-		const findMenuByUUID = await db.m_menu.findFirst({
-			select: {
-				id: true,
-				uuid: true,
-				m_menu_files: {
-					select: {
-						m_files_id: true,
-					},
-					take: 1,
-				},
-			},
-			where: {
-				uuid,
-			},
+		/* Send request to another server */
+		const upload = await fetch(`${process.env.API_ASSETS_HOST}/upload`, {
+			method: "POST",
+			body: formData,
 		});
 
-		let m_files = {} as m_files;
-		if (typeof findMenuByUUID?.m_menu_files[0] !== 'undefined') {
-			m_files = await db.m_files.update({
-				data: {
-					name: file.name.replaceAll(" ", "_"),
-					size: file.size,
-					type: file.type,
-					path: uploadPath + "/" + filename,
+		const file: IUpload = await upload.json()
+
+		if (file) {
+			const findMenuByUUID = await db.m_menu.findFirst({
+				select: {
+					id: true,
+					uuid: true,
+					m_menu_files: {
+						select: {
+							m_files_id: true,
+						},
+						take: 1,
+					},
 				},
 				where: {
-					id: findMenuByUUID.m_menu_files[0].m_files_id,
+					uuid,
 				},
 			});
-		} else {
-			m_files = await db.m_files.create({
-				data: {
-					name: file.name.replaceAll(" ", "_"),
-					size: file.size,
-					type: file.type,
-					path: uploadPath + "/" + filename,
-				},
-			});
-		}
 
-		if (m_files) {
-			if (typeof findMenuByUUID?.m_menu_files[0] === 'undefined') {
-				const create = await db.m_menu_files.create({
+			let m_files = {} as m_files;
+			if (typeof findMenuByUUID?.m_menu_files[0] !== "undefined") {
+				m_files = await db.m_files.update({
 					data: {
-						m_menu_id: findMenuByUUID?.id as any,
-						m_files_id: m_files.id,
+						name: file.name,
+						size: file.size,
+						type: file.type,
+						path: file.path,
+					},
+					where: {
+						id: findMenuByUUID.m_menu_files[0].m_files_id,
 					},
 				});
+			} else {
+				m_files = await db.m_files.create({
+					data: {
+						name: file.name,
+						size: file.size,
+						type: file.type,
+						path: file.path,
+					},
+				});
+			}
 
-				if (create) {
-					data = { ...m_files, path: dirUploadPath + "/" + m_files.uuid };
+			if (m_files) {
+				if (typeof findMenuByUUID?.m_menu_files[0] === "undefined") {
+					const create = await db.m_menu_files.create({
+						data: {
+							m_menu_id: findMenuByUUID?.id as any,
+							m_files_id: m_files.id,
+						},
+					});
+
+					if (create) {
+						data = { ...m_files, path: assets_api + "/" + m_files.uuid };
+
+						return Response.json({
+							data,
+							message: "Success",
+							status: 200,
+						});
+					}
+				} else {
+					data = { ...m_files, path: assets_api + "/" + m_files.uuid };
 
 					return Response.json({
 						data,
@@ -108,14 +103,6 @@ export async function POST(request: Request) {
 						status: 200,
 					});
 				}
-			} else {
-				data = { ...m_files, path: dirUploadPath + "/" + m_files.uuid };
-
-				return Response.json({
-					data,
-					message: "Success",
-					status: 200,
-				});
 			}
 		}
 

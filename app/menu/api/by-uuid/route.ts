@@ -8,7 +8,6 @@ export async function POST(request: Request) {
     const {uuid } = await request.json()
     // const dir_upload_path = process.env.API_ASSETS;
     const assets_api =  process.env.API_ASSETS_HOST + '/' +process.env.API_ASSETS;
-    const api_upload =  process.env.API_ASSETS_HOST;
 
     const data = await db.m_menu.findFirst({
         include: {
@@ -36,7 +35,6 @@ export async function POST(request: Request) {
     
 	return Response.json({
 		data,
-        file,
-        apiupload: api_upload
+        file
 	});
 }
