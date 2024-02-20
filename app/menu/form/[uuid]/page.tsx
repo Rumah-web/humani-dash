@@ -214,17 +214,7 @@ const Form = () => {
 										onChange={(e) => onChange("m_menu_category_id", e?.value)}
 									/>
 								</div>
-								<div className='flex flex-col space-y-2'>
-									<label htmlFor='name'>Description</label>
-									<Editor
-										editorState={editorState}
-										editorStyle={{ height: "400px" }}
-										toolbarClassName='toolbarClassName'
-										wrapperClassName='wrapperClassName'
-										editorClassName='px-4 border border-[#dfdfdf] bg-white'
-										onEditorStateChange={onEditorStateChange}
-									/>
-								</div>
+
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Price</label>
 									<NumericFormat
@@ -251,6 +241,17 @@ const Form = () => {
 										onValueChange={(values, sourceInfo) => {
 											onChange("price_promo", values.value);
 										}}
+									/>
+								</div>
+								<div className='flex flex-col space-y-2'>
+									<label htmlFor='name'>Description</label>
+									<Editor
+										editorState={editorState}
+										editorStyle={{ height: "400px" }}
+										toolbarClassName='toolbarClassName'
+										wrapperClassName='wrapperClassName'
+										editorClassName='px-4 border border-[#dfdfdf] bg-white'
+										onEditorStateChange={onEditorStateChange}
 									/>
 								</div>
 							</div>
