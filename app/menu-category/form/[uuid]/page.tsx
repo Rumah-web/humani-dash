@@ -231,7 +231,7 @@ const Form = () => {
 															<div
 																className={`flex justify-center h-36 relative`}>
 																<Image
-																	src={`${file}${istBase64 ? `` : `?w=200`}`}
+																	src={`${file}${istBase64 ? `` : `?width=200`}`}
 																	alt={data.name}
 																	width={100}
 																	height={100}
