@@ -13,7 +13,8 @@ async function getUser(email: string): Promise<m_user | null> {
       include: {
         m_files: {
           select: {
-            path: true
+            path: true,
+            uuid: true
           }
         }
       },

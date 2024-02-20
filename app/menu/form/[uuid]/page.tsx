@@ -23,6 +23,7 @@ import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
 import { IOptionsSelect } from "@/app/type";
+import { convertBase64 } from "@/app/lib/helper";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -34,6 +35,7 @@ const Form = () => {
 	const [file, setFile] = useState(null);
 	const [isLoading, setLoading] = useState(true);
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
+	const [isBase64, setBase64] = useState(false);
 	const [published, setPublished] = useState(false);
 	const [data, setData] = useState({} as m_menu);
 	const [dataField, setDataField] = useState({});
@@ -61,17 +63,17 @@ const Form = () => {
 		formData.append("file", file);
 		formData.append("uuid", data.uuid);
 
-		const upload = await fetch(`/menu/api/upload-file`, {
+		const base64 = (await convertBase64(file)) as any;
+
+		setFile(base64);
+		setBase64(true);
+
+		setLoadingUpload(false);
+
+		fetch("/menu/api/upload-file", {
 			method: "POST",
 			body: formData,
 		});
-
-		if (upload) {
-			const { data } = await upload.json();
-			setFile(data.path);
-
-			setLoadingUpload(false);
-		}
 	};
 
 	const onUpdateByField = async (data: any) => {
@@ -293,7 +295,7 @@ const Form = () => {
 															<div
 																className={`flex justify-center h-36 relative`}>
 																<Image
-																	src={`${file}?width=200`}
+																	src={`${file}${isBase64 ? `` : `?width=200`}`}
 																	alt={data.name}
 																	width={100}
 																	height={100}

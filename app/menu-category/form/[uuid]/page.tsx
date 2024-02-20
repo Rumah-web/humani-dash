@@ -19,6 +19,7 @@ import { m_menu_category } from "@prisma/client";
 import Image from "next/image";
 import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
+import { convertBase64 } from "@/app/lib/helper";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -29,6 +30,7 @@ const Form = () => {
 	const [editorState, setEditorState] = useState(EditorState.createEmpty());
 	const [file, setFile] = useState(null);
 	const [isLoading, setLoading] = useState(true);
+	const [istBase64, setBase64] = useState(false);
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
 	const [published, setPublished] = useState(false);
 	const [data, setData] = useState({} as m_menu_category);
@@ -55,17 +57,17 @@ const Form = () => {
 		formData.append("file", file);
 		formData.append("uuid", data.uuid);
 
-		const upload = await fetch("/menu-category/api/upload-file", {
+		const base64 = (await convertBase64(file)) as any;
+
+		setFile(base64);
+		setBase64(true);
+
+		setLoadingUpload(false);
+
+		fetch("/menu-category/api/upload-file", {
 			method: "POST",
 			body: formData,
 		});
-
-		if (upload) {
-			const { data } = await upload.json();
-			setFile(data.path);
-
-			setLoadingUpload(false);
-		}
 	};
 
 	const onUpdateByField = async (data: any) => {
@@ -229,7 +231,7 @@ const Form = () => {
 															<div
 																className={`flex justify-center h-36 relative`}>
 																<Image
-																	src={`${file}?w=200`}
+																	src={`${file}${istBase64 ? `` : `?w=200`}`}
 																	alt={data.name}
 																	width={100}
 																	height={100}

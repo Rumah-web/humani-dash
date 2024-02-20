@@ -15,11 +15,13 @@ import SwitcherOne from "@/components/Switchers/SwitcherOne";
 import CheckboxOne from "@/components/Checkboxes/CheckboxOne";
 import CheckboxTwo from "@/components/Checkboxes/CheckboxTwo";
 import InputPassword from "@/components/Inputs/Password";
+import { convertBase64 } from "@/app/lib/helper";
 
 const Form = () => {
 	const [file, setFile] = useState(null);
 	const [isLoading, setLoading] = useState(true);
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
+	const [isBase64, setBase64] = useState(false);
 	const [published, setPublished] = useState(false);
 	const [data, setData] = useState({} as m_user);
 	const [dataField, setDataField] = useState({});
@@ -76,17 +78,17 @@ const Form = () => {
 		formData.append("file", file);
 		formData.append("uuid", data.uuid);
 
-		const upload = await fetch("/users/api/upload-file", {
+		const base64 = (await convertBase64(file)) as any;
+
+		setFile(base64);
+		setBase64(true);
+
+		setLoadingUpload(false);
+
+		fetch("/users/api/upload-file", {
 			method: "POST",
 			body: formData,
 		});
-
-		if (upload) {
-			const { data } = await upload.json();
-			setFile(data.path);
-
-			setLoadingUpload(false);
-		}
 	};
 
 	const onUpdateByField = async (data: any) => {
@@ -321,7 +323,7 @@ const Form = () => {
 															<div
 																className={`flex justify-center h-36 relative`}>
 																<Image
-																	src={`${file}?width=200`}
+																	src={`${file}${isBase64 ? `` : `?width=200`}`}
 																	alt={data.username}
 																	width={100}
 																	height={100}

@@ -1,7 +1,3 @@
-import { existsSync, mkdirSync } from "fs";
-import path from "path";
-// const sharp = require('sharp');
-
 export function formatLongtDate(dateParams: Date) {
 	const date = new Date(dateParams);
 
@@ -130,30 +126,18 @@ export const resizeImage = async (
 	height?: number | null,
 	fill?: "contain" | "cover" | "fill" | "inside" | "outside"
 ) => {
-	const dir_upload = path.dirname(dir);
-	const file_name = path.basename(dir);
-	let dir_transform = `${dir_upload}/${width}/${fill}`;
-	if (height) {
-		dir_transform = `${dir_upload}/${width}x${height}/${fill}`;
-	}
-	if (!existsSync(dir_transform)) {
-		mkdirSync(dir_transform, { recursive: true });
-	}
+	return "";
+};
 
-	return ''
-
-	// const path_transform = `${dir_transform}/${file_name}`;
-
-	// if (existsSync(path_transform)) {
-    //     return path_transform
-	// } else {
-	// 	return sharp(dir)
-	// 		.resize(width, height, {
-	// 			fit: fill ? fill : "cover",
-	// 		})
-	// 		.toFile(path_transform)
-	// 		.then(() => {
-	// 			return path_transform;
-	// 		});
-	// }
+export const convertBase64 = (file: Blob) => {
+	return new Promise((resolve, reject) => {
+		const fileReader = new FileReader();
+		fileReader.readAsDataURL(file);
+		fileReader.onload = () => {
+			resolve(fileReader.result);
+		};
+		fileReader.onerror = (error) => {
+			reject(error);
+		};
+	});
 };
