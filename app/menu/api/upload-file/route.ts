@@ -25,6 +25,7 @@ export async function POST(request: Request) {
 		return Response.json({ error: "No files received." }, { status: 400 });
 	}
 
+
 	try {
 
 		/* Send request to another server */

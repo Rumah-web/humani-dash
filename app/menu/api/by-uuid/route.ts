@@ -6,8 +6,7 @@ type ResponseData = {
 
 export async function POST(request: Request) {
     const {uuid } = await request.json()
-    // const dir_upload_path = process.env.API_ASSETS;
-    const assets_api =  process.env.API_ASSETS_HOST + '/' +process.env.API_ASSETS;
+    const assets_api =  process.env.API_ASSETS_HOST + '/view';
 
     const data = await db.m_menu.findFirst({
         include: {

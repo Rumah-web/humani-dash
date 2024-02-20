@@ -9,10 +9,8 @@ ENV AUTH_SECRET=BLuHexCSSyrYsZOAlk9xrcmpqPtLiLvBRb8eN9EcOE4=
 ENV DATABASE_URL="postgres://postgres:2bhor33251ylEq6nJPnwCUEsTNyYrtacyDsBJTAylpc92SWgjJQbQsdE86DI7mMW@45.118.135.134:5533/hcs?schema=public&pool_timeout=0&connect_timeout=300"
 ENV PATH_UPLOAD="public/upload"
 ENV DIR_UPLOAD="upload"
-ENV API_ASSETS="media/api/assets/"
 ENV API_ASSETS_HOST="https://media.humanicode.com"
 ENV AUTH_TRUST_HOST=true
-ENV NEXT_SHARP_PATH=/tmp/node_modules/sharp
 
 RUN apt-get update && \
     apt-get install -y curl && \
