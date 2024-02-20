@@ -33,7 +33,7 @@ const Media = () => {
 					return (
 						<div className='p-2'>
 							<Image
-								src={"/" + row.path}
+								src={`${row.path}?width=200`}
 								width={100}
 								height={100}
 								alt={row.name}
@@ -222,7 +222,7 @@ const Media = () => {
 	};
 
 	const onRowClicked = (row: any, event: any) => {
-		return window.open(`/media/api/assets/${row.uuid}`, '_blank')
+		return window.open(`https://media.humanicode.com/view/${row.uuid}?width=500`, '_blank')
 	};
 
 	return (
