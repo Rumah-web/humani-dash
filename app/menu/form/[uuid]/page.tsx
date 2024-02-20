@@ -68,12 +68,12 @@ const Form = () => {
 		setFile(base64);
 		setBase64(true);
 
-		setLoadingUpload(false);
-
-		fetch("/menu/api/upload-file", {
+		await fetch("/menu/api/upload-file", {
 			method: "POST",
 			body: formData,
 		});
+
+		setLoadingUpload(false);
 	};
 
 	const onUpdateByField = async (data: any) => {

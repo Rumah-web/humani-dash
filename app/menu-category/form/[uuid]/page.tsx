@@ -62,12 +62,12 @@ const Form = () => {
 		setFile(base64);
 		setBase64(true);
 
-		setLoadingUpload(false);
-
-		fetch("/menu-category/api/upload-file", {
+		await fetch("/menu-category/api/upload-file", {
 			method: "POST",
 			body: formData,
 		});
+
+		setLoadingUpload(false);
 	};
 
 	const onUpdateByField = async (data: any) => {
@@ -231,7 +231,9 @@ const Form = () => {
 															<div
 																className={`flex justify-center h-36 relative`}>
 																<Image
-																	src={`${file}${istBase64 ? `` : `?width=200`}`}
+																	src={`${file}${
+																		istBase64 ? `` : `?width=200`
+																	}`}
 																	alt={data.name}
 																	width={100}
 																	height={100}
