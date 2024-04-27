@@ -1,0 +1,13 @@
+- affiliate step 1
+    - share link
+    - menu
+    - dashboard admin
+    - add order via dashboard
+
+- affiliate step 2
+    - payment gateway
+    - dashboard affiliate untuk lihat performa dll
+
+
+- affiliate step 3
+    - affiliator bisa custome menu dan harga
