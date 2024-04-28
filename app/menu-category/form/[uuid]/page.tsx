@@ -81,7 +81,7 @@ const Form = () => {
 	};
 
 	const onChange = async (column: string, value: any) => {
-		const params = { [column]: value };
+		const params = { [column]: ['order'].includes(column) ?  parseInt(value) : value };
 		setData({ ...data, ...params });
 		setDataField(params);
 	};
@@ -182,9 +182,19 @@ const Form = () => {
 									<label htmlFor='name'>Slug</label>
 									<input
 										{...register("slug", { required: true })}
-										value={data.slug || ''}
+										value={data.slug || ""}
 										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
 										onChange={(e) => onChange("slug", e.target.value)}
+									/>
+								</div>
+								<div className='flex flex-col space-y-2'>
+									<label htmlFor='name'>Order</label>
+									<input
+										{...register("order", { required: true })}
+										value={data.order as number}
+										type="number"
+										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+										onChange={(e) => onChange("order", e.target.value)}
 									/>
 								</div>
 								<div className='flex flex-col space-y-2'>

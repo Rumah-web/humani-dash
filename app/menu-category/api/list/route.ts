@@ -26,6 +26,7 @@ export async function POST(request: Request) {
 			name: true,
 			description: true,
 			status: true,
+			order: true,
 			slug: true,
 			m_files: {
 				select: {

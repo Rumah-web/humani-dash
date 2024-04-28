@@ -145,6 +145,7 @@ model m_menu_category {
   created_at  DateTime @default(now()) @db.Timestamp(6)
   status      String   @default("draft") @db.VarChar(50)
   slug        String?  @unique(map: "m_menu_category_slug")
+  order       Int?
   m_menu      m_menu[]
   m_files     m_files? @relation(fields: [cover], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
