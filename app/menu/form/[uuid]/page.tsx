@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation";
 import Select from "react-select";
 import { IOptionsSelect } from "@/app/type";
 import { convertBase64 } from "@/app/lib/helper";
-import { IconDelete } from "@/components/Icons";
+import { IconBoxOpen, IconDelete, IconLoading } from "@/components/Icons";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -83,13 +83,15 @@ const Form = () => {
 	};
 
 	const onUpdateByField = async (data: any) => {
-		await fetch("/menu/api/update-field", {
-			method: "POST",
-			body: JSON.stringify({ uuid: params.uuid, data }),
-			headers: {
-				"content-type": "application/json",
-			},
-		});
+		if (Object.keys(data).length > 0) {
+			await fetch("/menu/api/update-field", {
+				method: "POST",
+				body: JSON.stringify({ uuid: params.uuid, data }),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+		}
 	};
 
 	const onChange = async (column: string, value: any) => {
@@ -98,7 +100,11 @@ const Form = () => {
 		setDataField(params);
 	};
 
-	const onChangeItem = async (column: string, value: any, id: any) => {
+	const onChangeItem = async (
+		column: string,
+		value: any,
+		id: any,
+	) => {
 		const params = { [column]: value };
 
 		const update = await fetch("/menu/api/update-menu-item", {
@@ -202,12 +208,12 @@ const Form = () => {
 		})();
 	}, []);
 
-	const onAddItem = async () => {
+	const onAddItem = async (order: number) => {
 		setAdditem(true);
 
 		const addItem = await fetch("/menu/api/add-menu-item", {
 			method: "POST",
-			body: JSON.stringify({ uuid: params.uuid }),
+			body: JSON.stringify({ uuid: params.uuid, order }),
 			headers: {
 				"content-type": "application/json",
 			},
@@ -217,6 +223,22 @@ const Form = () => {
 		if (menuitem) {
 			setData({ ...data, m_menu_item: [...data.m_menu_item, menuitem.data] });
 		}
+
+		setAdditem(false);
+	};
+
+	const onDeleteItem = async (id: number) => {
+		setData({
+			...data,
+			m_menu_item: data.m_menu_item.filter((item, i) => item.id !== id),
+		});
+		await fetch("/menu/api/delete-menu-item", {
+			method: "POST",
+			body: JSON.stringify({ id }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
 	};
 
 	if (isLoading) {
@@ -275,7 +297,12 @@ const Form = () => {
 											thousandSeparator=','
 											className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
 											onValueChange={(values, sourceInfo) => {
-												onChange("price_promo", values.value);
+												onChange(
+													"min_qty",
+													typeof values.value === "string"
+														? parseInt(values.value)
+														: values.value
+												);
 											}}
 										/>
 									</div>
@@ -288,7 +315,12 @@ const Form = () => {
 											thousandSeparator=','
 											className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
 											onValueChange={(values, sourceInfo) => {
-												onChange("price_promo", values.value);
+												onChange(
+													"max_qty",
+													typeof values.value === "string"
+														? parseInt(values.value)
+														: values.value
+												);
 											}}
 										/>
 									</div>
@@ -313,10 +345,10 @@ const Form = () => {
 							</div>
 							<div className='flex flex-col gap-5.5 p-6.5'>
 								<div className='flex flex-col space-y-4 w-full'>
-									{data.m_menu_item && data.m_menu_item.length > 0 && (
+									{data.m_menu_item && data.m_menu_item.length > 0 ? (
 										<>
 											{data.m_menu_item.map((item, i) => {
-												console.log("items : ", item);
+
 												return (
 													<div
 														key={item.id}
@@ -330,30 +362,62 @@ const Form = () => {
 																		(opt, i) => opt.value === item.m_item_id
 																	)}
 																	onChange={(e) =>
-																		onChangeItem("m_item_id", e?.value, item.id)
+																		onChangeItem(
+																			"m_item_id",
+																			e?.value,
+																			item.id,
+																		)
 																	}
 																/>
 															</div>
 														</div>
-														<div className='cursor-pointer hover:opacity-75'>
-															<IconDelete />
+														<div
+															className='cursor-pointer hover:opacity-75'
+															onClick={() => item.id && onDeleteItem(item.id)}>
+															<IconDelete width='20' />
 														</div>
 													</div>
 												);
 											})}
 										</>
+									) : (
+										<div className='flex justify-center items-center flex-col space-y-2'>
+											<IconBoxOpen width={100} />
+											<div
+												className='text-[#000000] text-base cursor-pointer hover:underline'
+												onClick={() => {
+													const order = data.m_menu_item.find(
+														(_item, x) => x === data.m_menu_item.length - 1
+													);
+													!isAdditem
+														? onAddItem(order?.order ? order.order + 1 : 1)
+														: () => {};
+												}}>
+												{isAdditem ? <IconLoading /> : "Click to Add New"}
+											</div>
+										</div>
 									)}
-									{/* {isAdditem ? "Add" : "Hide"} */}
 								</div>
-								<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
-									<div className='w-full flex justify-start'>
-										<div
-											className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
-											onClick={onAddItem}>
-											Add Item
+								{data.m_menu_item && data.m_menu_item.length > 0 && (
+									<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
+										<div className='w-full flex justify-start'>
+											<div
+												className={`${
+													isAdditem ? "opacity-50" : ""
+												} px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70`}
+												onClick={() => {
+													const order = data.m_menu_item.find(
+														(_item, x) => x === data.m_menu_item.length - 1
+													);
+													!isAdditem
+														? onAddItem(order?.order ? order.order + 1 : 1)
+														: () => {};
+												}}>
+												{isAdditem ? <IconLoading /> : "Add Item"}
+											</div>
 										</div>
 									</div>
-								</div>
+								)}
 							</div>
 						</div>
 						<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>

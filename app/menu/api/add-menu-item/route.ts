@@ -5,7 +5,7 @@ type ResponseData = {
 };
 
 export async function POST(request: Request) {
-	const { uuid } = await request.json();
+	const { uuid, order } = await request.json();
 	let data = null;
 
 	const menu = await db.m_menu.findFirst({
@@ -15,7 +15,6 @@ export async function POST(request: Request) {
 	});
 
 	if (menu) {
-		console.log(menu);
 		const find = await db.m_menu_item.findFirst({
 			include: {
 				m_item: {
@@ -45,6 +44,7 @@ export async function POST(request: Request) {
 				},
 				data: {
 					m_menu_id: menu.id,
+					order
 				},
 			});
 

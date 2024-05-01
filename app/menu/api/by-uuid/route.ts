@@ -23,6 +23,9 @@ export async function POST(request: Request) {
             m_menu_item: {
                 include: {
                     m_item: true
+                },
+                orderBy: {
+                    order: 'asc'
                 }
             }
         },

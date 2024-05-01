@@ -5,17 +5,14 @@ type ResponseData = {
 };
 
 export async function POST(request: Request) {
-	let { data, id } = await request.json();
+    const {id} = await request.json()
 
-	const update = await db.m_menu_item.update({
-		data: {
-			...data,
-			status: "published",
-		},
-		where: {
-			id,
-		},
-	});
+    const update = await db.m_menu_item.delete({
+        where: {
+            id
+        }
+    })
+	
 
 	return Response.json({
 		data: update,
