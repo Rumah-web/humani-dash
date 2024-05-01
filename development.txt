@@ -3,10 +3,15 @@
     - menu
     - dashboard admin
     - add order via dashboard
+    - dashboard affiliate (share link)
+    - registrasi affiliate
 
 - affiliate step 2
     - payment gateway
-    - dashboard affiliate untuk lihat performa dll
+    - add order after chat wa for first time
+    - dashboard affiliate (full feature)
+    - send invoice to user
+    - withdraw
 
 
 - affiliate step 3

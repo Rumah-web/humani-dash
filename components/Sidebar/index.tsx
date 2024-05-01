@@ -329,8 +329,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 														<Link
 															href='/menu-category'
 															className={`first-letter:group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-																pathname === "/menu-category" &&
-																"text-white"
+																pathname === "/menu-category" && "text-white"
 															}`}>
 															Category
 														</Link>
@@ -339,10 +338,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 														<Link
 															href='/menu'
 															className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-																pathname === "/menu" &&
-																"text-white"
+																pathname === "/menu" && "text-white"
 															}`}>
 															Menu
+														</Link>
+													</li>
+													<li>
+														<Link
+															href='/menu-item'
+															className={`first-letter:group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+																pathname === "/menu-item" && "text-white"
+															}`}>
+															Item
 														</Link>
 													</li>
 												</ul>
@@ -353,7 +360,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 								}}
 							</SidebarLinkGroup>
 							{/* <!-- Menu Manage Menu --> */}
-
 						</ul>
 					</div>
 

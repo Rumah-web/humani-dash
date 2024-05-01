@@ -61,6 +61,7 @@ model m_menu {
   m_menu_category_id Int?
   m_menu_category    m_menu_category? @relation(fields: [m_menu_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   m_menu_files       m_menu_files[]
+  m_menu_item        m_menu_item[]
   order_detail       order_detail[]
 }
 
@@ -148,4 +149,24 @@ model m_menu_category {
   order       Int?
   m_menu      m_menu[]
   m_files     m_files? @relation(fields: [cover], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model m_item {
+  id          Int           @id @default(autoincrement())
+  uuid        String        @unique(map: "m_item_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name        String        @db.VarChar
+  created_at  DateTime      @default(now()) @db.Timestamp(6)
+  status      String        @default("draft") @db.VarChar(50)
+  description String?
+  m_menu_item m_menu_item[]
+}
+
+model m_menu_item {
+  id        Int    @id @default(autoincrement())
+  m_menu_id Int
+  m_item_id Int
+  order     Int?
+  m_item    m_item @relation(fields: [m_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  m_menu    m_menu @relation(fields: [m_menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
