@@ -59,9 +59,12 @@ model m_menu {
   created_at         DateTime         @default(now()) @db.Timestamp(6)
   status             String           @default("draft") @db.VarChar(50)
   m_menu_category_id Int?
+  min_qty            Int              @default(1)
+  max_qty            Int              @default(1000)
   m_menu_category    m_menu_category? @relation(fields: [m_menu_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   m_menu_files       m_menu_files[]
   m_menu_item        m_menu_item[]
+  m_menu_price       m_menu_price[]
   order_detail       order_detail[]
 }
 
@@ -160,13 +163,26 @@ model m_item {
   status      String        @default("draft") @db.VarChar(50)
   description String?
   m_menu_item m_menu_item[]
+
+  @@unique([name, status], map: "m_item_name_status")
 }
 
 model m_menu_item {
-  id        Int    @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   m_menu_id Int
-  m_item_id Int
+  m_item_id Int?
   order     Int?
-  m_item    m_item @relation(fields: [m_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  m_menu    m_menu @relation(fields: [m_menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status    String  @default("draft") @db.VarChar
+  m_item    m_item? @relation(fields: [m_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  m_menu    m_menu  @relation(fields: [m_menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model m_menu_price {
+  id         Int      @id @default(autoincrement())
+  min_qty    Int      @default(1)
+  max_qty    Int      @default(1000)
+  nominal    Decimal  @default(0) @db.Decimal
+  m_menu_id  Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  m_menu     m_menu   @relation(fields: [m_menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

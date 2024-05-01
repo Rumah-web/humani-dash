@@ -16,7 +16,7 @@ import Badge from "@/components/Badges";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Table/Loading";
-import { m_menu } from "@prisma/client";
+import { m_item, m_menu, m_menu_item } from "@prisma/client";
 import { NumericFormat } from "react-number-format";
 import Image from "next/image";
 import draftToHtml from "draftjs-to-html";
@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import Select from "react-select";
 import { IOptionsSelect } from "@/app/type";
 import { convertBase64 } from "@/app/lib/helper";
+import { IconDelete } from "@/components/Icons";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -35,9 +36,14 @@ const Form = () => {
 	const [file, setFile] = useState(null);
 	const [isLoading, setLoading] = useState(true);
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
+	const [isAdditem, setAdditem] = useState(false);
 	const [isBase64, setBase64] = useState(false);
 	const [published, setPublished] = useState(false);
-	const [data, setData] = useState({} as m_menu);
+	const [data, setData] = useState(
+		{} as m_menu & { m_menu_item: Partial<m_menu_item & { m_item: m_item }>[] }
+	);
+	const [menuItem, setMenuitem] = useState([] as m_menu_item[]);
+	const [itemsOptions, setItemsOptions] = useState([] as IOptionsSelect[]);
 	const [dataField, setDataField] = useState({});
 	const [options, setOptions] = useState([] as IOptionsSelect[]);
 	const [valueOption, setValueOption] = useState({} as IOptionsSelect);
@@ -92,6 +98,20 @@ const Form = () => {
 		setDataField(params);
 	};
 
+	const onChangeItem = async (column: string, value: any, id: any) => {
+		const params = { [column]: value };
+
+		const update = await fetch("/menu/api/update-menu-item", {
+			method: "POST",
+			body: JSON.stringify({ id, data: params }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		const updateItems = await update.json();
+	};
+
 	const onChangeState = async (status: string) => {
 		setPublished(true);
 		await fetch("/menu/api/change-state", {
@@ -124,6 +144,14 @@ const Form = () => {
 	useEffect(() => {
 		(async () => {
 			const reqCategory = await fetch("/menu/api/menu-category", {
+				method: "POST",
+				body: JSON.stringify({}),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+
+			const reqItems = await fetch("/menu/api/list-items", {
 				method: "POST",
 				body: JSON.stringify({}),
 				headers: {
@@ -164,10 +192,32 @@ const Form = () => {
 					);
 				}
 
+				if (reqItems) {
+					const listItem = await reqItems.json();
+					setItemsOptions(listItem.data);
+				}
+
 				setLoading(false);
 			}
 		})();
 	}, []);
+
+	const onAddItem = async () => {
+		setAdditem(true);
+
+		const addItem = await fetch("/menu/api/add-menu-item", {
+			method: "POST",
+			body: JSON.stringify({ uuid: params.uuid }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		const menuitem = await addItem.json();
+		if (menuitem) {
+			setData({ ...data, m_menu_item: [...data.m_menu_item, menuitem.data] });
+		}
+	};
 
 	if (isLoading) {
 		return (
@@ -215,34 +265,35 @@ const Form = () => {
 									/>
 								</div>
 
-								<div className='flex flex-col space-y-2'>
-									<label htmlFor='name'>Price</label>
-									<NumericFormat
-										prefix={"Rp."}
-										value={data.price as any}
-										name='price'
-										allowLeadingZeros
-										thousandSeparator=','
-										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
-										onValueChange={(values, sourceInfo) => {
-											onChange("price", values.value);
-										}}
-									/>
+								<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
+									<div className='flex flex-col space-y-2 w-full'>
+										<label htmlFor='name'>Min Order</label>
+										<NumericFormat
+											value={data.min_qty as any}
+											name='min_qty'
+											allowLeadingZeros
+											thousandSeparator=','
+											className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+											onValueChange={(values, sourceInfo) => {
+												onChange("price_promo", values.value);
+											}}
+										/>
+									</div>
+									<div className='flex flex-col space-y-2 w-full'>
+										<label htmlFor='name'>Max Order</label>
+										<NumericFormat
+											value={data.max_qty as any}
+											name='max_qty'
+											allowLeadingZeros
+											thousandSeparator=','
+											className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+											onValueChange={(values, sourceInfo) => {
+												onChange("price_promo", values.value);
+											}}
+										/>
+									</div>
 								</div>
-								<div className='flex flex-col space-y-2'>
-									<label htmlFor='name'>Discount Price</label>
-									<NumericFormat
-										prefix={"Rp."}
-										value={data.price_promo as any}
-										name='price_promo'
-										allowLeadingZeros
-										thousandSeparator=','
-										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
-										onValueChange={(values, sourceInfo) => {
-											onChange("price_promo", values.value);
-										}}
-									/>
-								</div>
+
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Description</label>
 									<Editor
@@ -256,6 +307,108 @@ const Form = () => {
 								</div>
 							</div>
 						</div>
+						<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
+							<div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
+								<h3 className='font-medium text-black dark:text-white'>Item</h3>
+							</div>
+							<div className='flex flex-col gap-5.5 p-6.5'>
+								<div className='flex flex-col space-y-4 w-full'>
+									{data.m_menu_item && data.m_menu_item.length > 0 && (
+										<>
+											{data.m_menu_item.map((item, i) => {
+												console.log("items : ", item);
+												return (
+													<div
+														key={item.id}
+														className='w-full flex items-center space-x-4'>
+														<div className='flex flex-col w-full'>
+															<div className='flex w-full'>
+																<Select
+																	options={itemsOptions}
+																	className='w-full'
+																	defaultValue={itemsOptions.find(
+																		(opt, i) => opt.value === item.m_item_id
+																	)}
+																	onChange={(e) =>
+																		onChangeItem("m_item_id", e?.value, item.id)
+																	}
+																/>
+															</div>
+														</div>
+														<div className='cursor-pointer hover:opacity-75'>
+															<IconDelete />
+														</div>
+													</div>
+												);
+											})}
+										</>
+									)}
+									{/* {isAdditem ? "Add" : "Hide"} */}
+								</div>
+								<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
+									<div className='w-full flex justify-start'>
+										<div
+											className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
+											onClick={onAddItem}>
+											Add Item
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
+							<div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
+								<h3 className='font-medium text-black dark:text-white'>
+									Price
+								</h3>
+							</div>
+							<div className='flex flex-col gap-5.5 p-6.5'>
+								<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
+									<div className='flex flex-col space-y-2 w-full'>
+										<label htmlFor='name'>Price</label>
+										<NumericFormat
+											prefix={"Rp."}
+											value={data.price as any}
+											name='price'
+											allowLeadingZeros
+											thousandSeparator=','
+											className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+											onValueChange={(values, sourceInfo) => {
+												onChange("price", values.value);
+											}}
+										/>
+									</div>
+									<div className='flex flex-col space-y-2 w-full'>
+										<label htmlFor='name'>Discount Price</label>
+										<NumericFormat
+											prefix={"Rp."}
+											value={data.price_promo as any}
+											name='price_promo'
+											allowLeadingZeros
+											thousandSeparator=','
+											className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+											onValueChange={(values, sourceInfo) => {
+												onChange("price_promo", values.value);
+											}}
+										/>
+									</div>
+								</div>
+							</div>
+							<div className='flex flex-col gap-5.5 p-6.5'>
+								<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
+									List Tiered
+								</div>
+								<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
+									<div className='w-full flex justify-start'>
+										<div
+											className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
+											onClick={() => {}}>
+											Add Tiered
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 					<div className='flex w-1/3 flex-col relative'>
 						<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
@@ -264,7 +417,7 @@ const Form = () => {
 									Publish
 								</h3>
 							</div>
-							<div className='flex flex-col gap-5.5 p-6.5'>
+							<div className='flex flex-col gap-5.5 p-6.5 space-y-2'>
 								<div className='flex space-x-2 justify-between'>
 									<label htmlFor='name'>Status</label>
 									<Badge
@@ -272,7 +425,7 @@ const Form = () => {
 										state={data.status === "draft" ? "danger" : "success"}
 									/>
 								</div>
-								<div className='mt-4 flex flex-col space-y-2'>
+								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Foto Menu</label>
 									{isLoadingUpload ? (
 										<>

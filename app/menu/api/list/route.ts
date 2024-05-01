@@ -28,6 +28,8 @@ export async function POST(request: Request) {
 			price: true,
 			price_promo: true,
 			status: true,
+			min_qty: true,
+			max_qty: true,
 			m_menu_category: {
 				select: {
 					name: true

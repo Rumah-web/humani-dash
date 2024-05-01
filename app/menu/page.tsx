@@ -8,6 +8,7 @@ import Loading from "@/components/Table/Loading";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import NoImage from "@/components/Placeholder/NoImage";
+import { formatShorttDate } from "../lib/helper";
 
 interface ITabCount {
 	status: string;
@@ -84,7 +85,8 @@ const Menu = () => {
 		},
 		{
 			name: "Category",
-			selector: (row: any) => row.m_menu_category ? row.m_menu_category.name : null,
+			selector: (row: any) =>
+				row.m_menu_category ? row.m_menu_category.name : null,
 			key: "m_menu_category",
 			type: "text",
 			sortable: true,
@@ -97,17 +99,6 @@ const Menu = () => {
 			type: "text",
 			sortable: true,
 			sortField: "name",
-		},
-		{
-			name: "Description",
-			selector: (row: any) => row.description,
-			key: "description",
-			type: "text",
-			sortable: true,
-			sortField: "description",
-			format: (row: any) => (
-				<div dangerouslySetInnerHTML={{ __html: row.description }} />
-			),
 		},
 		{
 			name: "Price",
@@ -174,6 +165,28 @@ const Menu = () => {
 				paddingRight: "8px",
 			},
 		},
+	};
+
+	const renderRowsComponent = ({ data }: any) => {
+		console.log('render : ', data)
+		return (
+			<div className="border-b border-[#e0e0e0] bg-[#fafafa]">
+				<div className='flex flex-col py-4 px-16 space-y-4'>
+					<div className='flex'>
+						<div className='w-1/6'>Minimal Order</div>
+						<div>{data.min_qty}</div>
+					</div>
+					<div className='flex'>
+						<div className='w-1/6'>Maximal Order</div>
+						<div>{data.max_qty}</div>
+					</div>
+					<div className='flex'>
+						<div className='w-1/6'>Description</div>
+						<div dangerouslySetInnerHTML={{ __html: data.description }} />
+					</div>
+				</div>
+			</div>
+		);
 	};
 
 	const runTabTotal = async () => {
@@ -400,6 +413,8 @@ const Menu = () => {
 								customStyles={customStyles}
 								persistTableHead={true}
 								striped={true}
+								expandableRows={true}
+								expandableRowsComponent={renderRowsComponent}
 								pagination
 								paginationTotalRows={total}
 								progressPending={isLoading}
