@@ -10,16 +10,16 @@ import {
 } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { useEffect, useState } from "react";
-import { FileUploader } from "react-drag-drop-files";
 import Badge from "@/components/Badges";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Table/Loading";
-import { m_menu_category } from "@prisma/client";
-import Image from "next/image";
+import { customer, m_menu_category, order } from "@prisma/client";
 import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
 import { convertBase64 } from "@/app/lib/helper";
+import Select from "react-select";
+import { IOptionsSelect } from "@/app/type";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -28,14 +28,14 @@ const Editor = dynamic(
 
 const Form = () => {
 	const [editorState, setEditorState] = useState(EditorState.createEmpty());
-	const [file, setFile] = useState(null);
 	const [isLoading, setLoading] = useState(true);
-	const [istBase64, setBase64] = useState(false);
-	const [isLoadingUpload, setLoadingUpload] = useState(false);
 	const [published, setPublished] = useState(false);
-	const [data, setData] = useState({} as m_menu_category);
+	const [data, setData] = useState({} as order);
+	const [customers, setCustomers] = useState([] as customer[]);
 	const [dataField, setDataField] = useState({});
 	const router = useRouter();
+	const [options, setOptions] = useState([] as IOptionsSelect[]);
+	const [affiliate, setAffiliate] = useState([] as IOptionsSelect[]);
 
 	const params = useParams<{ uuid: string }>();
 
@@ -45,29 +45,8 @@ const Form = () => {
 		formState: { errors },
 	} = useForm();
 
-	const fileTypes = ["JPG", "PNG", "JPEG"];
-
 	const onEditorStateChange = (editorState: any) => {
 		setEditorState(editorState);
-	};
-
-	const handleChangeFile = async (file: any) => {
-		setLoadingUpload(true);
-		const formData = new FormData();
-		formData.append("file", file);
-		formData.append("uuid", data.uuid);
-
-		const base64 = (await convertBase64(file)) as any;
-
-		setFile(base64);
-		setBase64(true);
-
-		await fetch("/order/api/upload-file", {
-			method: "POST",
-			body: formData,
-		});
-
-		setLoadingUpload(false);
 	};
 
 	const onUpdateByField = async (data: any) => {
@@ -127,12 +106,36 @@ const Form = () => {
 				},
 			});
 
+			const reCustomers = await fetch("/customer/api/list", {
+				method: "POST",
+				body: JSON.stringify({}),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+
+			const reqAffiliate = await fetch("/users/api/affiliate", {
+				method: "POST",
+				body: JSON.stringify({}),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+
 			if (req) {
 				const { data, file } = await req.json();
 				setData(data);
-				if (file) {
-					setFile(file);
+
+				const customerData = await reCustomers.json();
+				if (customerData) {
+					setOptions(customerData.data);
 				}
+
+				const affiliateData = await reqAffiliate.json()
+				if(affiliateData) {
+					setAffiliate(affiliateData.data)
+				}
+
 				setEditorState(
 					EditorState.createWithContent(
 						ContentState.createFromBlockArray(
@@ -173,9 +176,23 @@ const Form = () => {
 							<div className='flex flex-col gap-5.5 p-6.5'>
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Customer</label>
+									<Select
+										options={options}
+										defaultValue={options.find(
+											(opt, i) => opt.value === data.customer_id
+										)}
+										onChange={(e) => onChange("customer_id", e?.value)}
+									/>
 								</div>
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Affiliate</label>
+									<Select
+										options={affiliate}
+										defaultValue={affiliate.find(
+											(opt, i) => opt.value === data.affiliate_code
+										)}
+										onChange={(e) => onChange("affiliate_code", e?.value)}
+									/>
 								</div>
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Notes</label>

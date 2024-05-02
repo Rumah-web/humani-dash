@@ -20,7 +20,7 @@ export interface PropsTable {
 }
 
 export interface IOptionsSelect {
-	value: number,
+	value: number | string | null,
 	label: string
 }
 
