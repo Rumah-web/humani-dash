@@ -42,7 +42,6 @@ const Form = () => {
 	const [data, setData] = useState(
 		{} as m_menu & { m_menu_item: Partial<m_menu_item & { m_item: m_item }>[] }
 	);
-	const [menuItem, setMenuitem] = useState([] as m_menu_item[]);
 	const [itemsOptions, setItemsOptions] = useState([] as IOptionsSelect[]);
 	const [dataField, setDataField] = useState({});
 	const [options, setOptions] = useState([] as IOptionsSelect[]);
@@ -60,7 +59,8 @@ const Form = () => {
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const onEditorStateChange = (editorState: any) => {
-		setEditorState(editorState);
+		console.log("editorState : ", editorState);
+		if (editorState) setEditorState(editorState);
 	};
 
 	const handleChangeFile = async (file: any) => {
@@ -100,11 +100,7 @@ const Form = () => {
 		setDataField(params);
 	};
 
-	const onChangeItem = async (
-		column: string,
-		value: any,
-		id: any,
-	) => {
+	const onChangeItem = async (column: string, value: any, id: any) => {
 		const params = { [column]: value };
 
 		const update = await fetch("/menu/api/update-menu-item", {
@@ -132,19 +128,18 @@ const Form = () => {
 		router.push(`/menu`);
 	};
 
-	useEffect(() => {
-		const timeoutIdDesc = setTimeout(async () => {
-			const raw = convertToRaw(editorState.getCurrentContent());
-			await onUpdateByField({ description: draftToHtml(raw) });
-		}, 500);
-		return () => clearTimeout(timeoutIdDesc);
-	}, [editorState, 500]);
+	const onSaveEditor = async () => {
+		const raw = convertToRaw(editorState.getCurrentContent());
+		await onUpdateByField({ description: draftToHtml(raw) });
+	};
 
 	useEffect(() => {
-		const timeoutId = setTimeout(async () => {
-			await onUpdateByField(dataField);
-		}, 500);
-		return () => clearTimeout(timeoutId);
+		if (Object.keys(dataField).length > 0) {
+			const timeoutId = setTimeout(async () => {
+				await onUpdateByField(dataField);
+			}, 500);
+			return () => clearTimeout(timeoutId);
+		}
 	}, [data, 500]);
 
 	useEffect(() => {
@@ -335,6 +330,7 @@ const Form = () => {
 										wrapperClassName='wrapperClassName'
 										editorClassName='px-4 border border-[#dfdfdf] bg-white'
 										onEditorStateChange={onEditorStateChange}
+										onBlur={onSaveEditor}
 									/>
 								</div>
 							</div>
@@ -348,7 +344,6 @@ const Form = () => {
 									{data.m_menu_item && data.m_menu_item.length > 0 ? (
 										<>
 											{data.m_menu_item.map((item, i) => {
-
 												return (
 													<div
 														key={item.id}
@@ -362,11 +357,7 @@ const Form = () => {
 																		(opt, i) => opt.value === item.m_item_id
 																	)}
 																	onChange={(e) =>
-																		onChangeItem(
-																			"m_item_id",
-																			e?.value,
-																			item.id,
-																		)
+																		onChangeItem("m_item_id", e?.value, item.id)
 																	}
 																/>
 															</div>
@@ -460,9 +451,14 @@ const Form = () => {
 							</div>
 							<div className='flex flex-col gap-5.5 p-6.5'>
 								<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
-									List Tiered
+									<div className='flex justify-center items-center flex-col space-y-2 w-full'>
+										<IconBoxOpen width={100} />
+										<div className='text-[#000000] text-base cursor-pointer hover:underline'>
+											Click to Add Tiered Price
+										</div>
+									</div>
 								</div>
-								<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
+								{/* <div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
 									<div className='w-full flex justify-start'>
 										<div
 											className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
@@ -470,7 +466,7 @@ const Form = () => {
 											Add Tiered
 										</div>
 									</div>
-								</div>
+								</div> */}
 							</div>
 						</div>
 					</div>
