@@ -150,6 +150,7 @@ model m_menu_category {
   status      String   @default("draft") @db.VarChar(50)
   slug        String?  @unique(map: "m_menu_category_slug")
   order       Int?
+  is_show     Boolean  @default(false)
   m_menu      m_menu[]
   m_files     m_files? @relation(fields: [cover], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
