@@ -111,18 +111,6 @@ const Menu = () => {
 			sortField: "price",
 		},
 		{
-			name: "Price Promo",
-			selector: (row: any) => row.price_promo,
-			key: "price_promo",
-			type: "number",
-			format: (row: any) =>
-				`Rp. ${row.price_promo
-					.toString()
-					.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
-			sortable: true,
-			sortField: "price_promo",
-		},
-		{
 			name: "Status",
 			selector: (row: any) => row.status,
 			key: "status",
@@ -179,6 +167,10 @@ const Menu = () => {
 					<div className='flex'>
 						<div className='w-1/6'>Maximal Order</div>
 						<div>{data.max_qty}</div>
+					</div>
+					<div className='flex'>
+						<div className='w-1/6'>Price Promo</div>
+						<div>{`Rp. ${data.price_promo.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}</div>
 					</div>
 					<div className='flex'>
 						<div className='w-1/6'>Description</div>
