@@ -108,22 +108,24 @@ model m_user_roles {
   m_roles_id Int
   m_roles    m_roles @relation(fields: [m_roles_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   m_user     m_user  @relation(fields: [m_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([m_user_id, m_roles_id], map: "m_user_roles_m_user_id_m_roles_id")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model order {
   id             Int            @id @default(autoincrement())
   uuid           String         @unique(map: "order_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  order_no       Int
-  notes          String
-  customer_id    Int
+  order_no       Int?
+  notes          String?
+  customer_id    Int?
   status         String         @default("draft") @db.VarChar(20)
   created_at     DateTime       @default(now()) @db.Timestamp(6)
   source         String?        @db.VarChar(50)
   affiliate_code String?        @db.VarChar(50)
   user_created   Int?
   invoice        invoice[]
-  customer       customer       @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer       customer?      @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_detail   order_detail[]
 }
 

@@ -141,3 +141,11 @@ export const convertBase64 = (file: Blob) => {
 		};
 	});
 };
+
+export const generateOrderNo = (id: number) => {
+	const current = new Date();
+	const month = String(current.getMonth() + 1).padStart(2, "0");
+	const date = String(current.getDate()).padStart(2, "0");
+
+	return `${current.getFullYear()}${month}${date}${id}`;
+};

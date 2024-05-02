@@ -181,17 +181,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
 							{/* <!-- Menu Manage Order --> */}
 							<SidebarLinkGroup
-								activeCondition={
-									pathname === "/forms" || pathname.includes("forms")
-								}>
+								activeCondition={["/order", "/invoice"].includes(pathname)}>
 								{(handleClick, open) => {
 									return (
 										<React.Fragment>
 											<Link
 												href='#'
 												className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-													(pathname === "/forms" ||
-														pathname.includes("forms")) &&
+													["/order", "/invoice"].includes(pathname) &&
 													"bg-graydark dark:bg-meta-4"
 												}`}
 												onClick={(e) => {
@@ -238,20 +235,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 												<ul className='mt-4 mb-5.5 flex flex-col gap-2.5 pl-6'>
 													<li>
 														<Link
-															href='/forms/form-elements'
+															href='/order'
 															className={`first-letter:group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-																pathname === "/forms/form-elements" &&
-																"text-white"
+																pathname === "/order" && "text-white"
 															}`}>
 															Order
 														</Link>
 													</li>
 													<li>
 														<Link
-															href='/forms/form-layout'
+															href='/invoice'
 															className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-																pathname === "/forms/form-layout" &&
-																"text-white"
+																pathname === "/invoice" && "text-white"
 															}`}>
 															Invoice
 														</Link>
@@ -267,18 +262,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
 							{/* <!-- Menu Manage Menu --> */}
 							<SidebarLinkGroup
-								activeCondition={
-									pathname === "/forms" || pathname.includes("forms")
-								}>
+								activeCondition={[
+									"/menu-category",
+									"/menu",
+									"/menu-item",
+								].includes(pathname)}>
 								{(handleClick, open) => {
 									return (
 										<React.Fragment>
 											<Link
 												href='#'
 												className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-													(pathname === "/forms" ||
-														pathname.includes("forms")) &&
-													"bg-graydark dark:bg-meta-4"
+													["/menu-category", "/menu", "/menu-item"].includes(
+														pathname
+													) && "bg-graydark dark:bg-meta-4"
 												}`}
 												onClick={(e) => {
 													e.preventDefault();
