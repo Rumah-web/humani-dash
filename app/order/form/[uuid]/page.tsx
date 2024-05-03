@@ -14,12 +14,13 @@ import Badge from "@/components/Badges";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Table/Loading";
-import { customer, m_menu_category, order } from "@prisma/client";
+import { customer, m_menu, m_menu_category, order, order_detail } from "@prisma/client";
 import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
 import { convertBase64 } from "@/app/lib/helper";
 import Select from "react-select";
 import { IOptionsSelect } from "@/app/type";
+import { IconBoxOpen, IconDelete, IconLoading } from "@/components/Icons";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -30,12 +31,22 @@ const Form = () => {
 	const [editorState, setEditorState] = useState(EditorState.createEmpty());
 	const [isLoading, setLoading] = useState(true);
 	const [published, setPublished] = useState(false);
-	const [data, setData] = useState({} as order);
+	const [data, setData] = useState(
+		{} as order & { order_detail: order_detail[] }
+	);
 	const [customers, setCustomers] = useState([] as customer[]);
 	const [dataField, setDataField] = useState({});
 	const router = useRouter();
 	const [options, setOptions] = useState([] as IOptionsSelect[]);
 	const [affiliate, setAffiliate] = useState([] as IOptionsSelect[]);
+	const [isAdditem, setAdditem] = useState(false);
+	const [detailOptions, setDetailOptions] = useState([] as IOptionsSelect[]);
+	const [catOptions, setCatOptions] = useState([] as IOptionsSelect[]);
+	const [menuOptions, setMenuOptions] = useState([] as IOptionsSelect[]);
+	const [menuSelected, setMenuSelected] = useState(null as null | IOptionsSelect);
+	const [catSelected, setCatSelected] = useState(null as null | IOptionsSelect);
+	const [menu, setMenu] = useState({} as m_menu | null);
+	const [qty, setQty] = useState(0 as number);
 
 	const params = useParams<{ uuid: string }>();
 
@@ -122,6 +133,22 @@ const Form = () => {
 				},
 			});
 
+			const reqCategory = await fetch("/menu/api/menu-category", {
+				method: "POST",
+				body: JSON.stringify({}),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+
+			const reqDetail = await fetch("/order/api/list-order-detail", {
+				method: "POST",
+				body: JSON.stringify({ order_id: data.id }),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+
 			if (req) {
 				const { data, file } = await req.json();
 				setData(data);
@@ -131,9 +158,21 @@ const Form = () => {
 					setOptions(customerData.data);
 				}
 
-				const affiliateData = await reqAffiliate.json()
-				if(affiliateData) {
-					setAffiliate(affiliateData.data)
+				const affiliateData = await reqAffiliate.json();
+				if (affiliateData) {
+					setAffiliate(affiliateData.data);
+				}
+
+				if (reqDetail) {
+					const listOrderDetail = await reqDetail.json();
+
+					console.log(listOrderDetail);
+					setDetailOptions(listOrderDetail.data);
+				}
+
+				if (reqCategory) {
+					const catData = await reqCategory.json();
+					setCatOptions(catData.data);
 				}
 
 				setEditorState(
@@ -147,6 +186,85 @@ const Form = () => {
 			}
 		})();
 	}, []);
+
+	const onAddItem = async () => {
+		setAdditem(true);
+
+		const addItem = await fetch("/order/api/add-order-detail", {
+			method: "POST",
+			body: JSON.stringify({ uuid: data.uuid, menu: menu?.uuid, qty }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		const menuitem = await addItem.json();
+		if (menuitem) {
+			setData({ ...data, order_detail: [...data.order_detail, menuitem.data] });
+		}
+
+		setCatSelected(null)
+		setAdditem(false);
+		setMenuSelected(null)
+		setMenu(null)
+		setQty(0)
+	};
+
+	const onDeleteItem = async (id: number) => {
+		setData({
+			...data,
+			order_detail: data.order_detail.filter((item, i) => item.id !== id),
+		});
+		await fetch("/order/api/delete-order-detail", {
+			method: "POST",
+			body: JSON.stringify({ id }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+	};
+
+	const onChangeCategory = async (val: IOptionsSelect) => {
+		setMenuSelected(null)
+		setMenu(null)
+		setQty(0)
+		setCatSelected(val)
+
+		const reqMenu = await fetch("/menu/api/list-menu-by-category", {
+			method: "POST",
+			body: JSON.stringify({ category_id: val.value }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		if (reqMenu) {
+			const dataMenu = await reqMenu.json();
+			setMenuOptions(dataMenu.data);
+		}
+	};
+
+	const onSelectMenu = async (val: IOptionsSelect) => {
+		setMenuSelected(val);
+		setQty(0)
+
+		const reqMenu = await fetch("/menu/api/by-id", {
+			method: "POST",
+			body: JSON.stringify({ id: val.value }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		if (reqMenu) {
+			const dataMenu = await reqMenu.json();
+			setMenu(dataMenu.data);
+		}
+	};
+
+	const onChangeQty = (val: number) => {
+		setQty(val)
+	}
 
 	if (isLoading) {
 		return (
@@ -214,8 +332,84 @@ const Form = () => {
 								</h3>
 							</div>
 							<div className='flex flex-col gap-5.5 p-6.5'>
-								<div className='flex flex-col space-y-2'>
-									<label htmlFor='name'>Order</label>
+								<div className='flex flex-col space-y-4 w-full'>
+									<div className='w-full flex items-center space-x-4'>
+										<div className='flex flex-col space-y-2 w-full'>
+											<div className='flex w-full'>
+												<Select
+													options={catOptions}
+													className='w-full'
+													placeholder='Select Category'
+													value={catSelected}
+													onChange={(e) => onChangeCategory({label: e?.label, value: e?.value})}
+												/>
+											</div>
+											<div className='flex w-full'>
+												<Select
+													options={menuOptions}
+													className='w-full'
+													placeholder='Select Menu'
+													value={menuSelected}
+													onChange={(e) => onSelectMenu({value: e?.value, label: e?.label})}
+												/>
+											</div>
+											<div className='flex w-full'>
+												<input
+													type='number'
+													className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-1 px-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+													min={menu?.min_qty}
+													placeholder="Qty"
+													defaultValue={menu?.min_qty}
+													onChange={(e) => onChangeQty(parseInt(e.target.value))}
+												/>
+											</div>
+											<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
+												<div className='w-full flex justify-start'>
+													<div
+														onClick={() => onAddItem()}
+														className={`${
+															isAdditem ? "opacity-50" : ""
+														} px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70`}>
+														{isAdditem ? <IconLoading /> : "Add New"}
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div className='flex flex-col space-y-4 w-full'>
+									{data.order_detail && data.order_detail.length > 0 ? (
+										<>
+											{data.order_detail.map((item, i) => {
+												return (
+													<div
+														key={item.id}
+														className='w-full flex items-center space-x-4'>
+														<div>{`${i + 1}.`}</div>
+														<div className='flex flex-col space-y-2 w-full'>
+															{item.menu_name}
+														</div>
+														<div
+															className='cursor-pointer hover:opacity-75'
+															onClick={() => item.id && onDeleteItem(item.id)}>
+															<IconDelete width='20' />
+														</div>
+													</div>
+												);
+											})}
+										</>
+									) : (
+										<div className='flex justify-center items-center flex-col space-y-2'>
+											<IconBoxOpen width={100} />
+											<div
+												className='text-[#000000] text-base cursor-pointer hover:underline'
+												onClick={() => {
+													!isAdditem ? onAddItem() : () => {};
+												}}>
+												{isAdditem ? <IconLoading /> : "Click to Add New"}
+											</div>
+										</div>
+									)}
 								</div>
 							</div>
 						</div>

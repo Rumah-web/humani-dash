@@ -135,13 +135,15 @@ model order {
 model order_detail {
   id                     Int                      @id @default(autoincrement())
   order_id               Int
-  m_menu_id              Int
+  m_menu_id              Int?
   qty                    Int                      @default(1)
   discount               Decimal                  @default(0) @db.Decimal
-  price                  Decimal                  @default(0) @db.Decimal
-  notes                  String
+  total                  Decimal                  @default(0) @db.Decimal
+  notes                  String?
   menu_name              String?                  @db.VarChar
-  m_menu                 m_menu                   @relation(fields: [m_menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status                 String                   @default("draft") @db.VarChar
+  menu_price             Decimal                  @default(0) @db.Decimal
+  m_menu                 m_menu?                  @relation(fields: [m_menu_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order                  order                    @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_detail_menu_item order_detail_menu_item[]
 }

@@ -20,8 +20,8 @@ export interface PropsTable {
 }
 
 export interface IOptionsSelect {
-	value: number | string | null,
-	label: string
+	value: any,
+	label: any
 }
 
 export interface IUpload {
