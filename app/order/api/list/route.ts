@@ -21,6 +21,14 @@ export async function POST(request: Request) {
 	let data = null as any;
 
 	const query = await db.order.findMany({
+		include: {
+			customer: {
+				select: {
+					name: true,
+					phone: true
+				}
+			}
+		},
 		where: condition,
 		take,
 		skip,

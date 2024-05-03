@@ -59,7 +59,7 @@ const Form = () => {
 	);
 	const [catSelected, setCatSelected] = useState(null as null | IOptionsSelect);
 	const [menu, setMenu] = useState({} as m_menu | null);
-	const [qty, setQty] = useState(0 as number);
+	const [qty, setQty] = useState(0 as number );
 
 	const params = useParams<{ uuid: string }>();
 
@@ -212,10 +212,8 @@ const Form = () => {
 		});
 
 		const menuitem = await addItem.json();
-		console.log("menuitem : ", menuitem);
 		if (menuitem) {
 			setData({ ...data, order_detail: [...data.order_detail, menuitem.data] });
-			console.log("data : ", data);
 		}
 
 		setCatSelected(null);
@@ -281,7 +279,25 @@ const Form = () => {
 		setQty(val);
 	};
 
-	const onPublishOrder = async () => {};
+	const onPublishOrder = async () => {
+		const publishOrder = await fetch("/order/api/publish-order", {
+			method: "POST",
+			body: JSON.stringify({ uuid: data.uuid }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		if (publishOrder) {
+			const res = await publishOrder.json();
+
+			if (res.success) {
+				router.push(`/order`);
+			} else {
+				alert("Terjadi Kesalahan");
+			}
+		}
+	};
 
 	if (isLoading) {
 		return (
@@ -387,7 +403,7 @@ const Form = () => {
 													className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-1 px-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
 													min={menu?.min_qty}
 													max={menu?.max_qty}
-													value={qty}
+													// defaultValue={qty}
 													onChange={(e) =>
 														onChangeQty(parseInt(e.target.value))
 													}

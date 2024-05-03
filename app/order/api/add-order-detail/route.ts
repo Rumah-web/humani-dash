@@ -24,76 +24,84 @@ export async function POST(request: Request) {
 	if (parent && dataMenu) {
 		const total = qty * parseInt(dataMenu.price as any);
 
-		const transaction = await prisma?.$transaction(async (tx) => {
-			let create = await tx.order_detail.create({
-				include: {
-					m_menu: true,
-					order_detail_menu_item: true,
-				},
-				data: {
-					status: "published",
-					order_id: parent.id,
-					m_menu_id: dataMenu?.id,
-					menu_name: dataMenu?.name,
-					menu_price: dataMenu?.price,
-					qty,
-					total,
-					notes: "-",
-				},
-			});
-
-			if (create) {
-				const menuItems = await tx.m_menu_item.findMany({
-					select: {
-						m_menu: {
-							select: {
-								name: true,
-							},
-						},
-						m_item: {
-							select: {
-								name: true,
-							},
-						},
-						order: true,
+		try {
+			await prisma?.$transaction(async (tx) => {
+				let create = await tx.order_detail.create({
+					include: {
+						m_menu: true,
+						order_detail_menu_item: true,
 					},
-					where: {
-						m_menu_id: dataMenu.id,
-					},
-					orderBy: {
-						order: "asc",
+					data: {
+						status: "published",
+						order_id: parent.id,
+						m_menu_id: dataMenu?.id,
+						menu_name: dataMenu?.name,
+						menu_price: dataMenu?.price,
+						qty,
+						total,
+						notes: "-",
 					},
 				});
 
-				if (menuItems) {
-					let order_detail_menu_item = [] as order_detail_menu_item[];
-					for (let item of menuItems) {
-						order_detail_menu_item = [
-							...order_detail_menu_item,
-							{
-								order_detail_id: create.id,
-								name: item.m_item ? item.m_item.name : "-",
-								order: item.order,
-							} as any,
-						];
-					}
-
-					await tx.order_detail_menu_item.createMany({
-						data: order_detail_menu_item
+				if (create) {
+					const menuItems = await tx.m_menu_item.findMany({
+						select: {
+							m_menu: {
+								select: {
+									name: true,
+								},
+							},
+							m_item: {
+								select: {
+									name: true,
+								},
+							},
+							order: true,
+						},
+						where: {
+							m_menu_id: dataMenu.id,
+						},
+						orderBy: {
+							order: "asc",
+						},
 					});
 
-					create = { ...create, ...{ order_detail_menu_item: order_detail_menu_item } };
+					if (menuItems) {
+						let order_detail_menu_item = [] as order_detail_menu_item[];
+						for (let item of menuItems) {
+							order_detail_menu_item = [
+								...order_detail_menu_item,
+								{
+									order_detail_id: create.id,
+									name: item.m_item ? item.m_item.name : "-",
+									order: item.order,
+								} as any,
+							];
+						}
+
+						await tx.order_detail_menu_item.createMany({
+							data: order_detail_menu_item,
+						});
+
+						create = {
+							...create,
+							...{ order_detail_menu_item: order_detail_menu_item },
+						};
+					}
+
+					data = create;
 				}
+			});
+			success = true;
+		} catch (error) {
+			success = true;
+		}
 
-				data = create;
-			}
-		});
-
-		if (transaction) success = true;
+		
 	}
 
 	return Response.json({
 		data,
-		message: success ? "success" : "failed",
+		success
 	});
 }

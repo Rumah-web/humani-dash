@@ -16,25 +16,31 @@ export async function POST(request: Request) {
 	});
 
 	if (orderDetail) {
-		const transaction = await prisma?.$transaction(async (tx) => {
-            await tx.order_detail_menu_item.deleteMany({
-                where: {
-                    order_detail_id: orderDetail.id,
-                },
-            });
-    
-            await tx.order_detail.delete({
-                where: {
-                    id: orderDetail.id,
-                },
-            });
-        });
+		try {
+			await prisma?.$transaction(async (tx) => {
+				await tx.order_detail_menu_item.deleteMany({
+					where: {
+						order_detail_id: orderDetail.id,
+					},
+				});
+		
+				await tx.order_detail.delete({
+					where: {
+						id: orderDetail.id,
+					},
+				});
+			});
+			success = true;
+		} catch (error) {
+			success = false
+		}
+		
 		
 
-		if (transaction) success = true;
+		
 	}
 
 	return Response.json({
-		message: success ? "success" : "failed",
+		success
 	});
 }

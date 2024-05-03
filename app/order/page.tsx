@@ -56,14 +56,11 @@ const Menu = () => {
 		},
 		{
 			name: "Customer",
-			selector: (row: any) => row.customer_id,
-			key: "customer_id",
+			selector: (row: any) => `${row.customer.name} (${row.customer.phone})`,
+			key: "customer.id",
 			type: "text",
 			sortable: true,
-			sortField: "customer_id",
-			format: (row: any) => (
-				<div dangerouslySetInnerHTML={{ __html: row.customer_id }} />
-			),
+			sortField: "customer.id",
 		},
 		{
 			name: "Status",

@@ -28,8 +28,8 @@ model invoice {
   invoice_due_date DateTime  @default(now()) @db.Timestamp(6)
   status           String    @default("draft") @db.VarChar(50)
   total            Decimal   @default(0) @db.Decimal
-  ppn              Int       @default(0)
-  discount         Int       @default(0)
+  ppn              Decimal   @default(0) @db.Decimal
+  discount         Decimal   @default(0) @db.Decimal
   delivery_charge  Decimal   @default(0) @db.Decimal
   description      String?
   invoice_no       String?
@@ -118,7 +118,7 @@ model m_user_roles {
 model order {
   id             Int            @id @default(autoincrement())
   uuid           String         @unique(map: "order_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  order_no       Int?
+  order_no       String?
   notes          String?
   customer_id    Int?
   status         String         @default("draft") @db.VarChar(20)
@@ -210,6 +210,7 @@ model payment {
   total          Decimal          @default(0) @db.Decimal
   created_at     DateTime         @default(now()) @db.Timestamp(6)
   status         String           @default("draft") @db.VarChar
+  uuid           String           @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   invoice        invoice          @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   payment_detail payment_detail[]
 }

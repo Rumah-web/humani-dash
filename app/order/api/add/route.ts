@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 					order_detail: true,
 				},
 				data: {
-					order_no: parseInt(generateOrderNo(create.id)),
+					order_no: generateOrderNo(create.id.toString()),
 					notes: ''
 				},
 				where: {

@@ -142,10 +142,20 @@ export const convertBase64 = (file: Blob) => {
 	});
 };
 
-export const generateOrderNo = (id: number) => {
+export const generateOrderNo = (val: string) => {
 	const current = new Date();
 	const month = String(current.getMonth() + 1).padStart(2, "0");
 	const date = String(current.getDate()).padStart(2, "0");
 
-	return `${current.getFullYear()}${month}${date}${id}`;
+	return `TR_${current.getFullYear()}${month}${date}${val}`;
+};
+
+export const generateInvoiceNo = (val: string | null) => {
+	return `INV_${val}`;
+};
+
+export const invoiceDueDate = (start_date: Date) => {
+	const dueDate = start_date.setDate(start_date.getDate() + 7);
+
+	return new Date(dueDate);
 };
