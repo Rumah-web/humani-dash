@@ -24,7 +24,6 @@ model invoice {
   id               Int       @id @default(autoincrement())
   uuid             String    @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   order_id         Int?
-  payment_method   String    @default("manual transfer") @db.VarChar
   invoice_date     DateTime  @default(now()) @db.Timestamp(6)
   invoice_due_date DateTime  @default(now()) @db.Timestamp(6)
   status           String    @default("draft") @db.VarChar(50)
@@ -210,6 +209,7 @@ model payment {
   invoice_id     Int
   total          Decimal          @default(0) @db.Decimal
   created_at     DateTime         @default(now()) @db.Timestamp(6)
+  status         String           @default("draft") @db.VarChar
   invoice        invoice          @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   payment_detail payment_detail[]
 }
@@ -218,7 +218,7 @@ model payment {
 model payment_detail {
   id               Int      @id @default(autoincrement())
   payment_id       Int
-  payment_method   String   @default("manual") @db.VarChar
+  payment_method   String   @default("manual transfer") @db.VarChar
   proof_of_payment Int?
   nominal          Decimal  @default(0) @db.Decimal
   created_at       DateTime @default(now()) @db.Timestamp(6)

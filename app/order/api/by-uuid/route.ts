@@ -10,7 +10,11 @@ export async function POST(request: Request) {
 
 	const data = await db.order.findFirst({
 		include: {
-			order_detail: true,
+			order_detail: {
+				include: {
+					order_detail_menu_item: true
+				}
+			},
 		},
 		where: {
 			uuid,

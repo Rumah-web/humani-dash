@@ -14,7 +14,14 @@ import Badge from "@/components/Badges";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Table/Loading";
-import { customer, m_menu, m_menu_category, order, order_detail } from "@prisma/client";
+import {
+	customer,
+	m_menu,
+	m_menu_category,
+	order,
+	order_detail,
+	order_detail_menu_item,
+} from "@prisma/client";
 import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
 import { convertBase64 } from "@/app/lib/helper";
@@ -32,7 +39,11 @@ const Form = () => {
 	const [isLoading, setLoading] = useState(true);
 	const [published, setPublished] = useState(false);
 	const [data, setData] = useState(
-		{} as order & { order_detail: order_detail[] }
+		{} as order & {
+			order_detail: Partial<
+				order_detail & { order_detail_menu_item: order_detail_menu_item[] }
+			>[];
+		}
 	);
 	const [customers, setCustomers] = useState([] as customer[]);
 	const [dataField, setDataField] = useState({});
@@ -43,7 +54,9 @@ const Form = () => {
 	const [detailOptions, setDetailOptions] = useState([] as IOptionsSelect[]);
 	const [catOptions, setCatOptions] = useState([] as IOptionsSelect[]);
 	const [menuOptions, setMenuOptions] = useState([] as IOptionsSelect[]);
-	const [menuSelected, setMenuSelected] = useState(null as null | IOptionsSelect);
+	const [menuSelected, setMenuSelected] = useState(
+		null as null | IOptionsSelect
+	);
 	const [catSelected, setCatSelected] = useState(null as null | IOptionsSelect);
 	const [menu, setMenu] = useState({} as m_menu | null);
 	const [qty, setQty] = useState(0 as number);
@@ -199,15 +212,17 @@ const Form = () => {
 		});
 
 		const menuitem = await addItem.json();
+		console.log("menuitem : ", menuitem);
 		if (menuitem) {
 			setData({ ...data, order_detail: [...data.order_detail, menuitem.data] });
+			console.log("data : ", data);
 		}
 
-		setCatSelected(null)
+		setCatSelected(null);
 		setAdditem(false);
-		setMenuSelected(null)
-		setMenu(null)
-		setQty(0)
+		setMenuSelected(null);
+		setMenu(null);
+		setQty(0);
 	};
 
 	const onDeleteItem = async (id: number) => {
@@ -225,10 +240,10 @@ const Form = () => {
 	};
 
 	const onChangeCategory = async (val: IOptionsSelect) => {
-		setMenuSelected(null)
-		setMenu(null)
-		setQty(0)
-		setCatSelected(val)
+		setMenuSelected(null);
+		setMenu(null);
+		setQty(0);
+		setCatSelected(val);
 
 		const reqMenu = await fetch("/menu/api/list-menu-by-category", {
 			method: "POST",
@@ -246,7 +261,7 @@ const Form = () => {
 
 	const onSelectMenu = async (val: IOptionsSelect) => {
 		setMenuSelected(val);
-		setQty(0)
+		setQty(0);
 
 		const reqMenu = await fetch("/menu/api/by-id", {
 			method: "POST",
@@ -263,8 +278,10 @@ const Form = () => {
 	};
 
 	const onChangeQty = (val: number) => {
-		setQty(val)
-	}
+		setQty(val);
+	};
+
+	const onPublishOrder = async () => {};
 
 	if (isLoading) {
 		return (
@@ -331,37 +348,53 @@ const Form = () => {
 									Order Detail
 								</h3>
 							</div>
-							<div className='flex flex-col gap-5.5 p-6.5'>
+							<div className='flex flex-col gap-10 p-6.5'>
 								<div className='flex flex-col space-y-4 w-full'>
 									<div className='w-full flex items-center space-x-4'>
-										<div className='flex flex-col space-y-2 w-full'>
-											<div className='flex w-full'>
+										<div className='flex flex-col space-y-4 w-full'>
+											<div className='flex flex-col gap-2'>
+												<label htmlFor='m_menu_category'>Pilih Category</label>
 												<Select
 													options={catOptions}
 													className='w-full'
-													placeholder='Select Category'
+													placeholder='-- Select --'
 													value={catSelected}
-													onChange={(e) => onChangeCategory({label: e?.label, value: e?.value})}
+													id='m_menu_category'
+													onChange={(e) =>
+														onChangeCategory({
+															label: e?.label,
+															value: e?.value,
+														})
+													}
 												/>
 											</div>
-											<div className='flex w-full'>
+											<div className='flex flex-col gap-2'>
+												<label htmlFor='m_menu_category'>Pilih Menu</label>
 												<Select
 													options={menuOptions}
 													className='w-full'
-													placeholder='Select Menu'
+													placeholder='-- Select --'
 													value={menuSelected}
-													onChange={(e) => onSelectMenu({value: e?.value, label: e?.label})}
+													onChange={(e) =>
+														onSelectMenu({ value: e?.value, label: e?.label })
+													}
 												/>
 											</div>
-											<div className='flex w-full'>
+											<div className='flex flex-col gap-2'>
+												<label htmlFor='m_menu_category'>Qty</label>
 												<input
 													type='number'
 													className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-1 px-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
 													min={menu?.min_qty}
-													placeholder="Qty"
-													defaultValue={menu?.min_qty}
-													onChange={(e) => onChangeQty(parseInt(e.target.value))}
+													max={menu?.max_qty}
+													value={qty}
+													onChange={(e) =>
+														onChangeQty(parseInt(e.target.value))
+													}
 												/>
+												<span className='text-danger text-xs'>
+													{menu?.min_qty && `Minimal order ${menu.min_qty} pcs`}
+												</span>
 											</div>
 											<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
 												<div className='w-full flex justify-start'>
@@ -370,7 +403,7 @@ const Form = () => {
 														className={`${
 															isAdditem ? "opacity-50" : ""
 														} px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70`}>
-														{isAdditem ? <IconLoading /> : "Add New"}
+														{isAdditem ? <IconLoading /> : "Add Detail"}
 													</div>
 												</div>
 											</div>
@@ -384,10 +417,29 @@ const Form = () => {
 												return (
 													<div
 														key={item.id}
-														className='w-full flex items-center space-x-4'>
-														<div>{`${i + 1}.`}</div>
+														className='w-full flex items-start space-x-4'>
+														<div className='flex'>{`${i + 1}.`}</div>
 														<div className='flex flex-col space-y-2 w-full'>
 															{item.menu_name}
+															<div>
+																{item.order_detail_menu_item &&
+																	item.order_detail_menu_item?.length > 0 && (
+																		<>
+																			{item.order_detail_menu_item.map(
+																				(detail, i) => {
+																					return (
+																						<div
+																							key={i}
+																							className='px-0 flex space-x-2'>
+																							<div>{`${i + 1}.`}</div>
+																							<div>{detail.name}</div>
+																						</div>
+																					);
+																				}
+																			)}
+																		</>
+																	)}
+															</div>
 														</div>
 														<div
 															className='cursor-pointer hover:opacity-75'
@@ -400,14 +452,10 @@ const Form = () => {
 										</>
 									) : (
 										<div className='flex justify-center items-center flex-col space-y-2'>
-											<IconBoxOpen width={100} />
-											<div
-												className='text-[#000000] text-base cursor-pointer hover:underline'
-												onClick={() => {
-													!isAdditem ? onAddItem() : () => {};
-												}}>
-												{isAdditem ? <IconLoading /> : "Click to Add New"}
-											</div>
+											<IconBoxOpen
+												width={100}
+												height={100}
+											/>
 										</div>
 									)}
 								</div>
@@ -436,7 +484,7 @@ const Form = () => {
 											className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
 												published ? "opacity-70 cursor-wait" : ""
 											}`}
-											onClick={() => onChangeState("published")}>
+											onClick={() => onPublishOrder()}>
 											Publish
 										</button>
 									)}
