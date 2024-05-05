@@ -8,6 +8,7 @@ import Loading from "@/components/Table/Loading";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import NoImage from "@/components/Placeholder/NoImage";
+import { formatShorttDate } from "../lib/helper";
 
 interface ITabCount {
 	status: string;
@@ -60,6 +61,7 @@ const Menu = () => {
 			type: "text",
 			sortable: true,
 			sortField: "invoice_due_date",
+			format: (row: any) => formatShorttDate(row.invoice_due_date),
 		},
 		{
 			name: "Description",
@@ -80,7 +82,7 @@ const Menu = () => {
 			format: (row: any) => (
 				<div
 					className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
-						row.status === "finsihed" ? "bg-success" : "bg-danger"
+						row.status === "paid" ? "bg-success" : "bg-danger"
 					}`}>
 					{row.status}
 				</div>

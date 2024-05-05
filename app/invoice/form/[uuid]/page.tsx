@@ -27,7 +27,7 @@ import {
 import Image from "next/image";
 import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
-import { convertBase64 } from "@/app/lib/helper";
+import { convertBase64, formatShorttDate } from "@/app/lib/helper";
 import { Decimal } from "@prisma/client/runtime/library";
 import NoImage from "@/components/Placeholder/NoImage";
 import DataTable from "react-data-table-component";
@@ -80,7 +80,7 @@ const Form = () => {
 
 	let tabsDefault = [
 		{ label: "Order", value: "order", count: 0 },
-		{ label: "payment", value: "payment", count: 0 },
+		{ label: "Payment", value: "payment", count: 0 },
 	];
 
 	useEffect(() => {
@@ -101,6 +101,7 @@ const Form = () => {
 				setLoading(false);
 
 				const datas = await runQuery();
+				console.log("asas : ", datas);
 
 				setDatas(datas);
 			}
@@ -165,7 +166,6 @@ const Form = () => {
 				);
 			},
 		},
-
 		{
 			name: "Payment Method",
 			selector: (row: any) => row.payment_method,
@@ -181,6 +181,9 @@ const Form = () => {
 			type: "text",
 			sortable: true,
 			sortField: "description",
+			format: (row: any) => (
+				<div dangerouslySetInnerHTML={{ __html: row.description }} />
+			),
 		},
 		{
 			name: "Nominal",
@@ -237,7 +240,7 @@ const Form = () => {
 		},
 	};
 
-	const onAddPayment = async() => {
+	const onAddPayment = async () => {
 		const add = await fetch("/payment-detail/api/add", {
 			method: "POST",
 			body: JSON.stringify({ uuid: data.payment?.uuid }),
@@ -246,11 +249,12 @@ const Form = () => {
 			},
 		});
 
-		if(add) {
-			const addData = await add.json()
-			router.push(`/invoice/form/payment/${data.payment?.uuid}/${addData.data.uuid}`);
+		if (add) {
+			const addData = await add.json();
+			router.push(
+				`/invoice/form/payment/${data.payment?.uuid}/${addData.data.uuid}`
+			);
 		}
-		
 	};
 
 	const runQuery = async () => {
@@ -270,8 +274,6 @@ const Form = () => {
 			setLoadingPayment(false);
 			return data;
 		}
-
-		
 	};
 
 	const handleSort = async (column: any, sortDirection: string) => {
@@ -283,6 +285,7 @@ const Form = () => {
 
 			const datas = await runQuery();
 
+			console.log("hallo : ", datas);
 			setDatas(datas);
 			setLoadingPayment(false);
 
@@ -340,11 +343,11 @@ const Form = () => {
 									<div className='flex flex-col gap-5.5 p-6.5'>
 										<div className='flex space-x-12'>
 											<div className='flex flex-1 justify-between'>
-												<label htmlFor='name'>Status</label>
+												<label htmlFor='name'>Invoice Status</label>
 												<div className=''>
 													<div
 														className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
-															data.status === "finsihed"
+															data.status === "paid"
 																? "bg-success"
 																: "bg-danger"
 														}`}>
@@ -353,20 +356,26 @@ const Form = () => {
 												</div>
 											</div>
 											<div className='flex flex-1 justify-between'>
-												<label htmlFor='name'>Order No</label>
-												<div className=''>{data.order?.order_no}</div>
+												<label htmlFor='name'>Invoice No</label>
+												<div className=''>{data.invoice_no}</div>
 											</div>
 										</div>
 
 										<div className='flex space-x-12'>
 											<div className='flex flex-1 justify-between'>
 												<label htmlFor='name'>Date</label>
-												<div className=''>{data.invoice_date?.toString()}</div>
+												<div className=''>
+													{data.invoice_date
+														? formatShorttDate(data.invoice_date)
+														: null}
+												</div>
 											</div>
 											<div className='flex flex-1 justify-between'>
 												<label htmlFor='name'>Due Date</label>
 												<div className=''>
-													{data.invoice_due_date?.toString()}
+													{data.invoice_due_date
+														? formatShorttDate(data.invoice_due_date)
+														: null}
 												</div>
 											</div>
 										</div>
@@ -383,6 +392,7 @@ const Form = () => {
 										</div>
 									</div>
 								</div>
+								<div className='badge-corner'></div>
 							</div>
 						</div>
 						<div className='flex space-x-4 relative'>
@@ -460,15 +470,21 @@ const Form = () => {
 									<div className='flex flex-col gap-3 p-6.5 w-full'>
 										<div className='flex flex-1 justify-between'>
 											<label htmlFor='name'>Total</label>
-											<div>{data.total?.toString()}</div>
+											<div>{`Rp. ${data.total
+												?.toString()
+												.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}</div>
 										</div>
 										<div className='flex flex-1 justify-between'>
 											<label htmlFor='name'>Discount</label>
-											<div>{data.discount?.toString()}</div>
+											<div>{`Rp. ${data.discount
+												?.toString()
+												.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}</div>
 										</div>
 										<div className='flex flex-1 justify-between'>
 											<label htmlFor='name'>Delivery</label>
-											<div>{data.delivery_charge?.toString()}</div>
+											<div>{`Rp. ${data.delivery_charge
+												?.toString()
+												.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}</div>
 										</div>
 										<div className='flex flex-1 justify-between pt-2 border-t border-stroke dark:border-strokedark'>
 											<label
@@ -478,7 +494,9 @@ const Form = () => {
 											</label>
 											<div className='font-bold'>
 												{data.payment?.total
-													? data.payment.total.toString()
+													? `Rp. ${data.payment.total
+															?.toString()
+															.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`
 													: 0}
 											</div>
 										</div>

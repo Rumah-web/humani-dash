@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { convertBase64 } from "@/app/lib/helper";
 import Select from "react-select";
 import { IOptionsSelect } from "@/app/type";
-import { payment_detail } from "@prisma/client";
+import { invoice, payment, payment_detail } from "@prisma/client";
 import { NumericFormat } from "react-number-format";
 
 const Editor = dynamic(
@@ -36,8 +36,12 @@ const Form = () => {
 	const [istBase64, setBase64] = useState(false);
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
 	const [published, setPublished] = useState(false);
-	const [data, setData] = useState({} as payment_detail);
+	const [paid, setPaid] = useState(false);
+	const [data, setData] = useState(
+		{} as Partial<payment_detail & { payment: payment & { invoice: invoice } }>
+	);
 	const [options, setOptions] = useState([] as IOptionsSelect[]);
+	const [paidOptions, setPaidOptions] = useState([] as IOptionsSelect[]);
 	const [dataField, setDataField] = useState({});
 	const router = useRouter();
 
@@ -60,7 +64,7 @@ const Form = () => {
 		setLoadingUpload(true);
 		const formData = new FormData();
 		formData.append("file", file);
-		formData.append("uuid", data.uuid);
+		formData.append("uuid", data.uuid as any);
 
 		const base64 = (await convertBase64(file)) as any;
 
@@ -79,11 +83,19 @@ const Form = () => {
 		if (Object.keys(data).length > 0) {
 			await fetch("/payment-detail/api/update-field", {
 				method: "POST",
-				body: JSON.stringify({ uuid: params.uuid, data }),
+				body: JSON.stringify({ uuid: params.uuid_detail, data }),
 				headers: {
 					"content-type": "application/json",
 				},
 			});
+		}
+	};
+
+	const onSetPaid = async (val: string) => {
+		if (val === "yes") {
+			setPaid(true);
+		} else {
+			setPaid(false);
 		}
 	};
 
@@ -96,7 +108,7 @@ const Form = () => {
 	};
 
 	const onChangeState = async (status: string) => {
-		setPublished(true);
+		
 		await fetch("/payment-detail/api/change-state", {
 			method: "POST",
 			body: JSON.stringify({ uuid: params.uuid, status }),
@@ -104,7 +116,6 @@ const Form = () => {
 				"content-type": "application/json",
 			},
 		});
-		setPublished(false);
 
 		router.push(`/invoice/${params.uuid}`);
 	};
@@ -115,9 +126,10 @@ const Form = () => {
 	};
 
 	const onPublish = async () => {
+		setPublished(true);
 		const publishOrder = await fetch("/payment-detail/api/publish", {
 			method: "POST",
-			body: JSON.stringify({ uuid: data.uuid }),
+			body: JSON.stringify({ uuid: data.uuid, paid }),
 			headers: {
 				"content-type": "application/json",
 			},
@@ -126,8 +138,9 @@ const Form = () => {
 		if (publishOrder) {
 			const res = await publishOrder.json();
 
+			setPublished(false);
 			if (res.success) {
-				router.push(`/invoice/form/${params.uuid}`);
+				router.push(`/invoice/form/${res.data.payment?.invoice.uuid}`);
 			} else {
 				alert("Terjadi Kesalahan");
 			}
@@ -148,6 +161,14 @@ const Form = () => {
 				{ label: "Cash", value: "cash" },
 			];
 			setOptions(opt);
+
+			const paidOptions = [
+				{ label: "Yes", value: "yes" },
+				{ label: "No", value: "no" },
+			];
+
+			setPaidOptions(paidOptions);
+
 			const req = await fetch("/payment-detail/api/by-uuid", {
 				method: "POST",
 				body: JSON.stringify({ uuid: params.uuid_detail }),
@@ -217,20 +238,20 @@ const Form = () => {
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Nominal</label>
 									<NumericFormat
-											value={data.nominal as any}
-											name='nominal'
-											allowLeadingZeros
-											thousandSeparator=','
-											className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
-											onValueChange={(values, sourceInfo) => {
-												onChange(
-													"nominal",
-													typeof values.value === "string"
-														? parseInt(values.value)
-														: values.value
-												);
-											}}
-										/>
+										value={data.nominal as any}
+										name='nominal'
+										allowLeadingZeros
+										thousandSeparator=','
+										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+										onValueChange={(values, sourceInfo) => {
+											onChange(
+												"nominal",
+												typeof values.value === "string"
+													? parseInt(values.value)
+													: values.value
+											);
+										}}
+									/>
 								</div>
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Description</label>
@@ -258,8 +279,15 @@ const Form = () => {
 								<div className='flex space-x-2 justify-between'>
 									<label htmlFor='name'>Status</label>
 									<Badge
-										label={data.status}
+										label={data.status === "draft" ? "Not Verified" : "Success"}
 										state={data.status === "draft" ? "danger" : "success"}
+									/>
+								</div>
+								<div className='flex-1 flx-col space-y-2'>
+									<label htmlFor='name'>Pelunasan</label>
+									<Select
+										options={paidOptions}
+										onChange={(e) => onSetPaid(e?.value)}
 									/>
 								</div>
 								<div className='flex flex-col space-y-2'>
@@ -333,7 +361,7 @@ const Form = () => {
 												published ? "opacity-70 cursor-wait" : ""
 											}`}
 											onClick={() => onPublish()}>
-											Publish
+											Verified
 										</button>
 									)}
 
