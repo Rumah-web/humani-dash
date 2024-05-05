@@ -34,7 +34,8 @@ const Menu = () => {
 	let tabsDefault = [
 		{ label: "All", value: "all", count: 0 },
 		{ label: "Draft", value: "draft", count: 0 },
-		{ label: "Published", value: "published", count: 0 },
+		{ label: "New", value: "new", count: 0 },
+		{ label: "Finish", value: "finished", count: 0 },
 	];
 
 	const columns = [

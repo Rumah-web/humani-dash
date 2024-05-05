@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       condition = {...condition, ...where}
   }
 
-  const total = await db.m_item.count({
+  const total = await db.invoice.count({
     where: condition
   })
 

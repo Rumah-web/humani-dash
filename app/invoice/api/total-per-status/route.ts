@@ -6,7 +6,7 @@ type ResponseData = {
  
 export async function POST(request: Request) {
 
-  const data = await db.m_item.groupBy({
+  const data = await db.invoice.groupBy({
     by: ['status'],
     _count: {
       status: true

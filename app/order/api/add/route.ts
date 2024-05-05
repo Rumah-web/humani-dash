@@ -26,7 +26,8 @@ export async function POST(request: Request) {
 				},
 				data: {
 					order_no: generateOrderNo(create.id.toString()),
-					notes: ''
+					notes: '',
+					source: 'affiliate'
 				},
 				where: {
 					id: create.id,

@@ -15,16 +15,23 @@ import Badge from "@/components/Badges";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Table/Loading";
-import { m_menu_category } from "@prisma/client";
+import {
+	customer,
+	invoice,
+	m_menu_category,
+	m_user,
+	order,
+	order_detail,
+	order_detail_menu_item,
+} from "@prisma/client";
 import Image from "next/image";
 import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
 import { convertBase64 } from "@/app/lib/helper";
-
-const Editor = dynamic(
-	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
-	{ ssr: false }
-);
+import { Decimal } from "@prisma/client/runtime/library";
+import NoImage from "@/components/Placeholder/NoImage";
+import DataTable from "react-data-table-component";
+import Sort from "@/components/Table/Sort";
 
 const Form = () => {
 	const [editorState, setEditorState] = useState(EditorState.createEmpty());
@@ -33,9 +40,34 @@ const Form = () => {
 	const [istBase64, setBase64] = useState(false);
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
 	const [published, setPublished] = useState(false);
-	const [data, setData] = useState({} as m_menu_category);
+	const [datas, setDatas] = useState([]);
+	const [data, setData] = useState(
+		{} as Partial<
+			invoice & {
+				order: order & {
+					order_detail: Partial<
+						order_detail & {
+							order_detail_menu_item: order_detail_menu_item[];
+						}
+					>[];
+					customer: customer;
+					m_user: m_user;
+				};
+				payment: {
+					total: Decimal | undefined;
+					uuid: string | undefined;
+					status: string | undefined;
+				};
+			}
+		>
+	);
 	const [dataField, setDataField] = useState({});
 	const router = useRouter();
+	const [activeTab, setActiveTab] = useState("order");
+	const [tabs, setTabs] = useState(
+		[] as { label: string; value: string; count: number }[]
+	);
+	const [order, setOrder] = useState({ id: "desc" } as any);
 
 	const params = useParams<{ uuid: string }>();
 
@@ -45,79 +77,15 @@ const Form = () => {
 		formState: { errors },
 	} = useForm();
 
-	const fileTypes = ["JPG", "PNG", "JPEG"];
-
-	const onEditorStateChange = (editorState: any) => {
-		setEditorState(editorState);
-	};
-
-	const handleChangeFile = async (file: any) => {
-		setLoadingUpload(true);
-		const formData = new FormData();
-		formData.append("file", file);
-		formData.append("uuid", data.uuid);
-
-		const base64 = (await convertBase64(file)) as any;
-
-		setFile(base64);
-		setBase64(true);
-
-		await fetch("/menu-item/api/upload-file", {
-			method: "POST",
-			body: formData,
-		});
-
-		setLoadingUpload(false);
-	};
-
-	const onUpdateByField = async (data: any) => {
-		await fetch("/menu-item/api/update-field", {
-			method: "POST",
-			body: JSON.stringify({ uuid: params.uuid, data }),
-			headers: {
-				"content-type": "application/json",
-			},
-		});
-	};
-
-	const onChange = async (column: string, value: any) => {
-		const params = { [column]: ['order'].includes(column) ?  parseInt(value) : value };
-		setData({ ...data, ...params });
-		setDataField(params);
-	};
-
-	const onChangeState = async (status: string) => {
-		setPublished(true);
-		await fetch("/menu-item/api/change-state", {
-			method: "POST",
-			body: JSON.stringify({ uuid: params.uuid, status }),
-			headers: {
-				"content-type": "application/json",
-			},
-		});
-		setPublished(false);
-
-		router.push(`/menu-item`);
-	};
+	let tabsDefault = [
+		{ label: "Order", value: "order", count: 0 },
+		{ label: "payment", value: "payment", count: 0 },
+	];
 
 	useEffect(() => {
-		const timeoutIdDesc = setTimeout(async () => {
-			const raw = convertToRaw(editorState.getCurrentContent());
-			await onUpdateByField({ description: draftToHtml(raw) });
-		}, 500);
-		return () => clearTimeout(timeoutIdDesc);
-	}, [editorState, 500]);
-
-	useEffect(() => {
-		const timeoutId = setTimeout(async () => {
-			await onUpdateByField(dataField);
-		}, 500);
-		return () => clearTimeout(timeoutId);
-	}, [data, 500]);
-
-	useEffect(() => {
+		setTabs(tabsDefault);
 		(async () => {
-			const req = await fetch("/menu-item/api/by-uuid", {
+			const req = await fetch("/invoice/api/by-uuid", {
 				method: "POST",
 				body: JSON.stringify({ uuid: params.uuid }),
 				headers: {
@@ -126,27 +94,166 @@ const Form = () => {
 			});
 
 			if (req) {
-				const { data, file } = await req.json();
+				const { data } = await req.json();
 				setData(data);
-				if (file) {
-					setFile(file);
-				}
-				setEditorState(
-					EditorState.createWithContent(
-						ContentState.createFromBlockArray(
-							convertFromHTML(data.description) as any
-						)
-					)
-				);
+
 				setLoading(false);
 			}
 		})();
 	}, []);
 
+	const onClickTab = async (value: string) => {
+		setLoading(true);
+		setActiveTab(value);
+
+		let where = {};
+		if (["draft", "published"].includes(value)) {
+			where = {
+				status: value,
+			};
+		}
+
+		setLoading(false);
+	};
+
+	//payment
+	const columns = [
+		{
+			name: "UUID",
+			selector: (row: any) => row.uuid,
+			key: "uuid",
+			type: "text",
+			sortable: true,
+			omit: true,
+		},
+		{
+			name: "Bukti Bayar",
+			selector: (row: any) => (row.m_files ? row.m_files.path : null),
+			key: "path",
+			type: "text",
+			format: (row: any) => {
+				if (row.m_files.path) {
+					return (
+						<div className='p-2'>
+							<Image
+								src={`${row.m_files.path}?width=200`}
+								width={100}
+								height={100}
+								alt={row.name}
+								priority={true}
+								unoptimized
+								className='w-24'
+							/>
+						</div>
+					);
+				}
+
+				return (
+					<div className='py-1'>
+						<div className='bg-gray flex justify-center items-center w-28'>
+							<NoImage
+								w={50}
+								h={50}
+							/>
+						</div>
+					</div>
+				);
+			},
+		},
+
+		{
+			name: "Payment Method",
+			selector: (row: any) => row.payment_method,
+			key: "payment_method",
+			type: "text",
+			sortable: true,
+			sortField: "payment_method",
+		},
+		{
+			name: "Description",
+			selector: (row: any) => row.description,
+			key: "description",
+			type: "text",
+			sortable: true,
+			sortField: "description",
+		},
+		{
+			name: "Nominal",
+			selector: (row: any) => row.nominal,
+			key: "nominal",
+			type: "number",
+			format: (row: any) =>
+				`Rp. ${row.nominal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
+			sortable: true,
+			sortField: "nominal",
+		},
+		{
+			name: "Status",
+			selector: (row: any) => row.status,
+			key: "status",
+			type: "text",
+			format: (row: any) => (
+				<div
+					className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
+						row.status === "draft" ? "bg-danger" : "bg-success"
+					}`}>
+					{row.status}
+				</div>
+			),
+			sortable: true,
+			sortField: "status",
+		},
+	];
+
+	const customStyles = {
+		head: {
+			style: {
+				fontSize: "15px",
+				fontWeight: "bold",
+			},
+		},
+		rows: {
+			style: {
+				fontSize: "15px",
+				cursor: "pointer",
+			},
+		},
+		headCells: {
+			style: {
+				paddingLeft: "8px", // override the cell padding for head cells
+				paddingRight: "8px",
+			},
+		},
+		cells: {
+			style: {
+				paddingLeft: "8px", // override the cell padding for data cells
+				paddingRight: "8px",
+			},
+		},
+	};
+
+	const onAddPayment = () => {};
+
+	const handleSort = async (column: any, sortDirection: string) => {
+		if (typeof column.sortField !== "undefined") {
+			const order = { [column.sortField]: sortDirection };
+
+			setLoading(true);
+			setOrder(order);
+
+			// const data = await runQuery(condition, take, page, order);
+
+			setDatas([]);
+			setLoading(false);
+
+			console.log(Object.values(order)[0]);
+		}
+	};
+
 	if (isLoading) {
 		return (
 			<>
-				<Breadcrumb pageName='Create' />
+				<Breadcrumb pageName='Invoice' />
 				<div className='h-screen flex justify-center items-center'>
 					<Loading />
 				</div>
@@ -156,84 +263,252 @@ const Form = () => {
 
 	return (
 		<>
-			<Breadcrumb pageName='Create' />
-			<div className='pb-36'>
-				<form
-					onSubmit={handleSubmit((data) => console.log(data))}
-					className='flex space-x-4 relative'>
-					<div className='flex w-2/3 flex-col space-y-6'>
-						<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
-							<div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
-								<h3 className='font-medium text-black dark:text-white'>
-									Item Menu
-								</h3>
-							</div>
-							<div className='flex flex-col gap-5.5 p-6.5'>
-								<div className='flex flex-col space-y-2'>
-									<label htmlFor='name'>Name</label>
-									<input
-										{...register("name", { required: true })}
-										value={data.name}
-										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
-										onChange={(e) => onChange("name", e.target.value)}
-									/>
-								</div>
-								<div className='flex flex-col space-y-2'>
-									<label htmlFor='name'>Description</label>
-									<Editor
-										editorState={editorState}
-										editorStyle={{ height: "400px" }}
-										toolbarClassName='toolbarClassName'
-										wrapperClassName='wrapperClassName'
-										editorClassName='px-4 border border-[#dfdfdf] bg-white'
-										onEditorStateChange={onEditorStateChange}
-									/>
+			<Breadcrumb pageName='Invoice' />
+			<div className='flex'>
+				{tabs.map(({ value, label, count }, i) => {
+					return (
+						<div
+							key={i}
+							className={`pr-4 cursor-pointer text-center border-danger  ${
+								activeTab === value ? `border-b-2 text-danger font-bold` : ``
+							}`}>
+							<div
+								className='flex items-center space-x-2 py-1 transition-all hover:opacity-60'
+								onClick={() => onClickTab(value)}>
+								<div
+									className={`text-base capitalize ${
+										activeTab === value ? `font-bold` : ``
+									}`}>
+									{label}
 								</div>
 							</div>
 						</div>
-					</div>
-					<div className='flex w-1/3 flex-col relative'>
-						<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
-							<div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
-								<h3 className='font-medium text-black dark:text-white'>
-									Publish
-								</h3>
-							</div>
-							<div className='flex flex-col gap-5.5 p-6.5'>
-								<div className='flex space-x-2 justify-between'>
-									<label htmlFor='name'>Status</label>
-									<Badge
-										label={data.status}
-										state={data.status === "draft" ? "danger" : "success"}
-									/>
-								</div>
-								<div className='flex flex-col justify-end'>
-									{data.status === "draft" && (
-										<button
-											disabled={published ? true : false}
-											className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
-												published ? "opacity-70 cursor-wait" : ""
-											}`}
-											onClick={() => onChangeState("published")}>
-											Publish
-										</button>
-									)}
+					);
+				})}
+			</div>
+			<div className='pb-36 space-y-4'>
+				{activeTab === "order" && (
+					<>
+						<div className='flex space-x-4 relative'>
+							<div className='flex w-full flex-col space-y-6'>
+								<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
+									<div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
+										<h3 className='font-medium text-black dark:text-white'>
+											Order Information
+										</h3>
+									</div>
+									<div className='flex flex-col gap-5.5 p-6.5'>
+										<div className='flex space-x-12'>
+											<div className='flex flex-1 justify-between'>
+												<label htmlFor='name'>Status</label>
+												<div className=''>
+													<div
+														className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
+															data.status === "finsihed"
+																? "bg-success"
+																: "bg-danger"
+														}`}>
+														{data.status}
+													</div>
+												</div>
+											</div>
+											<div className='flex flex-1 justify-between'>
+												<label htmlFor='name'>Order No</label>
+												<div className=''>{data.order?.order_no}</div>
+											</div>
+										</div>
 
-									{data.status === "published" && (
-										<button
-											disabled={published ? true : false}
-											className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
-												published ? "opacity-70 cursor-wait" : ""
-											}`}
-											onClick={() => onChangeState("deleted")}>
-											Delete
-										</button>
-									)}
+										<div className='flex space-x-12'>
+											<div className='flex flex-1 justify-between'>
+												<label htmlFor='name'>Date</label>
+												<div className=''>{data.invoice_date?.toString()}</div>
+											</div>
+											<div className='flex flex-1 justify-between'>
+												<label htmlFor='name'>Due Date</label>
+												<div className=''>
+													{data.invoice_due_date?.toString()}
+												</div>
+											</div>
+										</div>
+
+										<div className='flex space-x-12'>
+											<div className='flex flex-1 justify-between'>
+												<label htmlFor='name'>Customer</label>
+												<div className=''>{`${data.order?.customer.name} (${data.order?.customer.phone})`}</div>
+											</div>
+											<div className='flex flex-1 justify-between'>
+												<label htmlFor='name'>Affiliate</label>
+												<div>{data.order?.m_user.name}</div>
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-				</form>
+						<div className='flex space-x-4 relative'>
+							<div className='flex-1 flex-col space-y-6'>
+								<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
+									<div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
+										<h3 className='font-medium text-black dark:text-white'>
+											Order Detail
+										</h3>
+									</div>
+									<div className='flex flex-col gap-5.5 p-6.5 w-full'>
+										<div className='flex flex-1 w-full'>
+											{data.order?.order_detail.map((order, i) => {
+												return (
+													<div
+														key={i}
+														className='flex flex-col w-full'>
+														<div className='flex space-x-2 w-full'>
+															<div>{`${i + 1}.`}</div>
+															<div className='flex flex-row w-full justify-between'>
+																<div className='flex w-2/5'>
+																	{order.menu_name}
+																</div>
+																<div className='flex w-1/5'>{`Qty ${order.qty}`}</div>
+																<div className='flex-1'>{`Notes ${order.notes}`}</div>
+															</div>
+														</div>
+														<div
+															className={`flex px-4 py-2 py-4 px-6.5 ${
+																i + 1 !== data.order?.order_detail.length
+																	? `border-b border-stroke dark:border-strokedark`
+																	: ``
+															}`}>
+															<div className='flex flex-col w-full'>
+																{order.order_detail_menu_item?.map(
+																	(item, i) => {
+																		return (
+																			<div
+																				key={i}
+																				className={`flex w-full space-x-2 py-2 mx-0 ${
+																					i + 1 !==
+																					order.order_detail_menu_item?.length
+																						? `border-b border-stroke dark:border-strokedark`
+																						: ``
+																				}`}>
+																				<div>{`${i + 1}.`}</div>
+																				<div>{item.name}</div>
+																			</div>
+																		);
+																	}
+																)}
+															</div>
+														</div>
+													</div>
+												);
+											})}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</>
+				)}
+
+				{activeTab === "payment" && (
+					<>
+						<div className='flex space-x-4 relative'>
+							<div className='flex w-full flex-col space-y-6'>
+								<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
+									<div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
+										<h3 className='font-medium text-black dark:text-white'>
+											Detail Payment
+										</h3>
+									</div>
+									<div className='flex flex-col gap-3 p-6.5 w-full'>
+										<div className='flex flex-1 justify-between'>
+											<label htmlFor='name'>Total</label>
+											<div>{data.total?.toString()}</div>
+										</div>
+										<div className='flex flex-1 justify-between'>
+											<label htmlFor='name'>Discount</label>
+											<div>{data.discount?.toString()}</div>
+										</div>
+										<div className='flex flex-1 justify-between'>
+											<label htmlFor='name'>Delivery</label>
+											<div>{data.delivery_charge?.toString()}</div>
+										</div>
+										<div className='flex flex-1 justify-between pt-2 border-t border-stroke dark:border-strokedark'>
+											<label
+												htmlFor='name'
+												className='font-bold'>
+												Total Bayar
+											</label>
+											<div className='font-bold'>
+												{data.payment?.total
+													? data.payment.total.toString()
+													: 0}
+											</div>
+										</div>
+									</div>
+									{/* <div className='flex flex-col gap-3 p-6.5 w-full'></div> */}
+								</div>
+							</div>
+						</div>
+						<div className='flex space-x-4 relative'>
+							<div className='flex w-full flex-col space-y-6'>
+								<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
+									<div className='flex justify-between border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
+										<h3 className='font-medium text-black dark:text-white'>
+											Payment History
+										</h3>
+										<div className='flex justify-between'>
+											<div className='w-full flex justify-end'>
+												<div
+													className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
+													onClick={onAddPayment}>
+													Add
+												</div>
+											</div>
+										</div>
+									</div>
+									<div className='flex flex-col gap-3 p-6.5 w-full'>
+										{Object.entries(columns).length > 0 && (
+											<>
+												<DataTable
+													columns={columns}
+													data={datas}
+													keyField={"id"}
+													noHeader={true}
+													fixedHeader={true}
+													customStyles={customStyles}
+													persistTableHead={true}
+													striped={true}
+													pagination={false}
+													progressPending={isLoading}
+													sortServer
+													onSort={(column, sortDirection) =>
+														handleSort(column, sortDirection)
+													}
+													sortIcon={
+														<>
+															{Object.values(order).includes("desc") ? (
+																<div className='rotate-180'>
+																	<Sort />
+																</div>
+															) : (
+																<div className='rotate-180'>
+																	<Sort />
+																</div>
+															)}
+														</>
+													}
+													progressComponent={
+														<div className='pt-5'>
+															<Loading />
+														</div>
+													}
+												/>
+											</>
+										)}
+									</div>
+								</div>
+							</div>
+						</div>
+					</>
+				)}
 			</div>
 		</>
 	);

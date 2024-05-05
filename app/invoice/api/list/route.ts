@@ -20,12 +20,14 @@ export async function POST(request: Request) {
 
 	let data = null as any;
 
-	const query = await db.m_item.findMany({
+	const query = await db.invoice.findMany({
 		select: {
 			uuid: true,
-			name: true,
 			status: true,
-			description: true
+			description: true,
+			invoice_date: true,
+			invoice_due_date: true,
+			invoice_no: true
 		},
 		where: condition,
 		take,

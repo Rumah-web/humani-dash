@@ -48,6 +48,7 @@ model m_files {
   m_menu_category m_menu_category[]
   m_menu_files    m_menu_files[]
   m_user          m_user[]
+  payment_detail  payment_detail[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -102,6 +103,7 @@ model m_user {
   user_owner     Int?
   m_files        m_files?       @relation(fields: [image], references: [id], onDelete: NoAction, onUpdate: NoAction)
   m_user_roles   m_user_roles[]
+  order          order[]
 }
 
 model m_user_roles {
@@ -116,19 +118,21 @@ model m_user_roles {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model order {
-  id             Int            @id @default(autoincrement())
-  uuid           String         @unique(map: "order_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  order_no       String?
-  notes          String?
-  customer_id    Int?
-  status         String         @default("draft") @db.VarChar(20)
-  created_at     DateTime       @default(now()) @db.Timestamp(6)
-  source         String?        @db.VarChar(50)
-  affiliate_code String?        @db.VarChar(50)
-  user_created   Int?
-  invoice        invoice[]
-  customer       customer?      @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  order_detail   order_detail[]
+  id              Int            @id @default(autoincrement())
+  uuid            String         @unique(map: "order_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  order_no        String?
+  notes           String?
+  customer_id     Int?
+  status          String         @default("draft") @db.VarChar(20)
+  created_at      DateTime       @default(now()) @db.Timestamp(6)
+  source          String?        @db.VarChar(50)
+  affiliate_code  String?        @db.VarChar(50)
+  user_created    Int?
+  status_delivery String         @default("new") @db.VarChar(50)
+  invoice         invoice[]
+  m_user          m_user?        @relation(fields: [affiliate_code], references: [affiliate_code], onDelete: NoAction, onUpdate: NoAction)
+  customer        customer?      @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order_detail    order_detail[]
 }
 
 model order_detail {
@@ -211,6 +215,7 @@ model payment {
   created_at     DateTime         @default(now()) @db.Timestamp(6)
   status         String           @default("draft") @db.VarChar
   uuid           String           @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  paid_date      DateTime?        @db.Timestamp(6)
   invoice        invoice          @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   payment_detail payment_detail[]
 }
@@ -220,8 +225,12 @@ model payment_detail {
   id               Int      @id @default(autoincrement())
   payment_id       Int
   payment_method   String   @default("manual transfer") @db.VarChar
-  proof_of_payment Int?
   nominal          Decimal  @default(0) @db.Decimal
   created_at       DateTime @default(now()) @db.Timestamp(6)
+  status           String   @default("new") @db.VarChar
+  description      String?
+  proof_of_payment Int?
+  uuid             String   @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   payment          payment  @relation(fields: [payment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  m_files          m_files? @relation(fields: [proof_of_payment], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

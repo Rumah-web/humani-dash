@@ -32,8 +32,8 @@ const Menu = () => {
 
 	let tabsDefault = [
 		{ label: "All", value: "all", count: 0 },
-		{ label: "Draft", value: "draft", count: 0 },
-		{ label: "Published", value: "published", count: 0 },
+		{ label: "New", value: "new", count: 0 },
+		{ label: "Paid", value: "paid", count: 0 },
 	];
 
 	const columns = [
@@ -46,12 +46,20 @@ const Menu = () => {
 			omit: true,
 		},
 		{
-			name: "Name",
-			selector: (row: any) => row.name,
-			key: "name",
+			name: "Invoice No",
+			selector: (row: any) => row.invoice_no,
+			key: "invoice_no",
 			type: "text",
 			sortable: true,
-			sortField: "name",
+			sortField: "invoice_no",
+		},
+		{
+			name: "Due Date",
+			selector: (row: any) => row.invoice_due_date,
+			key: "invoice_due_date",
+			type: "text",
+			sortable: true,
+			sortField: "invoice_due_date",
 		},
 		{
 			name: "Description",
@@ -72,7 +80,7 @@ const Menu = () => {
 			format: (row: any) => (
 				<div
 					className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
-						row.status === "draft" ? "bg-danger" : "bg-success"
+						row.status === "finsihed" ? "bg-success" : "bg-danger"
 					}`}>
 					{row.status}
 				</div>
@@ -110,7 +118,7 @@ const Menu = () => {
 	};
 
 	const runTabTotal = async () => {
-		const req = await fetch("/menu-item/api/total-per-status", {
+		const req = await fetch("/invoice/api/total-per-status", {
 			method: "POST",
 			body: JSON.stringify({}),
 			headers: {
@@ -125,7 +133,7 @@ const Menu = () => {
 	};
 
 	const runTotal = async (where: {}) => {
-		const req = await fetch("/menu-item/api/total", {
+		const req = await fetch("/invoice/api/total", {
 			method: "POST",
 			body: JSON.stringify({
 				where,
@@ -147,7 +155,7 @@ const Menu = () => {
 		skip: number,
 		orderBy: {}
 	) => {
-		const req = await fetch("/menu-item/api/list", {
+		const req = await fetch("/invoice/api/list", {
 			method: "POST",
 			body: JSON.stringify({
 				where,
@@ -257,38 +265,21 @@ const Menu = () => {
 		}
 	};
 
-	const onAdd = async () => {
-		const req = await fetch("/menu-item/api/add", {
-			method: "POST",
-			body: JSON.stringify({}),
-			headers: {
-				"content-type": "application/json",
-			},
-		});
-
-		if (req) {
-			const { data } = await req.json();
-			router.push(`/menu-item/form/${data.uuid}`);
-		}
-	};
+	
 
 	const onRowClicked = (row: any, event: any) => {
-		router.push(`/menu-item/form/${row.uuid}`);
+		router.push(`/invoice/form/${row.uuid}`);
 	};
 
 	return (
 		<>
-			<Breadcrumb pageName='Menu Item' />
+			<Breadcrumb pageName='Invoice' />
 			<div className='pb-36'>
 				<>
 					<div id='header'>
 						<div className='flex justify-between'>
 							<div className='w-full flex justify-end'>
-								<div
-									className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
-									onClick={onAdd}>
-									Add
-								</div>
+								
 							</div>
 						</div>
 					</div>
