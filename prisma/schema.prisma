@@ -224,13 +224,13 @@ model payment {
 model payment_detail {
   id               Int      @id @default(autoincrement())
   payment_id       Int
-  payment_method   String   @default("manual transfer") @db.VarChar
+  payment_method   String   @default("manual_transfer") @db.VarChar
   nominal          Decimal  @default(0) @db.Decimal
   created_at       DateTime @default(now()) @db.Timestamp(6)
-  status           String   @default("new") @db.VarChar
+  status           String   @default("draft") @db.VarChar
   description      String?
   proof_of_payment Int?
-  uuid             String   @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  uuid             String   @unique(map: "payment_detail_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   payment          payment  @relation(fields: [payment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   m_files          m_files? @relation(fields: [proof_of_payment], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

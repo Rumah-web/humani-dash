@@ -37,6 +37,7 @@ const Form = () => {
 	const [editorState, setEditorState] = useState(EditorState.createEmpty());
 	const [file, setFile] = useState(null);
 	const [isLoading, setLoading] = useState(true);
+	const [isLoadingPayment, setLoadingPayment] = useState(true);
 	const [istBase64, setBase64] = useState(false);
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
 	const [published, setPublished] = useState(false);
@@ -98,6 +99,10 @@ const Form = () => {
 				setData(data);
 
 				setLoading(false);
+
+				const datas = await runQuery();
+
+				setDatas(datas);
 			}
 		})();
 	}, []);
@@ -232,7 +237,42 @@ const Form = () => {
 		},
 	};
 
-	const onAddPayment = () => {};
+	const onAddPayment = async() => {
+		const add = await fetch("/payment-detail/api/add", {
+			method: "POST",
+			body: JSON.stringify({ uuid: data.payment?.uuid }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		if(add) {
+			const addData = await add.json()
+			router.push(`/invoice/form/payment/${data.payment?.uuid}/${addData.data.uuid}`);
+		}
+		
+	};
+
+	const runQuery = async () => {
+		setLoadingPayment(true);
+		const req = await fetch("/payment-detail/api/list", {
+			method: "POST",
+			body: JSON.stringify({
+				uuid: data.uuid,
+			}),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		if (req) {
+			const { data } = await req.json();
+			setLoadingPayment(false);
+			return data;
+		}
+
+		
+	};
 
 	const handleSort = async (column: any, sortDirection: string) => {
 		if (typeof column.sortField !== "undefined") {
@@ -241,10 +281,10 @@ const Form = () => {
 			setLoading(true);
 			setOrder(order);
 
-			// const data = await runQuery(condition, take, page, order);
+			const datas = await runQuery();
 
-			setDatas([]);
-			setLoading(false);
+			setDatas(datas);
+			setLoadingPayment(false);
 
 			console.log(Object.values(order)[0]);
 		}
@@ -477,7 +517,7 @@ const Form = () => {
 													persistTableHead={true}
 													striped={true}
 													pagination={false}
-													progressPending={isLoading}
+													progressPending={isLoadingPayment}
 													sortServer
 													onSort={(column, sortDirection) =>
 														handleSort(column, sortDirection)
