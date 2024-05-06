@@ -35,7 +35,10 @@ const Menu = () => {
 		{ label: "All", value: "all", count: 0 },
 		{ label: "Draft", value: "draft", count: 0 },
 		{ label: "New", value: "new", count: 0 },
+		{ label: "Process", value: "process", count: 0 },
+		{ label: "Delivery", value: "delivery", count: 0 },
 		{ label: "Finish", value: "finished", count: 0 },
+		{ label: "Cancel", value: "cancel", count: 0 },
 	];
 
 	const columns = [
@@ -78,6 +81,24 @@ const Menu = () => {
 			),
 			sortable: true,
 			sortField: "status",
+		},
+		{
+			name: "Payment",
+			selector: (row: any) => `${row.invoice[0].payment[0].status}`,
+			key: "payment.status",
+			type: "text",
+			sortable: true,
+			sortField: "payment.status",
+			format: (row: any) => (
+				<div
+					className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
+						row.invoice[0].payment[0].status === "paid"
+							? "bg-success"
+							: "bg-danger"
+					}`}>
+					{row.invoice[0].payment[0].status}
+				</div>
+			),
 		},
 	];
 
@@ -201,7 +222,12 @@ const Menu = () => {
 		setActiveTab(value);
 
 		let where = {};
-		if (["draft", "published"].includes(value)) {
+		if (
+			tabsDefault
+				.filter((tab, i) => tab.value !== "all")
+				.map((item, i) => item.value)
+				.includes(value)
+		) {
 			where = {
 				status: value,
 			};

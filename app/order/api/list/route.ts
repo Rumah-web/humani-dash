@@ -27,6 +27,15 @@ export async function POST(request: Request) {
 					name: true,
 					phone: true
 				}
+			},
+			invoice: {
+				include: {
+					payment: {
+						select: {
+							status: true
+						}
+					}
+				}
 			}
 		},
 		where: condition,

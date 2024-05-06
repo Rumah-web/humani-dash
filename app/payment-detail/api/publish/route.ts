@@ -43,6 +43,7 @@ export async function POST(request: Request) {
 					const payment = await tx.payment.update({
 						data: {
 							status: "paid",
+							paid_date: currentDate
 						},
 						where: {
 							id: data.payment_id,
