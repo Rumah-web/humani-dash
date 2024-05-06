@@ -60,7 +60,10 @@ const Menu = () => {
 		},
 		{
 			name: "Customer",
-			selector: (row: any) => `${row.customer.name} (${row.customer.phone})`,
+			selector: (row: any) =>
+				`${
+					row.customer ? `${row.customer.name} (${row.customer.phone})` : `-`
+				}`,
 			key: "customer.id",
 			type: "text",
 			sortable: true,
@@ -84,20 +87,27 @@ const Menu = () => {
 		},
 		{
 			name: "Payment",
-			selector: (row: any) => `${row.invoice[0].payment[0].status}`,
+			selector: (row: any) =>
+				`${row.invoice[0] ? row.invoice[0].payment[0].status : "-"}`,
 			key: "payment.status",
 			type: "text",
 			sortable: true,
 			sortField: "payment.status",
 			format: (row: any) => (
-				<div
-					className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
-						row.invoice[0].payment[0].status === "paid"
-							? "bg-success"
-							: "bg-danger"
-					}`}>
-					{row.invoice[0].payment[0].status}
-				</div>
+				<>
+					{row.invoice[0] ? (
+						<div
+							className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
+								row.invoice[0].payment[0].status === "paid"
+									? "bg-success"
+									: "bg-danger"
+							}`}>
+							{row.invoice[0].payment[0].status}
+						</div>
+					) : (
+						`-`
+					)}
+				</>
 			),
 		},
 	];
