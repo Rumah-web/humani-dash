@@ -82,6 +82,17 @@ const Form = () => {
 		setLoadingUpload(false);
 	};
 
+	const onDeleteFoto = async (id: number) => {
+		if (window.confirm(`Yakin ingin menghapus foto ini ?`)) {
+			setFile(null)
+			await fetch("/menu/api/delete-file", {
+				method: "POST",
+				body: JSON.stringify({uuid: params.uuid}),
+			});
+			
+		}
+	};
+
 	const onUpdateByField = async (data: any) => {
 		if (Object.keys(data).length > 0) {
 			await fetch("/menu/api/update-field", {
@@ -497,7 +508,7 @@ const Form = () => {
 											</div>
 										</>
 									) : (
-										<>
+										<div className='relative'>
 											<FileUploader
 												handleChange={handleChangeFile}
 												name='file'
@@ -543,7 +554,13 @@ const Form = () => {
 													)}
 												</div>
 											</FileUploader>
-										</>
+											{file && <div
+												className='absolute top-0 right-0 p-2 cursor-pointer hover:opacity-70'
+												onClick={() => onDeleteFoto(data.id)}>
+												<IconDelete width='20' />
+											</div>}
+											
+										</div>
 									)}
 								</div>
 								<div className='flex flex-col justify-end'>

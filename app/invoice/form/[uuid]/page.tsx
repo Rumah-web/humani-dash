@@ -392,7 +392,7 @@ const Form = () => {
 										</div>
 									</div>
 								</div>
-								<div className='badge-corner'></div>
+								{data.status === "paid" && <div className='badge-corner'></div>}
 							</div>
 						</div>
 						<div className='flex space-x-4 relative'>

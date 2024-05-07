@@ -5,6 +5,7 @@
     - add order via dashboard
     - dashboard affiliate (share link)
     - registrasi affiliate
+    - role based access
 
 - affiliate step 2
     - payment gateway
