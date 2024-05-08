@@ -132,7 +132,7 @@ const Form = () => {
 
 			const parentOptions = await fetch("/menu-category/api/parent", {
 				method: "POST",
-				body: JSON.stringify({}),
+				body: JSON.stringify({uuid: params.uuid}),
 				headers: {
 					"content-type": "application/json",
 				},

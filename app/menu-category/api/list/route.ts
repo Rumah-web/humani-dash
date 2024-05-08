@@ -10,8 +10,8 @@ export async function POST(request: Request) {
 
 	let condition = {
 		status: {
-			not: "deleted",
-		},
+			not: "deleted"
+		}
 	} as any;
 
 	if (Object.entries(where).length > 0) {

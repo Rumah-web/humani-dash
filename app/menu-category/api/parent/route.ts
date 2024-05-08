@@ -6,6 +6,7 @@ type ResponseData = {
 };
 
 export async function POST(request: Request) {
+    const { uuid } = await request.json();
 	let data = {} as IOptionsSelect[]
     const query = await db.m_menu_category.findMany({
         select: {
@@ -13,7 +14,11 @@ export async function POST(request: Request) {
             name: true
         },
 		where: {
-			parent_id: null
+			parent_id: null,
+            status: 'published',
+            uuid: {
+                not: uuid
+            }
 		}
     })
 
