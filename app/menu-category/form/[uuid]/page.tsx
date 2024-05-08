@@ -37,6 +37,7 @@ const Form = () => {
 	const [published, setPublished] = useState(false);
 	const [data, setData] = useState({} as m_menu_category);
 	const [options, setOptions] = useState([] as IOptionsSelect[]);
+	const [optionsShow, setOptionsShow] = useState([] as IOptionsSelect[]);
 	const [dataField, setDataField] = useState({});
 	const router = useRouter();
 
@@ -132,7 +133,7 @@ const Form = () => {
 
 			const parentOptions = await fetch("/menu-category/api/parent", {
 				method: "POST",
-				body: JSON.stringify({uuid: params.uuid}),
+				body: JSON.stringify({ uuid: params.uuid }),
 				headers: {
 					"content-type": "application/json",
 				},
@@ -146,10 +147,15 @@ const Form = () => {
 					setFile(file);
 				}
 
-				if(parentOptions) {
-					const parentData = await parentOptions.json()
-					setOptions(parentData.data)
+				if (parentOptions) {
+					const parentData = await parentOptions.json();
+					setOptions(parentData.data);
 				}
+
+				setOptionsShow([
+					{ label: "Yes", value: true },
+					{ label: "No", value: false },
+				]);
 
 				setEditorState(
 					EditorState.createWithContent(
@@ -206,6 +212,16 @@ const Form = () => {
 											(opt, i) => opt.value === data.parent_id
 										)}
 										onChange={(e) => onChange("parent_id", e?.value)}
+									/>
+								</div>
+								<div className='flex flex-col space-y-2'>
+									<label htmlFor='m_menu_category_id'>Show In Price Menu</label>
+									<Select
+										options={optionsShow}
+										defaultValue={optionsShow.find(
+											(opt, i) => opt.value === data.is_show
+										)}
+										onChange={(e) => onChange("is_show", e?.value)}
 									/>
 								</div>
 								<div className='flex flex-col space-y-2'>
