@@ -96,14 +96,6 @@ const Menu = () => {
 			sortField: "name",
 		},
 		{
-			name: "Slug",
-			selector: (row: any) => row.slug,
-			key: "slug",
-			type: "text",
-			sortable: true,
-			sortField: "slug",
-		},
-		{
 			name: "Order",
 			selector: (row: any) => row.order,
 			key: "orde",
