@@ -23,20 +23,21 @@ model customer {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model invoice {
-  id               Int       @id @default(autoincrement())
-  uuid             String    @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  order_id         Int?
-  invoice_date     DateTime  @default(now()) @db.Timestamp(6)
-  invoice_due_date DateTime  @default(now()) @db.Timestamp(6)
-  status           String    @default("draft") @db.VarChar(50)
-  total            Decimal   @default(0) @db.Decimal
-  ppn              Decimal   @default(0) @db.Decimal
-  discount         Decimal   @default(0) @db.Decimal
-  delivery_charge  Decimal   @default(0) @db.Decimal
-  description      String?
-  invoice_no       String?
-  order            order?    @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  payment          payment[]
+  id                   Int                    @id @default(autoincrement())
+  uuid                 String                 @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  order_id             Int?
+  invoice_date         DateTime               @default(now()) @db.Timestamp(6)
+  invoice_due_date     DateTime               @default(now()) @db.Timestamp(6)
+  status               String                 @default("draft") @db.VarChar(50)
+  total                Decimal                @default(0) @db.Decimal
+  ppn                  Decimal                @default(0) @db.Decimal
+  discount             Decimal                @default(0) @db.Decimal
+  delivery_charge      Decimal                @default(0) @db.Decimal
+  description          String?
+  invoice_no           String?
+  order                order?                 @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoice_bank_account invoice_bank_account[]
+  payment              payment[]
 }
 
 model m_files {
@@ -47,6 +48,7 @@ model m_files {
   size            Int
   type            String            @db.VarChar(100)
   created_at      DateTime          @default(now()) @db.Timestamp(6)
+  m_bank          m_bank[]
   m_menu_category m_menu_category[]
   m_menu_files    m_menu_files[]
   m_user          m_user[]
@@ -103,10 +105,12 @@ model m_user {
   image          Int?
   status         String         @default("draft") @db.VarChar(30)
   user_owner     Int?
+  bank_account   bank_account[]
   customer       customer[]
   m_files        m_files?       @relation(fields: [image], references: [id], onDelete: NoAction, onUpdate: NoAction)
   m_user_roles   m_user_roles[]
   order          order[]
+  session        session[]
 }
 
 model m_user_roles {
@@ -157,18 +161,21 @@ model order_detail {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model m_menu_category {
-  id          Int      @id @default(autoincrement())
-  uuid        String   @unique(map: "m_menu_category_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name        String   @db.VarChar
-  description String?
-  cover       Int?
-  created_at  DateTime @default(now()) @db.Timestamp(6)
-  status      String   @default("draft") @db.VarChar(50)
-  slug        String?  @unique(map: "m_menu_category_slug")
-  order       Int?
-  is_show     Boolean  @default(false)
-  m_menu      m_menu[]
-  m_files     m_files? @relation(fields: [cover], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                    Int               @id @default(autoincrement())
+  uuid                  String            @unique(map: "m_menu_category_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                  String            @db.VarChar
+  description           String?
+  cover                 Int?
+  created_at            DateTime          @default(now()) @db.Timestamp(6)
+  status                String            @default("draft") @db.VarChar(50)
+  slug                  String?           @unique(map: "m_menu_category_slug")
+  order                 Int?
+  is_show               Boolean           @default(false)
+  parent_id             Int?
+  m_menu                m_menu[]
+  m_files               m_files?          @relation(fields: [cover], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  m_menu_category       m_menu_category?  @relation("m_menu_categoryTom_menu_category", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_m_menu_category m_menu_category[] @relation("m_menu_categoryTom_menu_category")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -260,4 +267,50 @@ model payment_status_history {
   status     String   @default("new") @db.VarChar(50)
   created_at DateTime @default(now()) @db.Timestamp(6)
   payment    payment  @relation(fields: [payment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model bank_account {
+  id                   Int                    @id @default(autoincrement())
+  uuid                 String                 @unique(map: "bank_account_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  bank_id              Int
+  cabang               String?                @db.VarChar(100)
+  account_no           String                 @unique(map: "bank_account_account_no") @db.VarChar(50)
+  user_id              Int?
+  created_at           DateTime               @default(now()) @db.Timestamp(6)
+  updated_at           DateTime               @db.Timestamp(6)
+  account_name         String
+  m_bank               m_bank                 @relation(fields: [bank_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  m_user               m_user?                @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoice_bank_account invoice_bank_account[]
+}
+
+model config {
+  id                Int     @id @default(autoincrement())
+  uuid              String  @unique(map: "config_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  open_registration Boolean @default(false)
+}
+
+model invoice_bank_account {
+  id              Int          @id @default(autoincrement())
+  invoice_id      Int
+  bank_account_id Int
+  bank_account    bank_account @relation(fields: [bank_account_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoice         invoice      @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model m_bank {
+  id           Int            @id @default(autoincrement())
+  name         String         @db.VarChar(100)
+  logo         Int?
+  short_name   String         @db.VarChar(50)
+  uuid         String         @unique(map: "m_bank_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  bank_account bank_account[]
+  m_files      m_files?       @relation(fields: [logo], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model session {
+  id        Int    @id @default(autoincrement())
+  uuid      String @unique(map: "session_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  m_user_id Int
+  m_user    m_user @relation(fields: [m_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

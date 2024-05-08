@@ -20,6 +20,8 @@ import Image from "next/image";
 import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
 import { convertBase64 } from "@/app/lib/helper";
+import Select from "react-select";
+import { IOptionsSelect } from "@/app/type";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -34,6 +36,7 @@ const Form = () => {
 	const [isLoadingUpload, setLoadingUpload] = useState(false);
 	const [published, setPublished] = useState(false);
 	const [data, setData] = useState({} as m_menu_category);
+	const [options, setOptions] = useState([] as IOptionsSelect[]);
 	const [dataField, setDataField] = useState({});
 	const router = useRouter();
 
@@ -81,7 +84,9 @@ const Form = () => {
 	};
 
 	const onChange = async (column: string, value: any) => {
-		const params = { [column]: ['order'].includes(column) ?  parseInt(value) : value };
+		const params = {
+			[column]: ["order"].includes(column) ? parseInt(value) : value,
+		};
 		setData({ ...data, ...params });
 		setDataField(params);
 	};
@@ -125,12 +130,27 @@ const Form = () => {
 				},
 			});
 
+			const parentOptions = await fetch("/menu-category/api/parent", {
+				method: "POST",
+				body: JSON.stringify({}),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+
 			if (req) {
 				const { data, file } = await req.json();
 				setData(data);
+
 				if (file) {
 					setFile(file);
 				}
+
+				if(parentOptions) {
+					const parentData = await parentOptions.json()
+					setOptions(parentData.data)
+				}
+
 				setEditorState(
 					EditorState.createWithContent(
 						ContentState.createFromBlockArray(
@@ -179,12 +199,13 @@ const Form = () => {
 									/>
 								</div>
 								<div className='flex flex-col space-y-2'>
-									<label htmlFor='name'>Slug</label>
-									<input
-										{...register("slug", { required: true })}
-										value={data.slug || ""}
-										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
-										onChange={(e) => onChange("slug", e.target.value)}
+									<label htmlFor='m_menu_category_id'>Parent</label>
+									<Select
+										options={options}
+										defaultValue={options.find(
+											(opt, i) => opt.value === data.parent_id
+										)}
+										onChange={(e) => onChange("parent_id", e?.value)}
 									/>
 								</div>
 								<div className='flex flex-col space-y-2'>
@@ -192,7 +213,7 @@ const Form = () => {
 									<input
 										{...register("order", { required: true })}
 										value={data.order as number}
-										type="number"
+										type='number'
 										className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
 										onChange={(e) => onChange("order", e.target.value)}
 									/>

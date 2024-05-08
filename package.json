@@ -41,6 +41,7 @@
 		"react-jvectormap": "^0.0.16",
 		"react-number-format": "^5.3.1",
 		"react-select": "^5.8.0",
+		"referral-codes": "^3.0.0",
 		"sharp": "^0.33.2",
 		"zod": "^3.22.4"
 	},

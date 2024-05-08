@@ -37,6 +37,11 @@ export async function POST(request: Request) {
 					size: true,
 				},
 			},
+			m_menu_category: {
+				select: {
+					name: true
+				}
+			}
 		},
 		where: condition,
 		take,
@@ -49,6 +54,7 @@ export async function POST(request: Request) {
 			return {
 				...menu,
 				m_files: menu.m_files ? assets_api + "/" + menu.m_files?.uuid : null,
+				parent: menu.m_menu_category ? menu.m_menu_category.name : null,
 			};
 		});
 	}

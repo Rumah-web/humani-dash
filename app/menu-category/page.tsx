@@ -80,6 +80,14 @@ const Menu = () => {
 			omit: true,
 		},
 		{
+			name: "Parent",
+			selector: (row: any) => row.parent,
+			key: "parent_id",
+			type: "text",
+			sortable: false,
+			sortField: "parent_id",
+		},
+		{
 			name: "Name",
 			selector: (row: any) => row.name,
 			key: "name",
