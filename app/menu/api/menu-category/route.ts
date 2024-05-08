@@ -13,6 +13,16 @@ export async function POST(request: Request) {
         select: {
             id: true,
             name: true
+        },
+        where: {
+            status: 'published',
+            parent_id: {
+                not: null
+            },
+            m_menu_category: {
+                status: 'published',
+                is_show: true
+            }
         }
     })
 
