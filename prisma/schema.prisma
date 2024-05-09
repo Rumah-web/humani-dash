@@ -110,7 +110,7 @@ model m_user {
   m_files        m_files?       @relation(fields: [image], references: [id], onDelete: NoAction, onUpdate: NoAction)
   m_user_roles   m_user_roles[]
   order          order[]
-  session        session[]
+  sessions       Session[]
 }
 
 model m_user_roles {
@@ -308,9 +308,12 @@ model m_bank {
   m_files      m_files?       @relation(fields: [logo], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model session {
-  id        Int    @id @default(autoincrement())
-  uuid      String @unique(map: "session_uuid") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  m_user_id Int
-  m_user    m_user @relation(fields: [m_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  expires      DateTime
+  userId       String   @map("user_id") @db.Uuid
+  user         m_user   @relation(fields: [userId], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("sessions")
 }

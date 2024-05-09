@@ -111,6 +111,16 @@ const Menu = () => {
 			sortField: "price",
 		},
 		{
+			name: "Price Promo",
+			selector: (row: any) => row.price_promo,
+			key: "price_promo",
+			type: "number",
+			format: (row: any) =>
+				`Rp. ${row.price_promo.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
+			sortable: true,
+			sortField: "price_promo",
+		},
+		{
 			name: "Status",
 			selector: (row: any) => row.status,
 			key: "status",

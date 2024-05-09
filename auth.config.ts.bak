@@ -1,0 +1,92 @@
+import type { NextAuthConfig } from "next-auth";
+import { encode } from "next-auth/jwt";
+import db from "./prisma/lib/db";
+const { v4: uuidv4 } = require("uuid");
+
+const uuid = uuidv4();
+export const authConfig = (adapter: any) => {
+	return {
+		pages: {
+			signIn: "/auth/signin",
+		},
+		callbacks: {
+			authorized({ auth, request: { nextUrl } }) {
+				const isLoggedIn = !!auth?.user;
+				const isOnDashboard = !nextUrl.pathname.startsWith("/auth/signin");
+
+				if (isOnDashboard) {
+					if (isLoggedIn) return true;
+					return false; // Redirect unauthenticated users to login page
+				} else if (isLoggedIn) {
+					return Response.redirect(new URL("/", nextUrl));
+				}
+				return true;
+			},
+			async signIn({ user, account, profile, email, credentials }) {
+				return true;
+			},
+			async session({ session, token }: any) {
+				console.log("ini session : ", session, token);
+				if (session.user?.name) session.user.name = token.name;
+				if (token.image) session.user.image = token.image;
+				if (token.uuid) session.user.uuid = token.uuid;
+
+				return session;
+			},
+			async jwt({ token, trigger, user }) {
+				const assets_api = process.env.API_ASSETS_HOST + "/view";
+
+				// if (user) {
+				// 	const userSess = user as any
+				// 	const expires = new Date(Date.now() + 60 * 60 * 24 * 30 * 1000);
+				// 	const sessionToken = uuid;
+				// 	const session = await adapter.createSession!({
+				// 		userId: userSess.uuid,
+				// 		sessionToken,
+				// 		expires,
+				// 	});
+
+				// 	token.sessionId = session.sessionToken;
+				// }
+
+				if (token) {
+					const sessID = token.uuid as any;
+
+					console.log("see : ", sessID);
+
+					if (sessID) {
+						const findUser = await adapter.getUser!("1");
+					}
+					// if(!checkSession)
+					// 	return null
+				}
+
+				// * User only available on first run.
+				let newUser = { ...user } as any;
+				if (newUser.uuid) token.uuid = `${newUser.uuid}`;
+
+				if (newUser.image)
+					token.image = `${assets_api}/${newUser.m_files.uuid}`;
+
+				return token;
+			},
+		},
+		// jwt: {
+		// 	maxAge: 60 * 60 * 24 * 30,
+		// 	// async encode(arg) {
+		// 	// 	return (arg.token?.sessionId as string) ?? encode(arg);
+		// 	// },
+		// },
+		events: {
+			async signOut(message: any) {
+				console.log("logout : ", message);
+				await db.session.deleteMany({
+					where: {
+						sessionToken: message.token.sessionId,
+					},
+				});
+			},
+		},
+		providers: [], // Add providers with an empty array for now
+	} satisfies NextAuthConfig;
+};
