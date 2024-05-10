@@ -8,6 +8,9 @@ import Loading from "@/components/Table/Loading";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import NoImage from "@/components/Placeholder/NoImage";
+import { PageContext } from "../context";
+import { ISession } from "../type";
+import Page403 from "@/components/Auth/403";
 
 interface ITabCount {
 	status: string;
@@ -29,6 +32,22 @@ const Menu = () => {
 	);
 	const [condition, setCondition] = useState({} as any);
 	const [order, setOrder] = useState({ id: "desc" } as any);
+
+	const paramsPage = React.useContext(PageContext) as any;
+
+	let session: ISession | null = null;
+
+	if (paramsPage.session) {
+		session = paramsPage.session;
+	}
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	let tabsDefault = [
 		{ label: "All", value: "all", count: 0 },

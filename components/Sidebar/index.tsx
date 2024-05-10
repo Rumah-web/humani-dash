@@ -9,13 +9,25 @@ import { ISession } from "@/app/type";
 interface SidebarProps {
 	sidebarOpen: boolean;
 	setSidebarOpen: (arg: boolean) => void;
-	session: ISession
+	session: ISession;
 }
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 	const trigger = useRef<any>(null);
 	const sidebar = useRef<any>(null);
 
+	const check = (permission: string[]) => {
+		let authorized = false;
+		for (let item of permission) {
+			if (session?.user.roles?.includes(item)) {
+				authorized = true;
+				break;
+			}
+		}
+
+		return authorized;
+	};
+	
 	const menus = [
 		{ label: "Dashboard", icon: <IconDashboard />, url: "/" },
 		{ label: "Analytics", icon: <IconAnalytics />, url: "/chart" },
@@ -23,27 +35,37 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 			label: "Manage Order",
 			icon: <IconOrder />,
 			url: "#",
+			permission: check(["admin"]),
 			items: [
-				{ label: "Order", url: "/order" },
-				{ label: "Invoice", url: "/invoice" },
-				{ label: "Process Order", url: "/order-process" },
+				{
+					label: "Order",
+					url: "/order",
+					permission: check(["admin"]),
+				},
+				{ label: "Invoice", url: "/invoice", permission: check(["admin"]) },
 			],
 		},
 		{
 			label: "Manage Menu",
 			icon: <IconMenu />,
+			permission: check(["admin"]),
 			url: "#",
 			items: [
-				{ label: "Category", url: "/menu-category" },
-				{ label: "Menu", url: "/menu" },
-				{ label: "Item", url: "/menu-item" },
+				{ label: "Category", url: "/menu-category", permission: check(["admin"]) },
+				{ label: "Menu", url: "/menu", permission: check(["admin"]) },
+				{ label: "Item", url: "/menu-item", permission: check(["admin"]) },
 			],
 		},
 	] as IMenu[];
 
 	const others = [
 		{ label: "Media", icon: <>{IconDashboard}</>, url: "/media" },
-		{ label: "Users", icon: <>{IconAnalytics}</>, url: "/users" },
+		{
+			label: "Users",
+			icon: <>{IconAnalytics}</>,
+			url: "/users",
+			permission: check(["admin"]),
+		},
 	] as IMenu[];
 
 	// close on click outside
@@ -61,6 +83,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 		document.addEventListener("click", clickHandler);
 		return () => document.removeEventListener("click", clickHandler);
 	});
+
+	
+
 
 	return (
 		<aside

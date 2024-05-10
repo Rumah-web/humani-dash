@@ -9,7 +9,7 @@ import {
 	convertToRaw,
 } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import Badge from "@/components/Badges";
 import dynamic from "next/dynamic";
@@ -32,6 +32,9 @@ import { Decimal } from "@prisma/client/runtime/library";
 import NoImage from "@/components/Placeholder/NoImage";
 import DataTable from "react-data-table-component";
 import Sort from "@/components/Table/Sort";
+import { PageContext } from "@/app/context";
+import { ISession } from "@/app/type";
+import Page403 from "@/components/Auth/403";
 
 const Form = () => {
 	const [editorState, setEditorState] = useState(EditorState.createEmpty());
@@ -77,6 +80,22 @@ const Form = () => {
 		handleSubmit,
 		formState: { errors },
 	} = useForm();
+
+	const paramsPage = React.useContext(PageContext) as any;
+
+	let session: ISession | null = null;
+
+	if (paramsPage.session) {
+		session = paramsPage.session;
+	}
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	let tabsDefault = [
 		{ label: "Order", value: "order", count: 0 },

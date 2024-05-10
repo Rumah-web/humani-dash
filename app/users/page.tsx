@@ -11,6 +11,9 @@ import NoImage from "@/components/Placeholder/NoImage";
 import { formatLongtDate, formatShorttDate } from "../lib/helper";
 import { m_roles, m_user_roles } from "@prisma/client";
 import Badge from "@/components/Badges";
+import { PageContext } from "../context";
+import { ISession } from "../type";
+import Page403 from "@/components/Auth/403";
 
 interface ITabCount {
 	status: string;
@@ -33,6 +36,22 @@ const Users = () => {
 		[] as { label: string; value: string; count: number }[]
 	);
 	const [userData, setUserData] = useState(null as any);
+
+	const paramsPage = React.useContext(PageContext) as any;
+
+	let session: ISession | null = null;
+
+	if (paramsPage.session) {
+		session = paramsPage.session;
+	}
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	let tabsDefault = [
 		{ label: "All", value: "all", count: 0 },

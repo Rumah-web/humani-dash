@@ -9,7 +9,7 @@ import {
 	convertToRaw,
 } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import Badge from "@/components/Badges";
 import dynamic from "next/dynamic";
@@ -21,7 +21,9 @@ import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
 import { convertBase64 } from "@/app/lib/helper";
 import Select from "react-select";
-import { IOptionsSelect } from "@/app/type";
+import { IOptionsSelect, ISession } from "@/app/type";
+import { PageContext } from "@/app/context";
+import Page403 from "@/components/Auth/403";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -48,6 +50,22 @@ const Form = () => {
 		handleSubmit,
 		formState: { errors },
 	} = useForm();
+
+	const paramsPage = React.useContext(PageContext) as any;
+
+	let session: ISession | null = null;
+
+	if (paramsPage.session) {
+		session = paramsPage.session;
+	}
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 

@@ -2,7 +2,7 @@
 
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import Badge from "@/components/Badges";
 import { useParams } from "next/navigation";
@@ -16,6 +16,9 @@ import CheckboxOne from "@/components/Checkboxes/CheckboxOne";
 import CheckboxTwo from "@/components/Checkboxes/CheckboxTwo";
 import InputPassword from "@/components/Inputs/Password";
 import { convertBase64 } from "@/app/lib/helper";
+import { PageContext } from "@/app/context";
+import { ISession } from "@/app/type";
+import Page403 from "@/components/Auth/403";
 
 const Form = () => {
 	const [file, setFile] = useState(null);
@@ -39,6 +42,22 @@ const Form = () => {
 		handleSubmit,
 		formState: { errors },
 	} = useForm();
+
+	const paramsPage = React.useContext(PageContext) as any;
+
+	let session: ISession | null = null;
+
+	if (paramsPage.session) {
+		session = paramsPage.session;
+	}
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 

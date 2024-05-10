@@ -9,6 +9,9 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import NoImage from "@/components/Placeholder/NoImage";
 import { formatShorttDate } from "../lib/helper";
+import { PageContext } from "../context";
+import { ISession } from "../type";
+import Page403 from "@/components/Auth/403";
 
 interface ITabCount {
 	status: string;
@@ -36,6 +39,22 @@ const Menu = () => {
 		{ label: "New", value: "new", count: 0 },
 		{ label: "Paid", value: "paid", count: 0 },
 	];
+
+	const paramsPage = React.useContext(PageContext) as any;
+
+	let session: ISession | null = null;
+
+	if (paramsPage.session) {
+		session = paramsPage.session;
+	}
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	const columns = [
 		{
@@ -267,8 +286,6 @@ const Menu = () => {
 		}
 	};
 
-	
-
 	const onRowClicked = (row: any, event: any) => {
 		router.push(`/invoice/form/${row.uuid}`);
 	};
@@ -280,9 +297,7 @@ const Menu = () => {
 				<>
 					<div id='header'>
 						<div className='flex justify-between'>
-							<div className='w-full flex justify-end'>
-								
-							</div>
+							<div className='w-full flex justify-end'></div>
 						</div>
 					</div>
 					<div className='flex'>
