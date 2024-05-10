@@ -13,6 +13,7 @@ export default async function Home() {
 
   return (
     <>
+    {JSON.stringify(session)}
       <Statistic />
     </>
   );
