@@ -9,7 +9,7 @@ import {
 	convertToRaw,
 } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Badge from "@/components/Badges";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
@@ -26,8 +26,10 @@ import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
 import { convertBase64 } from "@/app/lib/helper";
 import Select from "react-select";
-import { IOptionsSelect } from "@/app/type";
+import { IOptionsSelect, ISession } from "@/app/type";
 import { IconBoxOpen, IconDelete, IconLoading } from "@/components/Icons";
+import { PageContext } from "@/app/context";
+import Page403 from "@/components/Auth/403";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -59,9 +61,18 @@ const Form = () => {
 	);
 	const [catSelected, setCatSelected] = useState(null as null | IOptionsSelect);
 	const [menu, setMenu] = useState({} as m_menu | null);
-	const [qty, setQty] = useState(0 as number );
+	const [qty, setQty] = useState(0 as number);
 
 	const params = useParams<{ uuid: string }>();
+
+	const paramsPage = React.useContext(PageContext) as any;
+
+	let session: ISession | null = null;
+
+	if(paramsPage.session) {
+		session =paramsPage.session
+	}
+
 
 	const {
 		register,
@@ -298,6 +309,14 @@ const Form = () => {
 			}
 		}
 	};
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	if (isLoading) {
 		return (

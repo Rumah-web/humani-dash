@@ -11,6 +11,7 @@ import NoImage from "@/components/Placeholder/NoImage";
 import { generateOrderNo } from "../lib/helper";
 import { PageContext } from "../context";
 import { ISession } from "../type";
+import Page403 from "@/components/Auth/403";
 
 interface ITabCount {
 	status: string;
@@ -320,6 +321,10 @@ const Order = (props: any) => {
 	const onRowClicked = (row: any, event: any) => {
 		router.push(`/order/form/${row.uuid}`);
 	};
+
+	if(!session?.user.roles?.includes('admin')) {
+		return <><Page403 /></>
+	}
 
 	return (
 		<>
