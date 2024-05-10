@@ -17,7 +17,7 @@ interface ITabCount {
 	};
 }
 
-const Menu = () => {
+const Order = () =>  {
 	const router = useRouter();
 	const [activeTab, setActiveTab] = useState("all");
 	const [datas, setDatas] = useState([]);
@@ -408,4 +408,4 @@ const Menu = () => {
 	);
 };
 
-export default Menu;
+export default Order;
