@@ -4,13 +4,15 @@ import Image from "next/image";
 import { IconAnalytics, IconDashboard, IconMenu, IconOrder } from "../Icons";
 import renderMenu from "./renderMenu";
 import { IMenu } from "@/types/menu";
+import { ISession } from "@/app/type";
 
 interface SidebarProps {
 	sidebarOpen: boolean;
 	setSidebarOpen: (arg: boolean) => void;
+	session: ISession
 }
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 	const trigger = useRef<any>(null);
 	const sidebar = useRef<any>(null);
 

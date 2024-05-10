@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import NoImage from "@/components/Placeholder/NoImage";
 import { generateOrderNo } from "../lib/helper";
+import { PageContext } from "../context";
+import { ISession } from "../type";
 
 interface ITabCount {
 	status: string;
@@ -17,7 +19,7 @@ interface ITabCount {
 	};
 }
 
-const Order = () =>  {
+const Order = (props: any) => {
 	const router = useRouter();
 	const [activeTab, setActiveTab] = useState("all");
 	const [datas, setDatas] = useState([]);
@@ -30,6 +32,14 @@ const Order = () =>  {
 	);
 	const [condition, setCondition] = useState({} as any);
 	const [order, setOrder] = useState({ id: "desc" } as any);
+
+	const params = React.useContext(PageContext) as any;
+
+	let session: ISession | null = null
+
+	if(params.session) {
+		session = params.session
+	}
 
 	let tabsDefault = [
 		{ label: "All", value: "all", count: 0 },
