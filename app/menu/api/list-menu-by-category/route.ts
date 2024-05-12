@@ -12,18 +12,26 @@ export async function POST(request: Request) {
 		select: {
 			id: true,
 			name: true,
+			price: true,
+			price_promo: true,
 		},
 		where: {
 			status: "published",
-            m_menu_category_id: category_id
+			m_menu_category_id: category_id,
 		},
 	});
 
 	if (query) {
 		data = query.map((item, i) => {
+			const price = `${
+				parseInt(item.price.toString()) - parseInt(item.price_promo.toString())
+			}`;
+			const label = `${item.name} - ${` Rp. ${price
+				.toString()
+				.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}`;
 			return {
 				value: item.id,
-				label: item.name,
+				label,
 			};
 		});
 	}
