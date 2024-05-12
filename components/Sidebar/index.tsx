@@ -2,7 +2,7 @@ import React, { act, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { IconAnalytics, IconDashboard, IconMenu, IconOrder } from "../Icons";
-import RenderMenu from "./RenderMenu";
+import Menu from "./Menu";
 import { IMenu } from "@/types/menu";
 import { ISession } from "@/app/type";
 
@@ -134,13 +134,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 				<nav className='mt-5 py-0 px-4 mt-0 lg:px-6'>
 					{/* <!-- Menu Group --> */}
 					<div>
-						{/* {RenderMenu({
-							menus,
-							sidebarOpen,
-							setSidebarOpen,
-							menuLabel: "Menu",
-						})} */}
-						<RenderMenu
+						<Menu
 							menus={menus}
 							sidebarOpen={sidebarOpen}
 							setSidebarOpen={setSidebarOpen}
@@ -150,13 +144,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 
 					{/* <!-- Others Group --> */}
 					<div>
-						{/* {RenderMenu({
-							menus: others,
-							sidebarOpen,
-							setSidebarOpen,
-							menuLabel: "Others",
-						})} */}
-						<RenderMenu
+						<Menu
 							menus={others}
 							sidebarOpen={sidebarOpen}
 							setSidebarOpen={setSidebarOpen}

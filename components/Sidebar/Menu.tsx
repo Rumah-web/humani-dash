@@ -4,7 +4,7 @@ import SidebarLinkGroup from "./SidebarLinkGroup";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const RenderMenu: FC<{
+const Menu: FC<{
 	menus: IMenu[];
 	sidebarOpen: boolean;
 	setSidebarOpen: (arg: boolean) => void;
@@ -169,4 +169,4 @@ const RenderMenu: FC<{
 	);
 };
 
-export default RenderMenu;
+export default Menu;
