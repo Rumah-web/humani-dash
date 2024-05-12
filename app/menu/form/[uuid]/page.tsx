@@ -115,7 +115,8 @@ const Form = () => {
 	};
 
 	const onChange = async (column: string, value: any) => {
-		const params = { [column]: value };
+		const fieldValue = typeof value === "undefined" ? null : value;
+		const params = { [column]: fieldValue };
 		setData({ ...data, ...params });
 		setDataField(params);
 	};
@@ -303,6 +304,8 @@ const Form = () => {
 									<label htmlFor='m_menu_category_id'>Category</label>
 									<Select
 										options={options}
+										isClearable={true}
+										isSearchable={true}
 										defaultValue={options.find(
 											(opt, i) => opt.value === data.m_menu_category_id
 										)}
@@ -380,6 +383,8 @@ const Form = () => {
 															<div className='flex w-full'>
 																<Select
 																	options={itemsOptions}
+																	isClearable={true}
+																	isSearchable={true}
 																	className='w-full'
 																	defaultValue={itemsOptions.find(
 																		(opt, i) => opt.value === item.m_item_id

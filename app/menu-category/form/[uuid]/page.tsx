@@ -59,8 +59,6 @@ const Form = () => {
 		session = paramsPage.session;
 	}
 
-	
-
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const onEditorStateChange = (editorState: any) => {
@@ -97,8 +95,9 @@ const Form = () => {
 	};
 
 	const onChange = async (column: string, value: any) => {
+		const fieldValue = typeof value === "undefined" ? null : value;
 		const params = {
-			[column]: ["order"].includes(column) ? parseInt(value) : value,
+			[column]: ["order"].includes(column) ? parseInt(fieldValue) : fieldValue,
 		};
 		setData({ ...data, ...params });
 		setDataField(params);
@@ -228,6 +227,8 @@ const Form = () => {
 									<label htmlFor='m_menu_category_id'>Parent</label>
 									<Select
 										options={options}
+										isClearable={true}
+										isSearchable={true}
 										defaultValue={options.find(
 											(opt, i) => opt.value === data.parent_id
 										)}

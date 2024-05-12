@@ -110,8 +110,9 @@ const Form = () => {
 	};
 
 	const onChange = async (column: string, value: any) => {
+		const fieldValue = typeof value === "undefined" ? null : value;
 		const params = {
-			[column]: ["order"].includes(column) ? parseInt(value) : value,
+			[column]: ["order"].includes(column) ? parseInt(fieldValue) : fieldValue,
 		};
 		setData({ ...data, ...params });
 		setDataField(params);
@@ -246,6 +247,7 @@ const Form = () => {
 									<label htmlFor='name'>Payment Method</label>
 									<Select
 										options={options}
+										isSearchable={true}
 										defaultValue={options.find(
 											(opt, i) => opt.value === data.payment_method
 										)}

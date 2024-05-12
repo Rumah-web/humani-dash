@@ -113,7 +113,8 @@ const Form = () => {
 	};
 
 	const onChange = async (column: string, value: any) => {
-		const params = { [column]: value };
+		const fieldValue = typeof value === "undefined" ? null : value;
+		const params = { [column]: fieldValue };
 		setData({ ...data, ...params });
 		setDataField(params);
 	};
@@ -269,6 +270,8 @@ const Form = () => {
 									<label htmlFor='email'>Roles</label>
 									<Select
 										options={roles}
+										isClearable={true}
+										isSearchable={true}
 										onChange={onChangeRoles}
 										onMenuClose={onMenuClose}
 										closeMenuOnSelect={false}

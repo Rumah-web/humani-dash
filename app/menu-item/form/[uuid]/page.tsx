@@ -92,8 +92,9 @@ const Form = () => {
 	};
 
 	const onChange = async (column: string, value: any) => {
+		const fieldValue = typeof value === "undefined" ? null : value;
 		const params = {
-			[column]: ["order"].includes(column) ? parseInt(value) : value,
+			[column]: ["order"].includes(column) ? parseInt(fieldValue) : fieldValue,
 		};
 		setData({ ...data, ...params });
 		setDataField(params);

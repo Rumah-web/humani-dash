@@ -69,10 +69,9 @@ const Form = () => {
 
 	let session: ISession | null = null;
 
-	if(paramsPage.session) {
-		session =paramsPage.session
+	if (paramsPage.session) {
+		session = paramsPage.session;
 	}
-
 
 	const {
 		register,
@@ -95,8 +94,9 @@ const Form = () => {
 	};
 
 	const onChange = async (column: string, value: any) => {
+		const fieldValue = typeof value === "undefined" ? null : value;
 		const params = {
-			[column]: ["order"].includes(column) ? parseInt(value) : value,
+			[column]: ["order"].includes(column) ? parseInt(fieldValue) : fieldValue,
 		};
 		setData({ ...data, ...params });
 		setDataField(params);
@@ -348,6 +348,8 @@ const Form = () => {
 									<label htmlFor='name'>Customer</label>
 									<Select
 										options={options}
+										isClearable={true}
+										isSearchable={true}
 										defaultValue={options.find(
 											(opt, i) => opt.value === data.customer_id
 										)}
@@ -358,6 +360,8 @@ const Form = () => {
 									<label htmlFor='name'>Affiliate</label>
 									<Select
 										options={affiliate}
+										isClearable={true}
+										isSearchable={true}
 										defaultValue={affiliate.find(
 											(opt, i) => opt.value === data.affiliate_code
 										)}
@@ -391,6 +395,8 @@ const Form = () => {
 												<label htmlFor='m_menu_category'>Pilih Category</label>
 												<Select
 													options={catOptions}
+													isClearable={true}
+													isSearchable={true}
 													className='w-full'
 													placeholder='-- Select --'
 													value={catSelected}
@@ -407,6 +413,8 @@ const Form = () => {
 												<label htmlFor='m_menu_category'>Pilih Menu</label>
 												<Select
 													options={menuOptions}
+													isClearable={true}
+													isSearchable={true}
 													className='w-full'
 													placeholder='-- Select --'
 													value={menuSelected}
