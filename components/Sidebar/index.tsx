@@ -27,7 +27,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 
 		return authorized;
 	};
-	
+
 	const menus = [
 		{ label: "Dashboard", icon: <IconDashboard />, url: "/" },
 		{ label: "Analytics", icon: <IconAnalytics />, url: "/chart" },
@@ -51,7 +51,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 			permission: check(["admin"]),
 			url: "#",
 			items: [
-				{ label: "Category", url: "/menu-category", permission: check(["admin"]) },
+				{
+					label: "Category",
+					url: "/menu-category",
+					permission: check(["admin"]),
+				},
 				{ label: "Menu", url: "/menu", permission: check(["admin"]) },
 				{ label: "Item", url: "/menu-item", permission: check(["admin"]) },
 			],
@@ -83,9 +87,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 		document.addEventListener("click", clickHandler);
 		return () => document.removeEventListener("click", clickHandler);
 	});
-
-	
-
 
 	return (
 		<aside
@@ -133,22 +134,34 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 				<nav className='mt-5 py-0 px-4 mt-0 lg:px-6'>
 					{/* <!-- Menu Group --> */}
 					<div>
-						{RenderMenu({
+						{/* {RenderMenu({
 							menus,
 							sidebarOpen,
 							setSidebarOpen,
 							menuLabel: "Menu",
-						})}
+						})} */}
+						<RenderMenu
+							menus={menus}
+							sidebarOpen={sidebarOpen}
+							setSidebarOpen={setSidebarOpen}
+							menuLabel={"menu"}
+						/>
 					</div>
 
 					{/* <!-- Others Group --> */}
 					<div>
-						{RenderMenu({
+						{/* {RenderMenu({
 							menus: others,
 							sidebarOpen,
 							setSidebarOpen,
 							menuLabel: "Others",
-						})}
+						})} */}
+						<RenderMenu
+							menus={others}
+							sidebarOpen={sidebarOpen}
+							setSidebarOpen={setSidebarOpen}
+							menuLabel={"Others"}
+						/>
 					</div>
 				</nav>
 				{/* <!-- Sidebar Menu --> */}
