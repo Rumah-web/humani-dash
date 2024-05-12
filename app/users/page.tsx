@@ -45,14 +45,6 @@ const Users = () => {
 		session = paramsPage.session;
 	}
 
-	if (!session?.user.roles?.includes("admin")) {
-		return (
-			<>
-				<Page403 />
-			</>
-		);
-	}
-
 	let tabsDefault = [
 		{ label: "All", value: "all", count: 0 },
 		{ label: "Draft", value: "draft", count: 0 },
@@ -133,7 +125,11 @@ const Users = () => {
 			format: (row: any) => (
 				<div
 					className={`text-xs text-white px-2 py-0.5 rounded-lg capitalize ${
-						row.status === "draft" ? "bg-danger" : (row.status === "active" ? "bg-success" : "bg-warning")
+						row.status === "draft"
+							? "bg-danger"
+							: row.status === "active"
+							? "bg-success"
+							: "bg-warning"
 					}`}>
 					{row.status}
 				</div>
@@ -340,7 +336,7 @@ const Users = () => {
 		const req = await fetch("/users/api/add", {
 			method: "POST",
 			body: JSON.stringify({
-				owner: userData.user.uuid
+				owner: userData.user.uuid,
 			}),
 			headers: {
 				"content-type": "application/json",
@@ -396,6 +392,14 @@ const Users = () => {
 			</>
 		);
 	};
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	return (
 		<>

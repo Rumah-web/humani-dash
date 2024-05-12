@@ -66,14 +66,6 @@ const Form = () => {
 		session = paramsPage.session;
 	}
 
-	if (!session?.user.roles?.includes("admin")) {
-		return (
-			<>
-				<Page403 />
-			</>
-		);
-	}
-
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const onEditorStateChange = (editorState: any) => {
@@ -102,12 +94,11 @@ const Form = () => {
 
 	const onDeleteFoto = async (id: number) => {
 		if (window.confirm(`Yakin ingin menghapus foto ini ?`)) {
-			setFile(null)
+			setFile(null);
 			await fetch("/menu/api/delete-file", {
 				method: "POST",
-				body: JSON.stringify({uuid: params.uuid}),
+				body: JSON.stringify({ uuid: params.uuid }),
 			});
-			
 		}
 	};
 
@@ -264,6 +255,14 @@ const Form = () => {
 			},
 		});
 	};
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	if (isLoading) {
 		return (
@@ -572,12 +571,13 @@ const Form = () => {
 													)}
 												</div>
 											</FileUploader>
-											{file && <div
-												className='absolute top-0 right-0 p-2 cursor-pointer hover:opacity-70'
-												onClick={() => onDeleteFoto(data.id)}>
-												<IconDelete width='20' />
-											</div>}
-											
+											{file && (
+												<div
+													className='absolute top-0 right-0 p-2 cursor-pointer hover:opacity-70'
+													onClick={() => onDeleteFoto(data.id)}>
+													<IconDelete width='20' />
+												</div>
+											)}
 										</div>
 									)}
 								</div>

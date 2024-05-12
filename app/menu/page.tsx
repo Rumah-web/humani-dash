@@ -42,14 +42,6 @@ const Menu = () => {
 		session = paramsPage.session;
 	}
 
-	if (!session?.user.roles?.includes("admin")) {
-		return (
-			<>
-				<Page403 />
-			</>
-		);
-	}
-
 	let tabsDefault = [
 		{ label: "All", value: "all", count: 0 },
 		{ label: "Draft", value: "draft", count: 0 },
@@ -135,7 +127,9 @@ const Menu = () => {
 			key: "price_promo",
 			type: "number",
 			format: (row: any) =>
-				`Rp. ${row.price_promo.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
+				`Rp. ${row.price_promo
+					.toString()
+					.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
 			sortable: true,
 			sortField: "price_promo",
 		},
@@ -185,9 +179,9 @@ const Menu = () => {
 	};
 
 	const renderRowsComponent = ({ data }: any) => {
-		console.log('render : ', data)
+		console.log("render : ", data);
 		return (
-			<div className="border-b border-[#e0e0e0] bg-[#fafafa]">
+			<div className='border-b border-[#e0e0e0] bg-[#fafafa]'>
 				<div className='flex flex-col py-4 px-16 space-y-4'>
 					<div className='flex'>
 						<div className='w-1/6'>Minimal Order</div>
@@ -199,7 +193,9 @@ const Menu = () => {
 					</div>
 					<div className='flex'>
 						<div className='w-1/6'>Price Promo</div>
-						<div>{`Rp. ${data.price_promo.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}</div>
+						<div>{`Rp. ${data.price_promo
+							.toString()
+							.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}</div>
 					</div>
 					<div className='flex'>
 						<div className='w-1/6'>Description</div>
@@ -376,6 +372,14 @@ const Menu = () => {
 	const onRowClicked = (row: any, event: any) => {
 		router.push(`/menu/form/${row.uuid}`);
 	};
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	return (
 		<>

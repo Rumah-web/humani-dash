@@ -51,14 +51,6 @@ const Form = () => {
 		session = paramsPage.session;
 	}
 
-	if (!session?.user.roles?.includes("admin")) {
-		return (
-			<>
-				<Page403 />
-			</>
-		);
-	}
-
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const getRoles = async () => {
@@ -220,6 +212,14 @@ const Form = () => {
 	const onSetNewPassword = (val: boolean) => {
 		setNewPassword(val);
 	};
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	if (isLoading) {
 		return (

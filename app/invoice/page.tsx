@@ -48,14 +48,6 @@ const Menu = () => {
 		session = paramsPage.session;
 	}
 
-	if (!session?.user.roles?.includes("admin")) {
-		return (
-			<>
-				<Page403 />
-			</>
-		);
-	}
-
 	const columns = [
 		{
 			name: "UUID",
@@ -289,6 +281,14 @@ const Menu = () => {
 	const onRowClicked = (row: any, event: any) => {
 		router.push(`/invoice/form/${row.uuid}`);
 	};
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	return (
 		<>

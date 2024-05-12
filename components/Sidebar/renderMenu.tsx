@@ -4,7 +4,7 @@ import SidebarLinkGroup from "./SidebarLinkGroup";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const renderMenu: FC<{
+const RenderMenu: FC<{
 	menus: IMenu[];
 	sidebarOpen: boolean;
 	setSidebarOpen: (arg: boolean) => void;
@@ -142,7 +142,7 @@ const renderMenu: FC<{
 															.filter((item, i) => isShow(item.permission))
 															.map((item, i) => {
 																return (
-																	<li>
+																	<li key={i}>
 																		<Link
 																			href={item.url}
 																			className={`first-letter:group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
@@ -169,4 +169,4 @@ const renderMenu: FC<{
 	);
 };
 
-export default renderMenu;
+export default RenderMenu;

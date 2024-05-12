@@ -89,14 +89,6 @@ const Form = () => {
 		session = paramsPage.session;
 	}
 
-	if (!session?.user.roles?.includes("admin")) {
-		return (
-			<>
-				<Page403 />
-			</>
-		);
-	}
-
 	let tabsDefault = [
 		{ label: "Order", value: "order", count: 0 },
 		{ label: "Payment", value: "payment", count: 0 },
@@ -311,6 +303,14 @@ const Form = () => {
 			console.log(Object.values(order)[0]);
 		}
 	};
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	if (isLoading) {
 		return (

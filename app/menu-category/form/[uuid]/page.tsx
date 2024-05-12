@@ -59,13 +59,7 @@ const Form = () => {
 		session = paramsPage.session;
 	}
 
-	if (!session?.user.roles?.includes("admin")) {
-		return (
-			<>
-				<Page403 />
-			</>
-		);
-	}
+	
 
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 
@@ -186,6 +180,14 @@ const Form = () => {
 			}
 		})();
 	}, []);
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	if (isLoading) {
 		return (

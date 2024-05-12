@@ -41,14 +41,6 @@ const Menu = () => {
 		session = paramsPage.session;
 	}
 
-	if (!session?.user.roles?.includes("admin")) {
-		return (
-			<>
-				<Page403 />
-			</>
-		);
-	}
-
 	let tabsDefault = [
 		{ label: "All", value: "all", count: 0 },
 		{ label: "Draft", value: "draft", count: 0 },
@@ -294,6 +286,14 @@ const Menu = () => {
 	const onRowClicked = (row: any, event: any) => {
 		router.push(`/menu-item/form/${row.uuid}`);
 	};
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	return (
 		<>

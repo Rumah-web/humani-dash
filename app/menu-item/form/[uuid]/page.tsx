@@ -56,14 +56,6 @@ const Form = () => {
 		session = paramsPage.session;
 	}
 
-	if (!session?.user.roles?.includes("admin")) {
-		return (
-			<>
-				<Page403 />
-			</>
-		);
-	}
-
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const onEditorStateChange = (editorState: any) => {
@@ -100,7 +92,9 @@ const Form = () => {
 	};
 
 	const onChange = async (column: string, value: any) => {
-		const params = { [column]: ['order'].includes(column) ?  parseInt(value) : value };
+		const params = {
+			[column]: ["order"].includes(column) ? parseInt(value) : value,
+		};
 		setData({ ...data, ...params });
 		setDataField(params);
 	};
@@ -161,6 +155,14 @@ const Form = () => {
 			}
 		})();
 	}, []);
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	if (isLoading) {
 		return (

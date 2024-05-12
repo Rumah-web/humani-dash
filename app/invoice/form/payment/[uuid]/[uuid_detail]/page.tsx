@@ -63,14 +63,6 @@ const Form = () => {
 		session = paramsPage.session;
 	}
 
-	if (!session?.user.roles?.includes("admin")) {
-		return (
-			<>
-				<Page403 />
-			</>
-		);
-	}
-
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const onEditorStateChange = (editorState: any) => {
@@ -126,7 +118,6 @@ const Form = () => {
 	};
 
 	const onChangeState = async (status: string) => {
-		
 		await fetch("/payment-detail/api/change-state", {
 			method: "POST",
 			body: JSON.stringify({ uuid: params.uuid, status }),
@@ -216,6 +207,14 @@ const Form = () => {
 			}
 		})();
 	}, []);
+
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
+	}
 
 	if (isLoading) {
 		return (
