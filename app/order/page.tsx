@@ -306,7 +306,7 @@ const Order = (props: any) => {
 	const onAdd = async () => {
 		const req = await fetch("/order/api/add", {
 			method: "POST",
-			body: JSON.stringify({}),
+			body: JSON.stringify({user_created: session?.user.uuid}),
 			headers: {
 				"content-type": "application/json",
 			},

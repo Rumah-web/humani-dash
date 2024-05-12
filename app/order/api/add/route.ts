@@ -6,18 +6,26 @@ type ResponseData = {
 };
 
 export async function POST(request: Request) {
+	const { user_created } = await request.json();
 	let data = null;
 
 	const findMenu = await db.order.findFirst({
 		where: {
 			status: "draft",
+			user_created,
 		},
 	});
 
 	if (findMenu) {
 		data = findMenu;
 	} else {
-		const create = await db.order.create({});
+		const create = await db.order.create({
+			data: {
+				user_created,
+				notes: "",
+				source: "affiliate",
+			},
+		});
 
 		if (create) {
 			const update = await db.order.update({
@@ -26,8 +34,6 @@ export async function POST(request: Request) {
 				},
 				data: {
 					order_no: generateOrderNo(create.id.toString()),
-					notes: '',
-					source: 'affiliate'
 				},
 				where: {
 					id: create.id,
