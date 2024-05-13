@@ -26,7 +26,7 @@ const Menu: FC<{
 		};
 		document.addEventListener("keydown", keyHandler);
 		return () => document.removeEventListener("keydown", keyHandler);
-	});
+	}, []);
 
 	useEffect(() => {
 		localStorage.setItem("sidebar-expanded", sidebarExpanded.toString());
@@ -83,6 +83,7 @@ const Menu: FC<{
 						return (
 							<SidebarLinkGroup
 								key={i}
+								index={i}
 								activeCondition={active}>
 								{(handleClick, open) => {
 									return (

@@ -67,7 +67,7 @@ const Form = () => {
 	);
 	const [dataField, setDataField] = useState({});
 	const router = useRouter();
-	const [activeTab, setActiveTab] = useState("order");
+	const [activeTab, setActiveTab] = useState("invoice");
 	const [tabs, setTabs] = useState(
 		[] as { label: string; value: string; count: number }[]
 	);
@@ -90,7 +90,7 @@ const Form = () => {
 	}
 
 	let tabsDefault = [
-		{ label: "Order", value: "order", count: 0 },
+		{ label: "Invoice", value: "invoice", count: 0 },
 		{ label: "Payment", value: "payment", count: 0 },
 	];
 
@@ -349,14 +349,14 @@ const Form = () => {
 				})}
 			</div>
 			<div className='pb-36 space-y-4'>
-				{activeTab === "order" && (
+				{activeTab === "invoice" && (
 					<>
 						<div className='flex space-x-4 relative'>
 							<div className='flex w-full flex-col space-y-6'>
 								<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
 									<div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
 										<h3 className='font-medium text-black dark:text-white'>
-											Order Information
+											Invoice Information
 										</h3>
 									</div>
 									<div className='flex flex-col gap-5.5 p-6.5'>
@@ -419,7 +419,7 @@ const Form = () => {
 								<div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
 									<div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
 										<h3 className='font-medium text-black dark:text-white'>
-											Order Detail
+											Invoice Detail
 										</h3>
 									</div>
 									<div className='flex flex-col gap-5.5 p-6.5 w-full'>

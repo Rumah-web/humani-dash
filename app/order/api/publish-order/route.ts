@@ -49,7 +49,7 @@ export async function POST(request: Request) {
                         ppn,
                         discount,
                         delivery_charge,
-                        description: "di kirim tgl 2 mei 2024 jam 5 sore",
+                        description: order.notes,
                         invoice_no: generateInvoiceNo(order.order_no),
                     },
                 });

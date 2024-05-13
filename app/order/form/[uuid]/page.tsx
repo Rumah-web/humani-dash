@@ -24,21 +24,32 @@ import {
 } from "@prisma/client";
 import draftToHtml from "draftjs-to-html";
 import { useRouter } from "next/navigation";
-import { convertBase64 } from "@/app/lib/helper";
+import { convertBase64, formatShorttDate, formatTime } from "@/app/lib/helper";
 import Select from "react-select";
 import { IOptionsSelect, ISession } from "@/app/type";
 import { IconBoxOpen, IconDelete, IconLoading } from "@/components/Icons";
 import { PageContext } from "@/app/context";
 import Page403 from "@/components/Auth/403";
 
+import "react-datetime/css/react-datetime.css";
+import Datetime from "react-datetime";
+import { cx, css } from "@emotion/css";
+
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
 	{ ssr: false }
 );
 
+type DeliveryDateTime = Date | null;
+
+type DeliveryDateTimeValue =
+	| DeliveryDateTime
+	| [DeliveryDateTime, DeliveryDateTime];
+
 const Form = () => {
 	const [editorState, setEditorState] = useState(EditorState.createEmpty());
 	const [isLoading, setLoading] = useState(true);
+	const [isPublish, setPublish] = useState(false);
 	const [published, setPublished] = useState(false);
 	const [data, setData] = useState(
 		{} as order & {
@@ -61,7 +72,10 @@ const Form = () => {
 	);
 	const [catSelected, setCatSelected] = useState(null as null | IOptionsSelect);
 	const [menu, setMenu] = useState({} as m_menu | null);
-	const [qty, setQty] = useState(0 as number);
+	const [qty, setQty] = useState("" as string | number);
+	const [deliveryDateTimeValue, onDeliveryDateTimeValue] = useState<Date>(
+		new Date()
+	);
 
 	const params = useParams<{ uuid: string }>();
 
@@ -80,7 +94,7 @@ const Form = () => {
 	} = useForm();
 
 	const onEditorStateChange = (editorState: any) => {
-		setEditorState(editorState);
+		if (editorState) setEditorState(editorState);
 	};
 
 	const onUpdateByField = async (data: any) => {
@@ -94,7 +108,12 @@ const Form = () => {
 	};
 
 	const onChange = async (column: string, value: any) => {
-		const fieldValue = typeof value === "undefined" ? null : value;
+		const fieldValue =
+			typeof value === "undefined"
+				? null
+				: column.endsWith("_date")
+				? new Date(value)
+				: value;
 		const params = {
 			[column]: ["order"].includes(column) ? parseInt(fieldValue) : fieldValue,
 		};
@@ -115,14 +134,6 @@ const Form = () => {
 
 		router.push(`/order`);
 	};
-
-	useEffect(() => {
-		const timeoutIdDesc = setTimeout(async () => {
-			const raw = convertToRaw(editorState.getCurrentContent());
-			await onUpdateByField({ notes: draftToHtml(raw) });
-		}, 500);
-		return () => clearTimeout(timeoutIdDesc);
-	}, [editorState, 500]);
 
 	useEffect(() => {
 		const timeoutId = setTimeout(async () => {
@@ -176,6 +187,8 @@ const Form = () => {
 			if (req) {
 				const { data, file } = await req.json();
 				setData(data);
+
+				if (data.status !== "draft") setPublish(true);
 
 				const customerData = await reCustomers.json();
 				if (customerData) {
@@ -231,7 +244,7 @@ const Form = () => {
 		setAdditem(false);
 		setMenuSelected(null);
 		setMenu(null);
-		setQty(0);
+		setQty("");
 	};
 
 	const onDeleteItem = async (id: number) => {
@@ -251,7 +264,7 @@ const Form = () => {
 	const onChangeCategory = async (val: IOptionsSelect) => {
 		setMenuSelected(null);
 		setMenu(null);
-		setQty(0);
+		setQty("");
 		setCatSelected(val);
 
 		const reqMenu = await fetch("/menu/api/list-menu-by-category", {
@@ -270,7 +283,7 @@ const Form = () => {
 
 	const onSelectMenu = async (val: IOptionsSelect) => {
 		setMenuSelected(val);
-		setQty(0);
+		setQty("");
 
 		const reqMenu = await fetch("/menu/api/by-id", {
 			method: "POST",
@@ -290,22 +303,29 @@ const Form = () => {
 		setQty(val);
 	};
 
+	const onSaveEditor = async () => {
+		const raw = convertToRaw(editorState.getCurrentContent());
+		await onUpdateByField({ notes: draftToHtml(raw) });
+	};
+
 	const onPublishOrder = async () => {
-		const publishOrder = await fetch("/order/api/publish-order", {
-			method: "POST",
-			body: JSON.stringify({ uuid: data.uuid }),
-			headers: {
-				"content-type": "application/json",
-			},
-		});
+		if (window.confirm(`Pastikan data order Anda sudah sesuai ?`)) {
+			const publishOrder = await fetch("/order/api/publish-order", {
+				method: "POST",
+				body: JSON.stringify({ uuid: data.uuid }),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
 
-		if (publishOrder) {
-			const res = await publishOrder.json();
+			if (publishOrder) {
+				const res = await publishOrder.json();
 
-			if (res.success) {
-				router.push(`/order`);
-			} else {
-				alert("Terjadi Kesalahan");
+				if (res.success) {
+					router.push(`/order`);
+				} else {
+					alert("Terjadi Kesalahan");
+				}
 			}
 		}
 	};
@@ -346,38 +366,75 @@ const Form = () => {
 							<div className='flex flex-col gap-5.5 p-6.5'>
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Customer</label>
-									<Select
-										options={options}
-										isClearable={true}
-										isSearchable={true}
-										defaultValue={options.find(
-											(opt, i) => opt.value === data.customer_id
-										)}
-										onChange={(e) => onChange("customer_id", e?.value)}
-									/>
+									{isPublish ? (
+										<>
+											{
+												options.find(
+													(item, i) => item.value === data.customer_id
+												)?.label
+											}
+										</>
+									) : (
+										<>
+											<Select
+												options={options}
+												isClearable={true}
+												isSearchable={true}
+												isDisabled={isPublish}
+												defaultValue={options.find(
+													(opt, i) => opt.value === data.customer_id
+												)}
+												onChange={(e) => onChange("customer_id", e?.value)}
+											/>
+										</>
+									)}
 								</div>
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Affiliate</label>
-									<Select
-										options={affiliate}
-										isClearable={true}
-										isSearchable={true}
-										defaultValue={affiliate.find(
-											(opt, i) => opt.value === data.affiliate_code
-										)}
-										onChange={(e) => onChange("affiliate_code", e?.value)}
-									/>
+									{isPublish ? (
+										<>{
+											affiliate.find(
+												(item, i) => item.value === data.affiliate_code
+											)?.label
+										}</>
+									) : (
+										<>
+											<Select
+												options={affiliate}
+												isClearable={true}
+												isSearchable={true}
+												isDisabled={isPublish}
+												defaultValue={affiliate.find(
+													(opt, i) => opt.value === data.affiliate_code
+												)}
+												onChange={(e) => onChange("affiliate_code", e?.value)}
+											/>
+										</>
+									)}
 								</div>
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Notes</label>
-									<Editor
-										editorState={editorState}
-										editorStyle={{ height: "400px" }}
-										toolbarClassName='toolbarClassName'
-										wrapperClassName='wrapperClassName'
-										editorClassName='px-4 border border-[#dfdfdf] bg-white'
-										onEditorStateChange={onEditorStateChange}
-									/>
+									{isPublish ? (
+										<>
+											<div
+												dangerouslySetInnerHTML={{
+													__html: data.notes ? data.notes : "",
+												}}
+											/>
+										</>
+									) : (
+										<>
+											<Editor
+												editorState={editorState}
+												editorStyle={{ height: "400px" }}
+												toolbarClassName='toolbarClassName'
+												wrapperClassName='wrapperClassName'
+												editorClassName='px-4 border border-[#dfdfdf] bg-white'
+												onEditorStateChange={onEditorStateChange}
+												onBlur={onSaveEditor}
+											/>
+										</>
+									)}
 								</div>
 							</div>
 						</div>
@@ -388,71 +445,79 @@ const Form = () => {
 								</h3>
 							</div>
 							<div className='flex flex-col gap-10 p-6.5'>
-								<div className='flex flex-col space-y-4 w-full'>
-									<div className='w-full flex items-center space-x-4'>
-										<div className='flex flex-col space-y-4 w-full'>
-											<div className='flex flex-col gap-2'>
-												<label htmlFor='m_menu_category'>Pilih Category</label>
-												<Select
-													options={catOptions}
-													isClearable={true}
-													isSearchable={true}
-													className='w-full'
-													placeholder='-- Select --'
-													value={catSelected}
-													id='m_menu_category'
-													onChange={(e) =>
-														onChangeCategory({
-															label: e?.label,
-															value: e?.value,
-														})
-													}
-												/>
-											</div>
-											<div className='flex flex-col gap-2'>
-												<label htmlFor='m_menu_category'>Pilih Menu</label>
-												<Select
-													options={menuOptions}
-													isClearable={true}
-													isSearchable={true}
-													className='w-full'
-													placeholder='-- Select --'
-													value={menuSelected}
-													onChange={(e) =>
-														onSelectMenu({ value: e?.value, label: e?.label })
-													}
-												/>
-											</div>
-											<div className='flex flex-col gap-2'>
-												<label htmlFor='m_menu_category'>Qty</label>
-												<input
-													type='number'
-													className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-1 px-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
-													min={menu?.min_qty}
-													max={menu?.max_qty}
-													// defaultValue={qty}
-													onChange={(e) =>
-														onChangeQty(parseInt(e.target.value))
-													}
-												/>
-												<span className='text-danger text-xs'>
-													{menu?.min_qty && `Minimal order ${menu.min_qty} pcs`}
-												</span>
-											</div>
-											<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
-												<div className='w-full flex justify-start'>
-													<div
-														onClick={() => onAddItem()}
-														className={`${
-															isAdditem ? "opacity-50" : ""
-														} px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70`}>
-														{isAdditem ? <IconLoading /> : "Add Detail"}
+								{!isPublish && (
+									<div className='flex flex-col space-y-4 w-full'>
+										<div className='w-full flex items-center space-x-4'>
+											<div className='flex flex-col space-y-4 w-full'>
+												<div className='flex flex-col gap-2'>
+													<label htmlFor='m_menu_category'>
+														Pilih Category
+													</label>
+													<Select
+														options={catOptions}
+														isClearable={true}
+														isSearchable={true}
+														className='w-full'
+														placeholder='-- Select --'
+														value={catSelected}
+														isDisabled={isPublish}
+														id='m_menu_category'
+														onChange={(e) =>
+															onChangeCategory({
+																label: e?.label,
+																value: e?.value,
+															})
+														}
+													/>
+												</div>
+												<div className='flex flex-col gap-2'>
+													<label htmlFor='m_menu_category'>Pilih Menu</label>
+													<Select
+														options={menuOptions}
+														isClearable={true}
+														isSearchable={true}
+														isDisabled={isPublish}
+														className='w-full'
+														placeholder='-- Select --'
+														value={menuSelected}
+														onChange={(e) =>
+															onSelectMenu({ value: e?.value, label: e?.label })
+														}
+													/>
+												</div>
+												<div className='flex flex-col gap-2'>
+													<label htmlFor='m_menu_category'>Qty</label>
+													<input
+														type='number'
+														className='w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-1 px-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+														min={menu?.min_qty}
+														max={menu?.max_qty}
+														disabled={isPublish}
+														defaultValue={qty}
+														onChange={(e) =>
+															onChangeQty(parseInt(e.target.value))
+														}
+													/>
+													<span className='text-danger text-xs'>
+														{menu?.min_qty &&
+															`Minimal order ${menu.min_qty} pcs`}
+													</span>
+												</div>
+												<div className='flex md:flex-row flex-col md:space-y-0 space-y-2 md:space-x-2 space-x-0 justify-between'>
+													<div className='w-full flex justify-start'>
+														<div
+															onClick={() => onAddItem()}
+															className={`${
+																isAdditem ? "opacity-50" : ""
+															} px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70`}>
+															{isAdditem ? <IconLoading /> : "Add Detail"}
+														</div>
 													</div>
 												</div>
 											</div>
 										</div>
 									</div>
-								</div>
+								)}
 								<div className='flex flex-col space-y-4 w-full'>
 									{data.order_detail && data.order_detail.length > 0 ? (
 										<>
@@ -513,6 +578,41 @@ const Form = () => {
 								</h3>
 							</div>
 							<div className='flex flex-col gap-5.5 p-6.5'>
+								<div className='flex flex-col gap-2'>
+									<label htmlFor='m_menu_category'>Waktu Pengiriman</label>
+									{isPublish ? (
+										<div className='flex space-x-2'>
+											<div>
+												{data.delivery_date &&
+													formatShorttDate(data.delivery_date)}
+											</div>
+											<div>
+												{data.delivery_date &&
+													`${formatTime(data.delivery_date)}`}
+											</div>
+										</div>
+									) : (
+										<>
+											<Datetime
+												input={true}
+												value={
+													data.delivery_date ? new Date(data.delivery_date) : ""
+												}
+												className={cx(
+													`w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-1 px-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`,
+													css`
+														input {
+															width: 100%;
+														}
+													`
+												)}
+												onChange={(e) => {
+													onChange("delivery_date", e.toString());
+												}}
+											/>
+										</>
+									)}
+								</div>
 								<div className='flex space-x-2 justify-between'>
 									<label htmlFor='name'>Status</label>
 									<Badge
@@ -528,7 +628,7 @@ const Form = () => {
 												published ? "opacity-70 cursor-wait" : ""
 											}`}
 											onClick={() => onPublishOrder()}>
-											Publish
+											Buat Invoice
 										</button>
 									)}
 

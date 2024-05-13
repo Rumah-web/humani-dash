@@ -120,6 +120,18 @@ export function formatShorttDate(dateParams: Date) {
 	return tanggal + " " + bulan + " " + tahun;
 }
 
+export function formatTime(dateParams: Date) {
+	const date = new Date(dateParams);
+
+	// current hours
+	let hours = date.getHours().toString().padStart(2, "0")
+
+	// current minutes
+	let minutes = date.getMinutes().toString().padStart(2, "0")
+
+	return `${hours}:${minutes} WIB`
+}
+
 export const resizeImage = async (
 	dir: string,
 	width: number,

@@ -63,10 +63,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, session }: SidebarProps) => {
 	] as IMenu[];
 
 	const others = [
-		{ label: "Media", icon: <>{IconDashboard}</>, url: "/media" },
+		{ label: "Media", icon: <IconDashboard />, url: "/media" },
 		{
 			label: "Users",
-			icon: <>{IconAnalytics}</>,
+			icon: <IconAnalytics />,
 			url: "/users",
 			permission: check(["admin"]),
 		},

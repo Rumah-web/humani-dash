@@ -69,7 +69,6 @@ const Form = () => {
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const onEditorStateChange = (editorState: any) => {
-		console.log("editorState : ", editorState);
 		if (editorState) setEditorState(editorState);
 	};
 
@@ -132,7 +131,7 @@ const Form = () => {
 			},
 		});
 
-		const updateItems = await update.json();
+		await update.json();
 	};
 
 	const onChangeState = async (status: string) => {

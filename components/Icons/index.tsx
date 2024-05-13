@@ -98,6 +98,9 @@ const IconBoxOpen = (props: any) => {
 	if (typeof width === "undefined") {
 		width = 20;
 	}
+	if (typeof height === "undefined") {
+		height = 20;
+	}
 
 	return (
 		<svg
@@ -118,6 +121,9 @@ const IconDashboard = (props: any) => {
 	let { width, height } = props;
 	if (typeof width === "undefined") {
 		width = 20;
+	}
+	if (typeof height === "undefined") {
+		height = 20;
 	}
 	return (
 		<svg
@@ -152,6 +158,9 @@ const IconAnalytics = (props: any) => {
 	if (typeof width === "undefined") {
 		width = 20;
 	}
+	if (typeof height === "undefined") {
+		height = 20;
+	}
 	return (
 		<svg
 			width={`${width}px`}
@@ -177,6 +186,9 @@ const IconOrder = (props: any) => {
 	if (typeof width === "undefined") {
 		width = 20;
 	}
+	if (typeof height === "undefined") {
+		height = 20;
+	}
 	return (
 		<svg
 			width={`${width}px`}
@@ -197,6 +209,9 @@ const IconMenu = (props: any) => {
 	let { width, height } = props;
 	if (typeof width === "undefined") {
 		width = 20;
+	}
+	if (typeof height === "undefined") {
+		height = 20;
 	}
 	return (
 		<svg
@@ -675,5 +690,5 @@ export {
 	IconAnalytics,
 	IconOrder,
 	IconMenu,
-	Icon403
+	Icon403,
 };
