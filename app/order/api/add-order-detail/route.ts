@@ -22,7 +22,8 @@ export async function POST(request: Request) {
 	});
 
 	if (parent && dataMenu) {
-		const total = qty * parseInt(dataMenu.price as any);
+		const price = parseInt(dataMenu.price as any) - parseInt(dataMenu.price_promo as any)
+		const total = qty * price;
 
 		try {
 			await prisma?.$transaction(async (tx) => {
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
 						order_id: parent.id,
 						m_menu_id: dataMenu?.id,
 						menu_name: dataMenu?.name,
-						menu_price: dataMenu?.price,
+						menu_price: price,
 						qty,
 						total,
 						notes: "-",
