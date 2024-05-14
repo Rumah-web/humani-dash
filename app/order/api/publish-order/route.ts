@@ -46,9 +46,17 @@ export async function POST(request: Request) {
 					: undefined;
 
 				if (invoice_due_date && invoice_due_date <= currentDate) {
-                    // check jika invoice due date lebih kecil atau sama dengan tgl sekarang
-                    invoice_due_date = currentDate
+					// check jika invoice due date lebih kecil atau sama dengan tgl sekarang
+					invoice_due_date = currentDate;
 				}
+
+				// create history
+				await tx.order_status_history.create({
+					data: {
+						order_id: order.id,
+						status: "new",
+					},
+				});
 
 				const invoice = await tx.invoice.create({
 					data: {
