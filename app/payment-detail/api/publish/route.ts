@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 					const payment = await tx.payment.update({
 						data: {
 							status: "paid",
-							paid_date: currentDate
+							paid_date: currentDate,
 						},
 						where: {
 							id: data.payment_id,
@@ -66,6 +66,13 @@ export async function POST(request: Request) {
 								},
 								where: {
 									id: inv.order_id,
+								},
+							});
+
+							await tx.order_status_history.create({
+								data: {
+									order_id: inv.order_id,
+									status: "new",
 								},
 							});
 						}

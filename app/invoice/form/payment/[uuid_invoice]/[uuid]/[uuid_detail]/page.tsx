@@ -47,7 +47,7 @@ const Form = () => {
 	const [dataField, setDataField] = useState({});
 	const router = useRouter();
 
-	const params = useParams<{ uuid: string; uuid_detail: string }>();
+	const params = useParams<{ uuid_invoice: string; uuid: string; uuid_detail: string }>();
 
 	const {
 		register,
@@ -230,7 +230,10 @@ const Form = () => {
 
 	return (
 		<>
-			<Breadcrumb pageName='Create' />
+			<Breadcrumb
+				pageName='Payment'
+				breadLinks={[{ label: "Invoice", url: `/invoice/form/${params.uuid_invoice}` }]}
+			/>
 			<div className='pb-36'>
 				<form
 					onSubmit={handleSubmit((data) => console.log(data))}

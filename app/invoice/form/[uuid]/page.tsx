@@ -253,7 +253,7 @@ const Form = () => {
 		if (add) {
 			const addData = await add.json();
 			router.push(
-				`/invoice/form/payment/${data.payment?.uuid}/${addData.data.uuid}`
+				`/invoice/form/payment/${data.uuid}/${data.payment?.uuid}/${addData.data.uuid}`
 			);
 		}
 	};
