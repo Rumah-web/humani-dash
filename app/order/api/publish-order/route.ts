@@ -11,6 +11,7 @@ export async function POST(request: Request) {
 	const currentDate = new Date();
 
 	let success = false as boolean;
+    let message = 'Failed' as string
 
     try {
         await prisma?.$transaction(async (tx) => {
@@ -72,11 +73,13 @@ export async function POST(request: Request) {
             }
         });
         success = true;
+        message = 'Success'
     } catch (error) {
         success = false
     }
 
 	return Response.json({
 		success,
+        message
 	});
 }

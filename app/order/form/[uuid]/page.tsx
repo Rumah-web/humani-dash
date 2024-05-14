@@ -35,6 +35,10 @@ import "react-datetime/css/react-datetime.css";
 import Datetime from "react-datetime";
 import { cx, css } from "@emotion/css";
 
+import { Bounce, ToastContainer, toast } from "react-toastify";
+
+import "react-toastify/dist/ReactToastify.css";
+
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
 	{ ssr: false }
@@ -51,6 +55,10 @@ const Form = () => {
 	const [isLoading, setLoading] = useState(true);
 	const [isPublish, setPublish] = useState(false);
 	const [published, setPublished] = useState(false);
+	const [itemMenuEdit, setItemMenuEdit] = useState(
+		null as null | { id: number; order_detail_id: number }
+	);
+	const [isEditItemMenu, setEditItemMenu] = useState(false);
 	const [data, setData] = useState(
 		{} as order & {
 			order_detail: Partial<
@@ -67,10 +75,16 @@ const Form = () => {
 	const [detailOptions, setDetailOptions] = useState([] as IOptionsSelect[]);
 	const [catOptions, setCatOptions] = useState([] as IOptionsSelect[]);
 	const [menuOptions, setMenuOptions] = useState([] as IOptionsSelect[]);
+	const [menuItemOptions, setMenuItemOptions] = useState(
+		[] as IOptionsSelect[]
+	);
 	const [menuSelected, setMenuSelected] = useState(
 		null as null | IOptionsSelect
 	);
 	const [catSelected, setCatSelected] = useState(null as null | IOptionsSelect);
+	const [menuItemSelected, setMenuItemSelected] = useState(
+		null as null | IOptionsSelect
+	);
 	const [menu, setMenu] = useState({} as m_menu | null);
 	const [qty, setQty] = useState("" as string | number);
 	const [deliveryDateTimeValue, onDeliveryDateTimeValue] = useState<Date>(
@@ -322,12 +336,87 @@ const Form = () => {
 				const res = await publishOrder.json();
 
 				if (res.success) {
+					toast(res.message, {
+						type: "success",
+					});
 					router.push(`/order`);
 				} else {
 					alert("Terjadi Kesalahan");
 				}
 			}
 		}
+	};
+
+	const onEditItemMenu = async (id_detail: number, id_detail_item: number) => {
+		if (!isEditItemMenu) {
+			const req = await fetch("/order/api/list-menu-item", {
+				method: "POST",
+				body: JSON.stringify({}),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+
+			if (req) {
+				const dataMenu = await req.json();
+				setMenuItemOptions(dataMenu.data);
+			}
+		}
+
+		setItemMenuEdit({ id: id_detail, order_detail_id: id_detail_item });
+		setEditItemMenu(true);
+	};
+
+	const onCancelEditItemMenu = () => {
+		setMenuItemSelected(null);
+		setItemMenuEdit(null);
+	};
+	const onSelectMenuItem = (val: IOptionsSelect) => {
+		console.log(val);
+		setMenuItemSelected(val);
+	};
+
+	const onSaveEditItemMenu = async (id: number) => {
+		const update = await fetch("/order/api/update-menu-item", {
+			method: "POST",
+			body: JSON.stringify({ id, name: menuItemSelected?.label }),
+			headers: {
+				"content-type": "application/json",
+			},
+		});
+
+		if (update) {
+			const resUpdate = await update.json();
+			if (resUpdate.success) {
+				toast(resUpdate.message, {
+					type: "success",
+				});
+
+				const order_detail = data.order_detail.map((order_detail, i) => {
+					const order_detail_menu_item =
+						order_detail.order_detail_menu_item &&
+						order_detail.order_detail_menu_item.map(
+							(order_detail_menu_item, i) => {
+								return {
+									...order_detail_menu_item,
+									...{
+										name:
+											order_detail_menu_item.id === id
+												? menuItemSelected?.label
+												: order_detail_menu_item.name,
+									},
+								};
+							}
+						);
+					return { ...order_detail, order_detail_menu_item };
+				});
+
+				setData({ ...data, order_detail });
+			}
+		}
+
+		setMenuItemSelected(null);
+		setItemMenuEdit(null);
 	};
 
 	if (!session?.user.roles?.includes("admin")) {
@@ -392,11 +481,13 @@ const Form = () => {
 								<div className='flex flex-col space-y-2'>
 									<label htmlFor='name'>Affiliate</label>
 									{isPublish ? (
-										<>{
-											affiliate.find(
-												(item, i) => item.value === data.affiliate_code
-											)?.label
-										}</>
+										<>
+											{
+												affiliate.find(
+													(item, i) => item.value === data.affiliate_code
+												)?.label
+											}
+										</>
 									) : (
 										<>
 											<Select
@@ -493,7 +584,7 @@ const Form = () => {
 														min={menu?.min_qty}
 														max={menu?.max_qty}
 														disabled={isPublish}
-														defaultValue={qty}
+														// value={qty}
 														onChange={(e) =>
 															onChangeQty(parseInt(e.target.value))
 														}
@@ -528,7 +619,16 @@ const Form = () => {
 														className='w-full flex items-start space-x-4'>
 														<div className='flex'>{`${i + 1}.`}</div>
 														<div className='flex flex-col space-y-2 w-full'>
-															{item.menu_name}
+															<div className='flex'>
+																<span>{item.menu_name}</span>
+																<span className='px-2'>-</span>
+																<span>
+																	{item.menu_price &&
+																		` Rp. ${item.menu_price
+																			.toString()
+																			.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}
+																</span>
+															</div>
 															<div>
 																{item.order_detail_menu_item &&
 																	item.order_detail_menu_item?.length > 0 && (
@@ -538,9 +638,69 @@ const Form = () => {
 																					return (
 																						<div
 																							key={i}
-																							className='px-0 flex space-x-2'>
+																							className='px-0 flex space-x-2 cursor-pointer mb-2'>
 																							<div>{`${i + 1}.`}</div>
-																							<div>{detail.name}</div>
+																							<div className='flex space-x-4  w-full items-center'>
+																								{itemMenuEdit &&
+																								itemMenuEdit.id === item.id &&
+																								itemMenuEdit.order_detail_id ===
+																									detail.id ? (
+																									<>
+																										<div className='w-2/3'>
+																											<Select
+																												options={
+																													menuItemOptions
+																												}
+																												isClearable={true}
+																												isSearchable={true}
+																												className='w-full'
+																												placeholder='-- Select --'
+																												defaultValue={menuItemOptions.find(
+																													(opt, i) =>
+																														opt.label ===
+																														detail.name
+																												)}
+																												onChange={(e) =>
+																													onSelectMenuItem({
+																														value: e?.value,
+																														label: e?.label,
+																													})
+																												}
+																											/>
+																										</div>
+																										<div
+																											className='text-xs'
+																											onClick={() =>
+																												onSaveEditItemMenu(
+																													detail.id
+																												)
+																											}>
+																											Done
+																										</div>
+																										<div
+																											className='text-xs'
+																											onClick={
+																												onCancelEditItemMenu
+																											}>
+																											Cancel
+																										</div>
+																									</>
+																								) : (
+																									<>
+																										<div>{detail.name}</div>
+																										<div
+																											className='text-xs'
+																											onClick={() => {
+																												onEditItemMenu(
+																													detail.order_detail_id,
+																													detail.id
+																												);
+																											}}>
+																											Edit
+																										</div>
+																									</>
+																								)}
+																							</div>
 																						</div>
 																					);
 																				}

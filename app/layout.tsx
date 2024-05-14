@@ -5,6 +5,7 @@ import Content from "@/components/Content";
 import { auth } from "@/auth";
 import { PageContext } from "./context";
 import { ISession } from "./type";
+import ToastProvider from "@/components/ToastProvider";
 
 export default async function RootLayout({
 	children,
@@ -22,7 +23,9 @@ export default async function RootLayout({
 	return (
 		<html lang='en'>
 			<body suppressHydrationWarning={true}>
-				<Content params={params}>{children}</Content>
+				<Content params={params}>
+					<ToastProvider>{children}</ToastProvider>
+				</Content>
 			</body>
 		</html>
 	);

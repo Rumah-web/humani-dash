@@ -12,7 +12,11 @@ export async function POST(request: Request) {
 		include: {
 			order_detail: {
 				include: {
-					order_detail_menu_item: true
+					order_detail_menu_item: {
+						orderBy: {
+							id: 'asc'
+						}
+					}
 				}
 			},
 		},
