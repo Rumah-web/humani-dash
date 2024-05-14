@@ -10,8 +10,8 @@ import { PageContext } from "../context";
 import { ISession } from "../type";
 import Page403 from "@/components/Auth/403";
 import Link from "next/link";
-import { IconLoading } from "@/components/Icons";
-import { formatShorttDate } from "../lib/helper";
+import { IconHistory, IconLoading } from "@/components/Icons";
+import { formatShorttDate, formatTime } from "../lib/helper";
 
 interface ITabCount {
 	status: string;
@@ -86,7 +86,8 @@ const Order = (props: any) => {
 			selector: (row: any) => row.delivery_date,
 			key: "delivery_date",
 			type: "text",
-			format: (row: any) => row.delivery_date ? formatShorttDate(row.delivery_date) : undefined,
+			format: (row: any) =>
+				row.delivery_date ? formatShorttDate(row.delivery_date) : undefined,
 			sortable: true,
 			sortField: "delivery_date",
 		},
@@ -153,6 +154,66 @@ const Order = (props: any) => {
 			sortable: false,
 		},
 	];
+
+	const renderRowsComponent = ({ data }: any) => {
+		console.log("render : ", data);
+		return (
+			<div className='border-b border-[#e0e0e0] bg-[#fafafa]'>
+				<div className='flex flex-col py-4 px-16 space-y-4'>
+					<div className='flex items-center space-x-8'>
+						<div className='w-1/6'>
+							<div className='text-center'>Proses Order</div>
+							<Link
+								href={``}
+								className='justify-center underline cursor-pointer hover:opacity-60 flex'>
+								[update]
+							</Link>
+						</div>
+
+						{data.order_status_history &&
+						data.order_status_history.length > 0 ? (
+							<>
+								<ol className='relative border-s border-gray-200 dark:border-gray-700'>
+									{data.order_status_history.map((history: any, i: number) => {
+										return (
+											<li
+												className='mb-10 ms-6'
+												key={i}>
+												<span className='absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -start-3 ring-8 ring-white dark:ring-gray-900 dark:bg-blue-900'>
+													<IconHistory />
+												</span>
+												<div className='flex space-x-4 items-center'>
+													<h3 className='flex items-center capitalize mb-1 text-base font-semibold text-gray-900 dark:text-white'>
+														{history.status}
+													</h3>
+													{i === 0 && (
+														<div className='h-fit text-xs text-white px-2 py-0.5 rounded-lg capitalize bg-warning'>
+															New
+														</div>
+													)}
+												</div>
+
+												<time className='block mb-2 text-sm font-normal flex space-x-2 leading-none text-darkgray dark:text-darkgray'>
+													<span>{`${formatShorttDate(
+														history.created_at
+													)}`}</span>
+													<span>{`${formatTime(history.created_at)}`}</span>
+												</time>
+											</li>
+										);
+									})}
+								</ol>
+							</>
+						) : (
+							<>
+								<div>Sedang dalam proses</div>
+							</>
+						)}
+					</div>
+				</div>
+			</div>
+		);
+	};
 
 	const customStyles = {
 		head: {
@@ -423,6 +484,8 @@ const Order = (props: any) => {
 								pagination
 								paginationTotalRows={total}
 								progressPending={isLoading}
+								expandableRows={true}
+								expandableRowsComponent={renderRowsComponent}
 								paginationServer
 								onChangeRowsPerPage={(newPerPage, page) =>
 									handlePerRowsChange(newPerPage, page)

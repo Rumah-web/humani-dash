@@ -36,6 +36,15 @@ export async function POST(request: Request) {
 						}
 					}
 				}
+			},
+			order_status_history: {
+				select: {
+					status: true,
+					created_at: true,
+				},
+				orderBy: {
+					created_at: 'desc'
+				}
 			}
 		},
 		where: condition,

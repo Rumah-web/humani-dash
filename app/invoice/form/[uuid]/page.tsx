@@ -406,10 +406,9 @@ const Form = () => {
 															<div>{`${i + 1}.`}</div>
 															<div className='flex flex-row w-full justify-between'>
 																<div className='flex w-2/5'>
-																	{order.menu_name}
+																	{order.menu_name} &nbsp; [{` ${order.qty} Pax `}]
 																</div>
-																<div className='flex w-1/5'>{`Qty ${order.qty}`}</div>
-																<div className='flex-1'>{`Notes ${order.notes}`}</div>
+																{/* <div className='flex w-1/5 justify-end'>{`${order.qty} Pax`}</div> */}
 															</div>
 														</div>
 														<div
