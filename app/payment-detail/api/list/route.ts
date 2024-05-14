@@ -9,14 +9,11 @@ type ResponseData = {
 export async function POST(request: Request) {
 	const assets_api = process.env.API_ASSETS_HOST + "/view";
 	const { uuid } = await request.json();
-	let data = {} as payment_detail[];
+	let data = [] as payment_detail[];
 
 	const payment = await db.payment.findFirst({
 		where: {
 			uuid,
-			// status: {
-			// 	not: "paid",
-			// },
 		},
 	});
 

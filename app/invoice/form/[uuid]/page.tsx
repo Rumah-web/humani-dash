@@ -111,9 +111,7 @@ const Form = () => {
 
 				setLoading(false);
 
-				const datas = await runQuery();
-				console.log("asas : ", datas);
-
+				const datas = await runQuery(data.payment.uuid);
 				setDatas(datas);
 			}
 		})();
@@ -156,7 +154,7 @@ const Form = () => {
 								src={`${row.m_files.path}?width=200`}
 								width={100}
 								height={100}
-								alt={row.name}
+								alt={row.m_files.path}
 								priority={true}
 								unoptimized
 								className='w-24'
@@ -182,16 +180,12 @@ const Form = () => {
 			selector: (row: any) => row.payment_method,
 			key: "payment_method",
 			type: "text",
-			sortable: true,
-			sortField: "payment_method",
 		},
 		{
 			name: "Description",
 			selector: (row: any) => row.description,
 			key: "description",
 			type: "text",
-			sortable: true,
-			sortField: "description",
 			format: (row: any) => (
 				<div dangerouslySetInnerHTML={{ __html: row.description }} />
 			),
@@ -203,8 +197,6 @@ const Form = () => {
 			type: "number",
 			format: (row: any) =>
 				`Rp. ${row.nominal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
-			sortable: true,
-			sortField: "nominal",
 		},
 		{
 			name: "Status",
@@ -219,8 +211,6 @@ const Form = () => {
 					{row.status}
 				</div>
 			),
-			sortable: true,
-			sortField: "status",
 		},
 	];
 
@@ -268,12 +258,12 @@ const Form = () => {
 		}
 	};
 
-	const runQuery = async () => {
+	const runQuery = async (uuid: string) => {
 		setLoadingPayment(true);
 		const req = await fetch("/payment-detail/api/list", {
 			method: "POST",
 			body: JSON.stringify({
-				uuid: data.uuid,
+				uuid,
 			}),
 			headers: {
 				"content-type": "application/json",
@@ -284,23 +274,6 @@ const Form = () => {
 			const { data } = await req.json();
 			setLoadingPayment(false);
 			return data;
-		}
-	};
-
-	const handleSort = async (column: any, sortDirection: string) => {
-		if (typeof column.sortField !== "undefined") {
-			const order = { [column.sortField]: sortDirection };
-
-			setLoading(true);
-			setOrder(order);
-
-			const datas = await runQuery();
-
-			console.log("hallo : ", datas);
-			setDatas(datas);
-			setLoadingPayment(false);
-
-			console.log(Object.values(order)[0]);
 		}
 	};
 
@@ -520,7 +493,6 @@ const Form = () => {
 											</div>
 										</div>
 									</div>
-									{/* <div className='flex flex-col gap-3 p-6.5 w-full'></div> */}
 								</div>
 							</div>
 						</div>
@@ -555,23 +527,6 @@ const Form = () => {
 													striped={true}
 													pagination={false}
 													progressPending={isLoadingPayment}
-													sortServer
-													onSort={(column, sortDirection) =>
-														handleSort(column, sortDirection)
-													}
-													sortIcon={
-														<>
-															{Object.values(order).includes("desc") ? (
-																<div className='rotate-180'>
-																	<Sort />
-																</div>
-															) : (
-																<div className='rotate-180'>
-																	<Sort />
-																</div>
-															)}
-														</>
-													}
 													progressComponent={
 														<div className='pt-5'>
 															<Loading />
