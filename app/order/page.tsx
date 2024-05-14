@@ -86,7 +86,7 @@ const Order = (props: any) => {
 			selector: (row: any) => row.delivery_date,
 			key: "delivery_date",
 			type: "text",
-			format: (row: any) => formatShorttDate(row.delivery_date),
+			format: (row: any) => row.delivery_date ? formatShorttDate(row.delivery_date) : undefined,
 			sortable: true,
 			sortField: "delivery_date",
 		},

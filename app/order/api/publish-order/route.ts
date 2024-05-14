@@ -50,14 +50,6 @@ export async function POST(request: Request) {
 					invoice_due_date = currentDate;
 				}
 
-				// create history
-				await tx.order_status_history.create({
-					data: {
-						order_id: order.id,
-						status: "new",
-					},
-				});
-
 				const invoice = await tx.invoice.create({
 					data: {
 						order_id: order.id,
