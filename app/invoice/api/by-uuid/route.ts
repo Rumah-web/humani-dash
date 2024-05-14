@@ -11,7 +11,11 @@ export async function POST(request: Request) {
 	const assets_api = process.env.API_ASSETS_HOST + "/view";
 
 	let data = {} as invoice & {
-		payment: { total: Decimal | undefined; uuid: string | undefined; status: string | undefined };
+		payment: {
+			total: Decimal | undefined;
+			uuid: string | undefined;
+			status: string | undefined;
+		};
 	};
 	let result = await db.invoice.findFirst({
 		include: {
@@ -19,7 +23,11 @@ export async function POST(request: Request) {
 				include: {
 					order_detail: {
 						include: {
-							order_detail_menu_item: true,
+							order_detail_menu_item: {
+								orderBy: {
+									id: "asc",
+								},
+							},
 						},
 					},
 					customer: true,

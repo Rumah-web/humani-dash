@@ -6,12 +6,12 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Sort from "@/components/Table/Sort";
 import Loading from "@/components/Table/Loading";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import NoImage from "@/components/Placeholder/NoImage";
-import { generateOrderNo } from "../lib/helper";
 import { PageContext } from "../context";
 import { ISession } from "../type";
 import Page403 from "@/components/Auth/403";
+import Link from "next/link";
+import { IconLoading } from "@/components/Icons";
+import { formatShorttDate } from "../lib/helper";
 
 interface ITabCount {
 	status: string;
@@ -26,6 +26,7 @@ const Order = (props: any) => {
 	const [datas, setDatas] = useState([]);
 	const [total, setTotal] = useState(0);
 	const [isLoading, setLoading] = useState(true);
+	const [isLoadingAdd, setLoadingAdd] = useState(false);
 	const [page, setPage] = useState(0);
 	const [take, setTake] = useState(10);
 	const [tabs, setTabs] = useState(
@@ -36,10 +37,10 @@ const Order = (props: any) => {
 
 	const params = React.useContext(PageContext) as any;
 
-	let session: ISession | null = null
+	let session: ISession | null = null;
 
-	if(params.session) {
-		session = params.session
+	if (params.session) {
+		session = params.session;
 	}
 
 	let tabsDefault = [
@@ -81,6 +82,15 @@ const Order = (props: any) => {
 			sortField: "customer.id",
 		},
 		{
+			name: "Delivery",
+			selector: (row: any) => row.delivery_date,
+			key: "delivery_date",
+			type: "text",
+			format: (row: any) => formatShorttDate(row.delivery_date),
+			sortable: true,
+			sortField: "delivery_date",
+		},
+		{
 			name: "Status",
 			selector: (row: any) => row.status,
 			key: "status",
@@ -120,6 +130,27 @@ const Order = (props: any) => {
 					)}
 				</>
 			),
+		},
+		{
+			name: "Invoice",
+			selector: (row: any) => row.invoice,
+			type: "text",
+			format: (row: any) => (
+				<>
+					{row.invoice && row.invoice.length > 0 ? (
+						<>
+							<Link
+								href={`/invoice/form/${row.invoice[0].uuid}`}
+								className='underline text-sm'>
+								Lihat Invoice
+							</Link>
+						</>
+					) : (
+						<>-</>
+					)}
+				</>
+			),
+			sortable: false,
 		},
 	];
 
@@ -304,9 +335,10 @@ const Order = (props: any) => {
 	};
 
 	const onAdd = async () => {
+		setLoadingAdd(true);
 		const req = await fetch("/order/api/add", {
 			method: "POST",
-			body: JSON.stringify({user_created: session?.user.uuid}),
+			body: JSON.stringify({ user_created: session?.user.uuid }),
 			headers: {
 				"content-type": "application/json",
 			},
@@ -316,14 +348,19 @@ const Order = (props: any) => {
 			const { data } = await req.json();
 			router.push(`/order/form/${data.uuid}`);
 		}
+		setLoadingAdd(false);
 	};
 
 	const onRowClicked = (row: any, event: any) => {
 		router.push(`/order/form/${row.uuid}`);
 	};
 
-	if(!session?.user.roles?.includes('admin')) {
-		return <><Page403 /></>
+	if (!session?.user.roles?.includes("admin")) {
+		return (
+			<>
+				<Page403 />
+			</>
+		);
 	}
 
 	return (
@@ -337,7 +374,7 @@ const Order = (props: any) => {
 								<div
 									className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
 									onClick={onAdd}>
-									Add
+									{isLoadingAdd ? <IconLoading /> : `Add`}
 								</div>
 							</div>
 						</div>

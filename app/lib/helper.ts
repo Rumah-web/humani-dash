@@ -167,7 +167,7 @@ export const generateInvoiceNo = (val: string | null) => {
 };
 
 export const invoiceDueDate = (start_date: Date) => {
-	const dueDate = start_date.setDate(start_date.getDate() + 7);
+	const dueDate = start_date.setDate(start_date.getDate() - 2);
 
 	return new Date(dueDate);
 };

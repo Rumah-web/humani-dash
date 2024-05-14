@@ -423,7 +423,7 @@ const Form = () => {
 										</h3>
 									</div>
 									<div className='flex flex-col gap-5.5 p-6.5 w-full'>
-										<div className='flex flex-1 w-full'>
+										<div className='flex flex-col w-full'>
 											{data.order?.order_detail.map((order, i) => {
 												return (
 													<div
@@ -442,7 +442,7 @@ const Form = () => {
 														<div
 															className={`flex px-4 py-2 py-4 px-6.5 ${
 																i + 1 !== data.order?.order_detail.length
-																	? `border-b border-stroke dark:border-strokedark`
+																	? ``
 																	: ``
 															}`}>
 															<div className='flex flex-col w-full'>

@@ -55,6 +55,7 @@ const Form = () => {
 	const [isLoading, setLoading] = useState(true);
 	const [isPublish, setPublish] = useState(false);
 	const [published, setPublished] = useState(false);
+	const [loadingInvoice, setLoadingInvoice] = useState(false);
 	const [itemMenuEdit, setItemMenuEdit] = useState(
 		null as null | { id: number; order_detail_id: number }
 	);
@@ -324,6 +325,7 @@ const Form = () => {
 
 	const onPublishOrder = async () => {
 		if (window.confirm(`Pastikan data order Anda sudah sesuai ?`)) {
+			setLoadingInvoice(true);
 			const publishOrder = await fetch("/order/api/publish-order", {
 				method: "POST",
 				body: JSON.stringify({ uuid: data.uuid }),
@@ -344,6 +346,8 @@ const Form = () => {
 					alert("Terjadi Kesalahan");
 				}
 			}
+
+			setLoadingInvoice(false);
 		}
 	};
 
@@ -688,16 +692,18 @@ const Form = () => {
 																								) : (
 																									<>
 																										<div>{detail.name}</div>
-																										<div
-																											className='text-xs'
-																											onClick={() => {
-																												onEditItemMenu(
-																													detail.order_detail_id,
-																													detail.id
-																												);
-																											}}>
-																											Edit
-																										</div>
+																										{!isPublish && (
+																											<div
+																												className='text-xs'
+																												onClick={() => {
+																													onEditItemMenu(
+																														detail.order_detail_id,
+																														detail.id
+																													);
+																												}}>
+																												Edit
+																											</div>
+																										)}
 																									</>
 																								)}
 																							</div>
@@ -709,11 +715,16 @@ const Form = () => {
 																	)}
 															</div>
 														</div>
-														<div
-															className='cursor-pointer hover:opacity-75'
-															onClick={() => item.id && onDeleteItem(item.id)}>
-															<IconDelete width='20' />
-														</div>
+
+														{!isPublish && (
+															<div
+																className='cursor-pointer hover:opacity-75'
+																onClick={() =>
+																	item.id && onDeleteItem(item.id)
+																}>
+																<IconDelete width='20' />
+															</div>
+														)}
 													</div>
 												);
 											})}
@@ -783,20 +794,20 @@ const Form = () => {
 								<div className='flex flex-col justify-end'>
 									{data.status === "draft" && (
 										<button
-											disabled={published ? true : false}
+											disabled={loadingInvoice ? true : false}
 											className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
-												published ? "opacity-70 cursor-wait" : ""
+												loadingInvoice ? "opacity-70 cursor-wait" : ""
 											}`}
 											onClick={() => onPublishOrder()}>
-											Buat Invoice
+											{loadingInvoice ? <IconLoading /> : `Buat Invoice`}
 										</button>
 									)}
 
 									{data.status === "published" && (
 										<button
-											disabled={published ? true : false}
+											disabled={loadingInvoice ? true : false}
 											className={`px-8 py-3 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
-												published ? "opacity-70 cursor-wait" : ""
+												loadingInvoice ? "opacity-70 cursor-wait" : ""
 											}`}
 											onClick={() => onChangeState("deleted")}>
 											Delete
