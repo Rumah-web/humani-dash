@@ -59,7 +59,7 @@ const Form = () => {
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const onEditorStateChange = (editorState: any) => {
-		setEditorState(editorState);
+		if (editorState) setEditorState(editorState);
 	};
 
 	const handleChangeFile = async (file: any) => {
@@ -115,14 +115,6 @@ const Form = () => {
 	};
 
 	useEffect(() => {
-		const timeoutIdDesc = setTimeout(async () => {
-			const raw = convertToRaw(editorState.getCurrentContent());
-			await onUpdateByField({ description: draftToHtml(raw) });
-		}, 500);
-		return () => clearTimeout(timeoutIdDesc);
-	}, [editorState, 500]);
-
-	useEffect(() => {
 		const timeoutId = setTimeout(async () => {
 			await onUpdateByField(dataField);
 		}, 500);
@@ -156,6 +148,11 @@ const Form = () => {
 			}
 		})();
 	}, []);
+
+	const onSaveEditor = async () => {
+		const raw = convertToRaw(editorState.getCurrentContent());
+		await onUpdateByField({ description: draftToHtml(raw) });
+	};
 
 	if (!session?.user.roles?.includes("admin")) {
 		return (
@@ -209,6 +206,7 @@ const Form = () => {
 										wrapperClassName='wrapperClassName'
 										editorClassName='px-4 border border-[#dfdfdf] bg-white'
 										onEditorStateChange={onEditorStateChange}
+										onBlur={onSaveEditor}
 									/>
 								</div>
 							</div>
