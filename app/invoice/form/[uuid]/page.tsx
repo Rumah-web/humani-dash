@@ -406,7 +406,8 @@ const Form = () => {
 															<div>{`${i + 1}.`}</div>
 															<div className='flex flex-row w-full justify-between'>
 																<div className='flex w-2/5'>
-																	{order.menu_name} &nbsp; [{` ${order.qty} Pax `}]
+																	{order.menu_name} &nbsp; [
+																	{` ${order.qty} Pax `}]
 																</div>
 																{/* <div className='flex w-1/5 justify-end'>{`${order.qty} Pax`}</div> */}
 															</div>
@@ -493,6 +494,7 @@ const Form = () => {
 										</div>
 									</div>
 								</div>
+								{data.status === "paid" && <div className='badge-corner'></div>}
 							</div>
 						</div>
 						<div className='flex space-x-4 relative'>
@@ -502,15 +504,17 @@ const Form = () => {
 										<h3 className='font-medium text-black dark:text-white'>
 											Payment History
 										</h3>
-										<div className='flex justify-between'>
-											<div className='w-full flex justify-end'>
-												<div
-													className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
-													onClick={onAddPayment}>
-													Add
+										{data.status !== "paid" && (
+											<div className='flex justify-between'>
+												<div className='w-full flex justify-end'>
+													<div
+														className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
+														onClick={onAddPayment}>
+														Add
+													</div>
 												</div>
 											</div>
-										</div>
+										)}
 									</div>
 									<div className='flex flex-col gap-3 p-6.5 w-full'>
 										{Object.entries(columns).length > 0 && (
