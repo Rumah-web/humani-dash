@@ -268,6 +268,20 @@ const Menu = () => {
 			});
 
 			setTabs(tabsDefault);
+
+			const parentCategory = await fetch("/menu-category/api/category-parent", {
+				method: "POST",
+				body: JSON.stringify({}),
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+
+			if (parentCategory) {
+				const dataParentCategory = await parentCategory.json();
+
+				setOptions(dataParentCategory.data);
+			}
 		})();
 	}, []);
 
@@ -548,6 +562,11 @@ const Menu = () => {
 							<DataTable
 								columns={columns}
 								data={datas}
+								className={cx(
+									css`
+										z-index: 0;
+									`
+								)}
 								keyField={"id"}
 								noHeader={true}
 								fixedHeader={true}
