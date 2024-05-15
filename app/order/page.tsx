@@ -164,7 +164,7 @@ const Order = (props: any) => {
 						<div className='w-1/6'>
 							<div className='text-center'>Proses Order</div>
 							<Link
-								href={``}
+								href={`/process-order/form/${data.uuid}`}
 								className='justify-center underline cursor-pointer hover:opacity-60 flex'>
 								[update]
 							</Link>

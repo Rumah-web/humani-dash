@@ -24,6 +24,7 @@ const Breadcrumb = ({ pageName, breadLinks }: BreadcrumbProps) => {
 						breadLinks.map((link, i) => {
 							return (
 								<li
+									key={i}
 									className={cx(
 										`font-medium text-primary cursor-pointer`,
 										css`

@@ -24,6 +24,8 @@ import Select from "react-select";
 import { IOptionsSelect, ISession } from "@/app/type";
 import { PageContext } from "@/app/context";
 import Page403 from "@/components/Auth/403";
+import { IconDelete } from "@/components/Icons";
+import { toast } from "react-toastify";
 
 const Editor = dynamic(
 	() => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -180,6 +182,18 @@ const Form = () => {
 		})();
 	}, []);
 
+	const onDeleteFoto = async (id: number) => {
+		if (window.confirm(`Yakin ingin menghapus foto ini ?`)) {
+			setFile(null);
+			await fetch("/menu-category/api/delete-file", {
+				method: "POST",
+				body: JSON.stringify({ uuid: params.uuid }),
+			});
+
+			toast('sukses', {type: 'success'})
+		}
+	};
+
 	if (!session?.user.roles?.includes("admin")) {
 		return (
 			<>
@@ -296,7 +310,7 @@ const Form = () => {
 											</div>
 										</>
 									) : (
-										<>
+										<div className='relative'>
 											<FileUploader
 												handleChange={handleChangeFile}
 												name='file'
@@ -344,7 +358,14 @@ const Form = () => {
 													)}
 												</div>
 											</FileUploader>
-										</>
+											{file && (
+												<div
+													className='absolute top-0 right-0 p-2 cursor-pointer hover:opacity-70'
+													onClick={() => onDeleteFoto(data.id)}>
+													<IconDelete width='20' />
+												</div>
+											)}
+										</div>
 									)}
 								</div>
 								<div className='flex flex-col justify-end'>
