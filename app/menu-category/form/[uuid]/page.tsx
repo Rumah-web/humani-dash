@@ -64,7 +64,7 @@ const Form = () => {
 	const fileTypes = ["JPG", "PNG", "JPEG"];
 
 	const onEditorStateChange = (editorState: any) => {
-		setEditorState(editorState);
+		if (editorState) setEditorState(editorState);
 	};
 
 	const handleChangeFile = async (file: any) => {
@@ -118,14 +118,6 @@ const Form = () => {
 
 		router.push(`/menu-category`);
 	};
-
-	useEffect(() => {
-		const timeoutIdDesc = setTimeout(async () => {
-			const raw = convertToRaw(editorState.getCurrentContent());
-			await onUpdateByField({ description: draftToHtml(raw) });
-		}, 500);
-		return () => clearTimeout(timeoutIdDesc);
-	}, [editorState, 500]);
 
 	useEffect(() => {
 		const timeoutId = setTimeout(async () => {
@@ -192,6 +184,11 @@ const Form = () => {
 
 			toast('sukses', {type: 'success'})
 		}
+	};
+
+	const onSaveEditor = async () => {
+		const raw = convertToRaw(editorState.getCurrentContent());
+		await onUpdateByField({ description: draftToHtml(raw) });
 	};
 
 	if (!session?.user.roles?.includes("admin")) {
@@ -278,6 +275,7 @@ const Form = () => {
 										wrapperClassName='wrapperClassName'
 										editorClassName='px-4 border border-[#dfdfdf] bg-white'
 										onEditorStateChange={onEditorStateChange}
+										onBlur={onSaveEditor}
 									/>
 								</div>
 							</div>
