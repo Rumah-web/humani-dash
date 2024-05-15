@@ -316,7 +316,7 @@ const Menu = () => {
 	const onSearch = async (data: any) => {
 		setLoading(true);
 
-		let where = {};
+		let where = condition;
 
 		let filterSearch = {} as any;
 
@@ -326,28 +326,32 @@ const Menu = () => {
 
 			if (value && value !== "") {
 				where = {
-					...condition,
 					...where,
 					...{
-						[key]: {
-							contains: value,
-							mode: "insensitive",
-						},
+						[key]:
+							typeof value === "number"
+								? value
+								: {
+										contains: value,
+										mode: "insensitive",
+								  },
 					},
 				};
 
 				filterSearch = {
-					...condition,
 					...filterSearch,
 					...{
-						[key]: {
-							contains: value,
-							mode: "insensitive",
-						},
+						[key]:
+							typeof value === "number"
+								? value
+								: {
+										contains: value,
+										mode: "insensitive",
+								  },
 					},
 				};
 			} else {
-				const findCondition = Object.entries(condition).filter(
+				const findCondition = Object.entries(where).filter(
 					(item, i) => item[0] !== key
 				);
 

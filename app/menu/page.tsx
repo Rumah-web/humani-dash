@@ -411,7 +411,7 @@ const Menu = () => {
 	};
 
 	const onSearch = async (data: any) => {
-		console.log("search : ", data);
+		
 		setLoading(true);
 
 		let where = condition;
