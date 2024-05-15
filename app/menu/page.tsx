@@ -328,8 +328,18 @@ const Menu = () => {
 		let where = {};
 		if (["draft", "published"].includes(value)) {
 			where = {
-				status: value,
+				...condition,
+				...{
+					status: value,
+				},
 			};
+
+			setCondition(where);
+		} else {
+			const findCondition = Object.entries(condition).filter(
+				(item, i) => item[0] !== "status"
+			);
+			where = Object.fromEntries(findCondition);
 
 			setCondition(where);
 		}
@@ -487,7 +497,12 @@ const Menu = () => {
 	};
 
 	const handleChangeSelect = async (column: string, e: any) => {
-		setValue(column, e.value);
+		if(e) {
+			setValue(column, e.value);
+		} else {
+			setValue(column, null);
+		}
+		
 
 		const data = getValues();
 		await onSearch(data);
@@ -537,7 +552,9 @@ const Menu = () => {
 											placeholder={`Select Category`}
 											isClearable={true}
 											isSearchable={true}
-											onChange={(e) => handleChangeSelect("m_menu_category_id", e)}
+											onChange={(e) =>
+												handleChangeSelect("m_menu_category_id", e)
+											}
 										/>
 									</div>
 								</div>
