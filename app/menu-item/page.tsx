@@ -406,7 +406,7 @@ const Menu = () => {
 						<div className='flex justify-between space-x-8'>
 							<form
 								onSubmit={handleSubmit((data) => onSearch(data))}
-								className='flex flex-col space-y-4 w-full relative pb-8'>
+								className='flex flex-col space-y-4 w-full relative pb-4'>
 								<div className='flex w-full space-x-4 relative flex-wrap'>
 									<div className='flex w-1/2'>
 										<input
@@ -415,7 +415,7 @@ const Menu = () => {
 										/>
 									</div>
 								</div>
-								<div>
+								{/* <div>
 									<button
 										disabled={isLoadingSearch}
 										className={`px-8 py-2.5 bg-success rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
@@ -424,7 +424,7 @@ const Menu = () => {
 										onClick={() => null}>
 										{isLoadingSearch ? <IconLoading /> : "Search"}
 									</button>
-								</div>
+								</div> */}
 							</form>
 							<div className='w-fit flex justify-end'>
 								<div
