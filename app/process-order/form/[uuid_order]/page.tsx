@@ -39,8 +39,8 @@ const Form = () => {
 		"prepare",
 		"cooking",
 		"packing",
-		"deliver",
-		"finsihed",
+		"delivery",
+		"finished",
 	];
 
 	if (paramsPage.session) {

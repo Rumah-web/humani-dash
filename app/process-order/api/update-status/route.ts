@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 			});
 
 			if (findOrder) {
-				const query = await tx.order_status_history.create({
+				await tx.order_status_history.create({
 					data: {
 						status,
 						order_id: findOrder.id,
