@@ -6,16 +6,24 @@ type ResponseData = {
  
 export async function POST(request: Request) {
 
+  const { filter } = await request.json();
+
+  let condition = {
+		status: {
+			not: "deleted",
+		},
+	};
+
+	if (filter && Object.keys(filter).length > 0) {
+		condition = { ...condition, ...filter };
+	}
+
   const data = await db.invoice.groupBy({
     by: ['status'],
     _count: {
       status: true
     },
-    where: {
-      status: {
-        not: 'deleted'
-      }
-    }
+    where: condition
   })
 
   return Response.json({
