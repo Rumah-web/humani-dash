@@ -34,6 +34,7 @@ const Menu = () => {
 		[] as { label: string; value: string; count: number }[]
 	);
 	const [condition, setCondition] = useState({} as any);
+	const [filter, setFilter] = useState({} as any);
 	const [order, setOrder] = useState({ id: "desc" } as any);
 
 	const paramsPage = React.useContext(PageContext) as any;
@@ -131,10 +132,10 @@ const Menu = () => {
 		},
 	};
 
-	const runTabTotal = async () => {
+	const runTabTotal = async (filter: any) => {
 		const req = await fetch("/menu-item/api/total-per-status", {
 			method: "POST",
-			body: JSON.stringify({}),
+			body: JSON.stringify(filter),
 			headers: {
 				"content-type": "application/json",
 			},
@@ -193,7 +194,7 @@ const Menu = () => {
 		(async () => {
 			const data = await runQuery(condition, take, page, order);
 			const total = await runTotal(condition);
-			const tabTotal = await runTabTotal();
+			const tabTotal = await runTabTotal(filter);
 
 			setDatas(data);
 			setLoading(false);
@@ -220,7 +221,7 @@ const Menu = () => {
 	}, []);
 
 	useEffect(() => {
-		console.log("hallo : ", condition);
+		console.log(condition);
 	}, [condition]);
 
 	const onClickTab = async (value: string) => {
@@ -230,12 +231,20 @@ const Menu = () => {
 		let where = {};
 		if (["draft", "published"].includes(value)) {
 			where = {
-				status: value,
+				...condition,
+				...{
+					status: value,
+				},
 			};
 
 			setCondition(where);
 		} else {
-			setCondition({});
+			const findCondition = Object.entries(condition).filter(
+				(item, i) => item[0] !== "status"
+			);
+			where = Object.fromEntries(findCondition);
+
+			setCondition(where);
 		}
 
 		const data = await runQuery(where, take, page, order);
@@ -304,11 +313,13 @@ const Menu = () => {
 		router.push(`/menu-item/form/${row.uuid}`);
 	};
 
-	const onChangeSearch = async (data: any) => {
+	const onSearch = async (data: any) => {
 		setLoadingSearch(true);
 		setLoading(true);
 
-		let where = {...condition};
+		let where = {};
+
+		let filterSearch = {} as any;
 
 		for (let search of Object.entries(data)) {
 			const key = search[0];
@@ -316,6 +327,7 @@ const Menu = () => {
 
 			if (value && value !== "") {
 				where = {
+					...condition,
 					...where,
 					...{
 						[key]: {
@@ -324,16 +336,33 @@ const Menu = () => {
 						},
 					},
 				};
+
+				filterSearch = {
+					...condition,
+					...filterSearch,
+					...{
+						[key]: {
+							contains: value,
+							mode: "insensitive",
+						},
+					},
+				};
+			} else {
+				const findCondition = Object.entries(condition).filter(
+					(item, i) => item[0] !== key
+				);
+
+				where = Object.fromEntries(findCondition);
+				filterSearch = Object.fromEntries(findCondition);
 			}
 		}
 
-		console.log(where)
-
 		const query = await runQuery(where, take, page, order);
 		const total = await runTotal(where);
-		const tabTotal = await runTabTotal();
+		const tabTotal = await runTabTotal({ filter: filterSearch });
 
-		setCondition({ ...condition, ...where });
+		setFilter({ ...filter, where });
+		setCondition(where);
 		setDatas(query);
 
 		setTotal(total);
@@ -376,7 +405,7 @@ const Menu = () => {
 					<div id='header'>
 						<div className='flex justify-between space-x-8'>
 							<form
-								onSubmit={handleSubmit((data) => onChangeSearch(data))}
+								onSubmit={handleSubmit((data) => onSearch(data))}
 								className='flex flex-col space-y-4 w-full relative pb-8'>
 								<div className='flex w-full space-x-4 relative flex-wrap'>
 									<div className='flex w-1/2'>
