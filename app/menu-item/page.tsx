@@ -13,6 +13,7 @@ import { ISession } from "../type";
 import Page403 from "@/components/Auth/403";
 import { useForm } from "react-hook-form";
 import { IconLoading } from "@/components/Icons";
+import { cx, css } from "@emotion/css";
 
 interface ITabCount {
 	status: string;
@@ -27,7 +28,6 @@ const Menu = () => {
 	const [datas, setDatas] = useState([]);
 	const [total, setTotal] = useState(0);
 	const [isLoading, setLoading] = useState(true);
-	const [isLoadingSearch, setLoadingSearch] = useState(false);
 	const [page, setPage] = useState(0);
 	const [take, setTake] = useState(10);
 	const [tabs, setTabs] = useState(
@@ -314,7 +314,6 @@ const Menu = () => {
 	};
 
 	const onSearch = async (data: any) => {
-		setLoadingSearch(true);
 		setLoading(true);
 
 		let where = {};
@@ -384,8 +383,6 @@ const Menu = () => {
 		});
 
 		setTabs(tabsDefault);
-
-		setLoadingSearch(false);
 		setLoading(false);
 	};
 
@@ -406,25 +403,24 @@ const Menu = () => {
 						<div className='flex justify-between space-x-8'>
 							<form
 								onSubmit={handleSubmit((data) => onSearch(data))}
-								className='flex flex-col space-y-4 w-full relative pb-4'>
-								<div className='flex w-full space-x-4 relative flex-wrap'>
+								className='flex flex-col space-y-4 w-full relative pb-border'>
+								<div className='flex w-full relative flex-wrap'>
 									<div className='flex w-1/2'>
 										<input
 											{...register("name")}
-											className='w-full rounded-lg border-[1.5px] border-stroke bg-white h-fit py-2 px-2 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+											placeholder='Search Name'
+											className={cx(
+												`w-full rounded-lg border-[1.5px] border-stroke bg-white h-fit py-2 px-2 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`,
+												css`
+													::placeholder {
+														font-weight: normal;
+														font-size: 0.9rem;
+													}
+												`
+											)}
 										/>
 									</div>
 								</div>
-								{/* <div>
-									<button
-										disabled={isLoadingSearch}
-										className={`px-8 py-2.5 bg-success rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
-											isLoadingSearch ? "opacity-70" : ""
-										}`}
-										onClick={() => null}>
-										{isLoadingSearch ? <IconLoading /> : "Search"}
-									</button>
-								</div> */}
 							</form>
 							<div className='w-fit flex justify-end'>
 								<div
