@@ -1,24 +1,31 @@
-import db from '@/prisma/lib/db'
- 
+import db from "@/prisma/lib/db";
+
 type ResponseData = {
-  message: string
-}
- 
+	message: string;
+};
+
 export async function POST(request: Request) {
+	const { filter } = await request.json();
 
-  const data = await db.m_menu_category.groupBy({
-    by: ['status'],
-    _count: {
-      status: true
-    },
-    where: {
-      status: {
-        not: 'deleted'
-      }
-    }
-  })
+	let condition = {
+		status: {
+			not: "deleted",
+		},
+	};
 
-  return Response.json({
-    data
-  })
+	if (filter && Object.keys(filter).length > 0) {
+		condition = { ...condition, ...filter };
+	}
+
+	const data = await db.m_menu_category.groupBy({
+		by: ["status"],
+		_count: {
+			status: true,
+		},
+		where: condition,
+	});
+
+	return Response.json({
+		data,
+	});
 }

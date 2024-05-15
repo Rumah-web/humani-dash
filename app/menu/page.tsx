@@ -38,7 +38,6 @@ const Menu = () => {
 	const [filter, setFilter] = useState({} as any);
 	const [order, setOrder] = useState({ id: "desc" } as any);
 	const [options, setOptions] = useState([] as IOptionsSelect[]);
-	const refFormSearch = useRef(null as any);
 	const paramsPage = React.useContext(PageContext) as any;
 
 	const {
@@ -525,7 +524,6 @@ const Menu = () => {
 						<div className='flex flex-col'>
 							<form
 								onSubmit={handleSubmit((data) => onSearch(data))}
-								ref={refFormSearch}
 								className='flex flex-col space-y-4 w-full relative mb-4 py-2 bg-white border-stroke'>
 								<div className='flex w-full items-center relative flex-wrap'>
 									<div className='flex w-1/2 px-4'>

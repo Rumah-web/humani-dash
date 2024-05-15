@@ -404,12 +404,12 @@ const Menu = () => {
 			<div className='pb-36'>
 				<>
 					<div id='header'>
-						<div className='flex justify-between space-x-8'>
+						<div className='flex flex-col'>
 							<form
 								onSubmit={handleSubmit((data) => onSearch(data))}
-								className='flex flex-col space-y-4 w-full relative pb-border'>
+								className='flex flex-col space-y-4 w-full relative mb-4 py-2 bg-white border-stroke'>
 								<div className='flex w-full relative flex-wrap'>
-									<div className='flex w-1/2'>
+									<div className='flex w-full px-4'>
 										<input
 											{...register("name")}
 											placeholder='Search Name'
@@ -426,7 +426,7 @@ const Menu = () => {
 									</div>
 								</div>
 							</form>
-							<div className='w-fit flex justify-end'>
+							<div className='w-full flex justify-end'>
 								<div
 									className='px-8 py-2 bg-danger h-fit rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
 									onClick={onAdd}>
