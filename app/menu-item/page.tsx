@@ -11,6 +11,8 @@ import NoImage from "@/components/Placeholder/NoImage";
 import { PageContext } from "../context";
 import { ISession } from "../type";
 import Page403 from "@/components/Auth/403";
+import { useForm } from "react-hook-form";
+import { IconLoading } from "@/components/Icons";
 
 interface ITabCount {
 	status: string;
@@ -25,6 +27,7 @@ const Menu = () => {
 	const [datas, setDatas] = useState([]);
 	const [total, setTotal] = useState(0);
 	const [isLoading, setLoading] = useState(true);
+	const [isLoadingSearch, setLoadingSearch] = useState(false);
 	const [page, setPage] = useState(0);
 	const [take, setTake] = useState(10);
 	const [tabs, setTabs] = useState(
@@ -34,6 +37,12 @@ const Menu = () => {
 	const [order, setOrder] = useState({ id: "desc" } as any);
 
 	const paramsPage = React.useContext(PageContext) as any;
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm();
 
 	let session: ISession | null = null;
 
@@ -46,6 +55,8 @@ const Menu = () => {
 		{ label: "Draft", value: "draft", count: 0 },
 		{ label: "Published", value: "published", count: 0 },
 	];
+
+	const searchColumns = ["name"];
 
 	const columns = [
 		{
@@ -208,6 +219,10 @@ const Menu = () => {
 		})();
 	}, []);
 
+	useEffect(() => {
+		console.log("hallo : ", condition);
+	}, [condition]);
+
 	const onClickTab = async (value: string) => {
 		setLoading(true);
 		setActiveTab(value);
@@ -219,6 +234,8 @@ const Menu = () => {
 			};
 
 			setCondition(where);
+		} else {
+			setCondition({});
 		}
 
 		const data = await runQuery(where, take, page, order);
@@ -287,6 +304,62 @@ const Menu = () => {
 		router.push(`/menu-item/form/${row.uuid}`);
 	};
 
+	const onChangeSearch = async (data: any) => {
+		setLoadingSearch(true);
+		setLoading(true);
+
+		let where = {...condition};
+
+		for (let search of Object.entries(data)) {
+			const key = search[0];
+			const value = search[1];
+
+			if (value && value !== "") {
+				where = {
+					...where,
+					...{
+						[key]: {
+							contains: value,
+							mode: "insensitive",
+						},
+					},
+				};
+			}
+		}
+
+		console.log(where)
+
+		const query = await runQuery(where, take, page, order);
+		const total = await runTotal(where);
+		const tabTotal = await runTabTotal();
+
+		setCondition({ ...condition, ...where });
+		setDatas(query);
+
+		setTotal(total);
+
+		tabsDefault = tabsDefault.map((tab, i) => {
+			const find: ITabCount = tabTotal.find(
+				(res: ITabCount, i: number) => res.status === tab.value
+			);
+
+			if (find) {
+				return { ...tab, count: find._count.status };
+			}
+
+			if (tab.value === "all") {
+				return { ...tab, count: total };
+			}
+
+			return tab;
+		});
+
+		setTabs(tabsDefault);
+
+		setLoadingSearch(false);
+		setLoading(false);
+	};
+
 	if (!session?.user.roles?.includes("admin")) {
 		return (
 			<>
@@ -301,10 +374,32 @@ const Menu = () => {
 			<div className='pb-36'>
 				<>
 					<div id='header'>
-						<div className='flex justify-between'>
-							<div className='w-full flex justify-end'>
+						<div className='flex justify-between space-x-8'>
+							<form
+								onSubmit={handleSubmit((data) => onChangeSearch(data))}
+								className='flex flex-col space-y-4 w-full relative pb-8'>
+								<div className='flex w-full space-x-4 relative flex-wrap'>
+									<div className='flex w-1/2'>
+										<input
+											{...register("name")}
+											className='w-full rounded-lg border-[1.5px] border-stroke bg-white h-fit py-2 px-2 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+										/>
+									</div>
+								</div>
+								<div>
+									<button
+										disabled={isLoadingSearch}
+										className={`px-8 py-2.5 bg-success rounded-lg text-white text-xs cursor-pointer hover:opacity-70 ${
+											isLoadingSearch ? "opacity-70" : ""
+										}`}
+										onClick={() => null}>
+										{isLoadingSearch ? <IconLoading /> : "Search"}
+									</button>
+								</div>
+							</form>
+							<div className='w-fit flex justify-end'>
 								<div
-									className='px-8 py-2 bg-danger rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
+									className='px-8 py-2 bg-danger h-fit rounded-lg text-white text-xs cursor-pointer hover:opacity-70'
 									onClick={onAdd}>
 									Add
 								</div>
