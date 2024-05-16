@@ -9,6 +9,7 @@ export async function POST(request: Request) {
 	const { uuid, menu, qty } = await request.json();
 	let data = null;
 	let success = false as boolean;
+	let message = 'Failed' as string;
 
 	const dataMenu = await db.m_menu.findFirst({
 		where: {
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
 		const total = qty * price;
 
 		try {
-			await prisma?.$transaction(async (tx) => {
+			await db.$transaction(async (tx) => {
 				let create = await tx.order_detail.create({
 					include: {
 						m_menu: true,
@@ -94,8 +95,11 @@ export async function POST(request: Request) {
 				}
 			});
 			success = true;
+			message = 'Success'
 		} catch (error) {
-			success = true;
+			console.log('error on server : ', error)
+			success = false;
+			message = JSON.stringify(error)
 		}
 
 		

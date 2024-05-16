@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 	let message = "Failed" as string;
 
 	try {
-		await prisma?.$transaction(async (tx) => {
+		await db.$transaction(async (tx) => {
 			const findOrder = await tx.order.update({
 				data: {
 					status_process: status,

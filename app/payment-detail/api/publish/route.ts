@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 	let result = {} as payment_detail;
 
 	try {
-		await prisma?.$transaction(async (tx) => {
+		await db.$transaction(async (tx) => {
 			const data = await tx.payment_detail.update({
 				include: {
 					payment: {

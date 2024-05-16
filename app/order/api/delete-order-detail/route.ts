@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
 	if (orderDetail) {
 		try {
-			await prisma?.$transaction(async (tx) => {
+			await db.$transaction(async (tx) => {
 				await tx.order_detail_menu_item.deleteMany({
 					where: {
 						order_detail_id: orderDetail.id,

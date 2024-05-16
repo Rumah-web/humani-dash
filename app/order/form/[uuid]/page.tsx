@@ -252,6 +252,7 @@ const Form = () => {
 
 		const menuitem = await addItem.json();
 		if (menuitem) {
+			console.log('add item : ', menuitem)
 			setData({ ...data, order_detail: [...data.order_detail, menuitem.data] });
 		}
 
@@ -618,114 +619,123 @@ const Form = () => {
 										<>
 											{data.order_detail.map((item, i) => {
 												return (
-													<div
-														key={item.id}
-														className='w-full flex items-start space-x-4'>
-														<div className='flex'>{`${i + 1}.`}</div>
-														<div className='flex flex-col space-y-2 w-full'>
-															<div className='flex'>
-																<span>{item.menu_name}</span>
-																<span className='px-2'>-</span>
-																<span>
-																	{item.menu_price &&
-																		` Rp. ${item.menu_price
-																			.toString()
-																			.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}
-																</span>
-															</div>
-															<div>
-																{item.order_detail_menu_item &&
-																	item.order_detail_menu_item?.length > 0 && (
-																		<>
-																			{item.order_detail_menu_item.map(
-																				(detail, i) => {
-																					return (
-																						<div
-																							key={i}
-																							className='px-0 flex space-x-2 cursor-pointer mb-2'>
-																							<div>{`${i + 1}.`}</div>
-																							<div className='flex space-x-4  w-full items-center'>
-																								{itemMenuEdit &&
-																								itemMenuEdit.id === item.id &&
-																								itemMenuEdit.order_detail_id ===
-																									detail.id ? (
-																									<>
-																										<div className='w-2/3'>
-																											<Select
-																												options={
-																													menuItemOptions
-																												}
-																												isClearable={true}
-																												isSearchable={true}
-																												className='w-full'
-																												placeholder='-- Select --'
-																												defaultValue={menuItemOptions.find(
-																													(opt, i) =>
-																														opt.label ===
-																														detail.name
-																												)}
-																												onChange={(e) =>
-																													onSelectMenuItem({
-																														value: e?.value,
-																														label: e?.label,
-																													})
-																												}
-																											/>
-																										</div>
-																										<div
-																											className='text-xs'
-																											onClick={() =>
-																												onSaveEditItemMenu(
-																													detail.id
-																												)
-																											}>
-																											Done
-																										</div>
-																										<div
-																											className='text-xs'
-																											onClick={
-																												onCancelEditItemMenu
-																											}>
-																											Cancel
-																										</div>
-																									</>
-																								) : (
-																									<>
-																										<div>{detail.name}</div>
-																										{!isPublish && (
-																											<div
-																												className='text-xs'
-																												onClick={() => {
-																													onEditItemMenu(
-																														detail.order_detail_id,
-																														detail.id
-																													);
-																												}}>
-																												Edit
-																											</div>
-																										)}
-																									</>
-																								)}
-																							</div>
-																						</div>
-																					);
-																				}
-																			)}
-																		</>
-																	)}
-															</div>
-														</div>
-
-														{!isPublish && (
+													<>
+														{item && (
 															<div
-																className='cursor-pointer hover:opacity-75'
-																onClick={() =>
-																	item.id && onDeleteItem(item.id)
-																}>
-																<IconDelete width='20' />
+																key={item.id}
+																className='w-full flex items-start space-x-4'>
+																<div className='flex'>{`${i + 1}.`}</div>
+																<div className='flex flex-col space-y-2 w-full'>
+																	<div className='flex'>
+																		<span>{item.menu_name}</span>
+																		<span className='px-2'>-</span>
+																		<span>
+																			{item.menu_price &&
+																				` Rp. ${item.menu_price
+																					.toString()
+																					.replace(
+																						/\B(?=(\d{3})+(?!\d))/g,
+																						"."
+																					)}`}
+																		</span>
+																	</div>
+																	<div>
+																		{item.order_detail_menu_item &&
+																			item.order_detail_menu_item?.length >
+																				0 && (
+																				<>
+																					{item.order_detail_menu_item.map(
+																						(detail, i) => {
+																							return (
+																								<div
+																									key={i}
+																									className='px-0 flex space-x-2 cursor-pointer mb-2'>
+																									<div>{`${i + 1}.`}</div>
+																									<div className='flex space-x-4  w-full items-center'>
+																										{itemMenuEdit &&
+																										itemMenuEdit.id ===
+																											item.id &&
+																										itemMenuEdit.order_detail_id ===
+																											detail.id ? (
+																											<>
+																												<div className='w-2/3'>
+																													<Select
+																														options={
+																															menuItemOptions
+																														}
+																														isClearable={true}
+																														isSearchable={true}
+																														className='w-full'
+																														placeholder='-- Select --'
+																														defaultValue={menuItemOptions.find(
+																															(opt, i) =>
+																																opt.label ===
+																																detail.name
+																														)}
+																														onChange={(e) =>
+																															onSelectMenuItem({
+																																value: e?.value,
+																																label: e?.label,
+																															})
+																														}
+																													/>
+																												</div>
+																												<div
+																													className='text-xs'
+																													onClick={() =>
+																														onSaveEditItemMenu(
+																															detail.id
+																														)
+																													}>
+																													Done
+																												</div>
+																												<div
+																													className='text-xs'
+																													onClick={
+																														onCancelEditItemMenu
+																													}>
+																													Cancel
+																												</div>
+																											</>
+																										) : (
+																											<>
+																												<div>{detail.name}</div>
+																												{!isPublish && (
+																													<div
+																														className='text-xs'
+																														onClick={() => {
+																															onEditItemMenu(
+																																detail.order_detail_id,
+																																detail.id
+																															);
+																														}}>
+																														Edit
+																													</div>
+																												)}
+																											</>
+																										)}
+																									</div>
+																								</div>
+																							);
+																						}
+																					)}
+																				</>
+																			)}
+																	</div>
+																</div>
+
+																{!isPublish && (
+																	<div
+																		className='cursor-pointer hover:opacity-75'
+																		onClick={() =>
+																			item.id && onDeleteItem(item.id)
+																		}>
+																		<IconDelete width='20' />
+																	</div>
+																)}
 															</div>
 														)}
-													</div>
+													</>
 												);
 											})}
 										</>
